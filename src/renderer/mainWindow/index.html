@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../assets/css/index.css">
+    <link rel="stylesheet" href="../../../node_modules/flatpickr/dist/flatpickr.min.css">
+</head>
+
+<body>
+    <div id="titlebar">
+        <div id="drag-region">数据库管理系统</div>
+        <div id="window-controls">
+            <button id="setting" class="control-btn" title="系统配置">⚙</button>
+            <button id="minimize" class="control-btn">_</button>
+            <button id="maximize" class="control-btn">□</button>
+            <button id="close" class="control-btn">x</button>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="vertical-tabbar">
+            <button class="tab-btn active" data-tab="create">📄 新建文档</button>
+            <button class="tab-btn" data-tab="view-normal">📂 查阅普通文档</button>
+            <button class="tab-btn" data-tab="view-important">📂 查阅重要文档</button>
+            <button class="tab-btn" data-tab="name-manager">📂 姓名管理</button>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="content-panel">
+            <!-- 新建文档内容 -->
+            <div id="create-tab" class="tab-content active">
+                <div class="newDoc-content">
+                    <div class="newDoc-body">
+                        <form id="newDoc-docForm">
+                            <div class="form-group">
+                                <label for="docTitle">标题：</label>
+                                <input type="text" id="docTitle" required maxlength="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="sender_unit">来文单位：</label>
+                                <input type="text" id="sender_unit" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="sender_number">来文编号：</label>
+                                <input type="text" id="sender_number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="original_number">原文件号：</label>
+                                <input type="text" id="original_number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="drafting_unit">制文单位：</label>
+                                <input type="text" id="drafting_unit" required>
+                            </div>
+                            <!-- 双列布局行 -->
+                            <div class="form-row">
+                                <!-- 呈阅领导 -->
+                                <div class="form-group">
+                                    <label for="review_leader">呈阅领导：</label>
+                                    <select id="review_leader" required>
+                                    </select>
+                                </div>
+
+                                <!-- 密级 -->
+                                <div class="form-group">
+                                    <label for="secrecy_level">密级：</label>
+                                    <select id="secrecy_level" required>
+                                        <option value="普通">普通</option>
+                                        <option value="秘密">秘密</option>
+                                        <option value="机密">机密</option>
+                                        <option value="绝密">绝密</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <!-- 审核领导 -->
+                                <div class="form-group">
+                                    <label for="crgency_level">紧急程度：</label>
+                                    <select id="crgency_level" required>
+                                        <option value="普通">普通</option>
+                                        <option value="加急">加急</option>
+                                        <option value="特急">特急</option>
+                                    </select>
+                                </div>
+                                <!-- 保密期限 -->
+                                <div class="form-group">
+                                    <label for="secrecy_period">保密期限：</label>
+                                    <select id="secrecy_period" required>
+                                        <option value="1年">1年</option>
+                                        <option value="5年">5年</option>
+                                        <option value="10年">10年</option>
+                                        <option value="20年">20年</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button id="print" class="newDoc-btn cancel">打印</button>
+                                <button type="reset" class="newDoc-btn cancel">重置</button>
+                                <button type="submit" name="docType" value="normal"
+                                    class="newDoc-btn primary">创建普通文档</button>
+                                <button type="submit" name="docType" value="important"
+                                    class="newDoc-btn primary">创建重要文档</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 查阅文档内容 -->
+            <div id="view-normal-tab" class="tab-content">
+                <ol id="docList-normal" class="doc-list" style="height:100%"></ol>
+            </div>
+
+            <!-- 查阅文档内容 -->
+            <div id="view-important-tab" class="tab-content">
+                <ol id="docList-important" class="doc-list" style="height:100%"></ol>
+            </div>
+
+            <!-- 姓名管理 -->
+            <div id="name-manager-tab" class="tab-content">
+                <div class="name-manager-container">
+                    <div class="add-name">
+                        <input type="text" id="name" placeholder="请输入姓名" class="add-name-real" />
+                        <input type="text" id="alias" placeholder="请输入常用称呼" class="add-name-alias" />
+                        <button id="add-name-btn" class="btnadd-name">添加</button>
+                    </div>
+                    <div id="name-tree" class="collapsible-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template id="docItemTemplate">
+        <div class="doc-item">
+            <div class="doc-info">
+                <span class="doc-title"></span>
+                <span class="doc-date"></span>
+                <div class="doc-meta">
+                    <span class="doc-sender_unit"></span>
+                    <span class="doc-info doc-sender_number"></span>
+                    <span class="doc-info doc-original_number"></span>
+                    <span class="doc-info doc-drafting_unit"></span>
+                </div>
+            </div>
+            <div class="doc-actions">
+                <button id="toImportant" class="action-btn toimportant-btn" title="转为重要文件">📑</button>
+                <button id="editForm" class="action-btn edit-btn" title="编辑文档">✏️</button>
+                <button class="action-btn annotate-btn" title="添加批注">💬</button>
+                <button id="deleteDoc" class="action-btn delete-btn" title="删除文档">🗑️</button>
+            </div>
+        </div>
+    </template>
+    <template id="docItemTemplate-important">
+        <div class="doc-item-important">
+            <div class="doc-info-important">
+                <span class="doc-title-important"></span>
+                <span class="doc-date-important"></span>
+                <div class="doc-meta-important">
+                    <span class="doc-sender_unit-important"></span>
+                    <span class="doc-info doc-sender_number-important"></span>
+                    <span class="doc-info doc-original_number-important"></span>
+                    <span class="doc-info doc-drafting_unit-important"></span>
+                </div>
+            </div>
+            <div class="doc-actions-important">
+                <button id="editForm-important" class="action-btn edit-btn" title="编辑文档">✏️</button>
+                <button class="action-btn annotate-btn" title="添加批注">💬</button>
+                <button id="deleteDoc-important" class="action-btn delete-btn" title="删除文档">🗑️</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- 姓名折叠列表 -->
+    <template id="collapsible-item-template">
+        <div class="collapsible-item">
+            <div class="collapsible-header">
+                <span class="toggle-icon"></span>
+                <span class="author-name"></span>
+                <button class="delete-author" title="删除作者及其所有别名">×</button>
+            </div>
+            <div class="collapsible-content"></div>
+        </div>
+    </template>
+
+    <template id="alias-item-template">
+        <div class="alias-item">
+            <span class="alias-name"></span>
+            <button class="delete-alias" title="删除该别名">×</button>
+        </div>
+    </template>
+
+    <div id="docModal" class="modal">
+        <div class="pop-bg">
+            <div class="pop-content">
+                <div class="modal-header">
+                    <span class="pop-title-header">编辑文档</span>
+                </div>
+                <div class="modal-body">
+                    <form id="pop-docForm">
+                        <div class="form-group">
+                            <label for="docTitle">标题：</label>
+                            <input type="text" id="pop-docTitle" required maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="sender_unit">来文单位：</label>
+                            <input type="text" id="pop-sender_unit" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sender_number">来文编号：</label>
+                            <input type="text" id="pop-sender_number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="original_number">原文件号：</label>
+                            <input type="text" id="pop-original_number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="drafting_unit">制文单位：</label>
+                            <input type="text" id="pop-drafting_unit" required>
+                        </div>
+                        <!-- 双列布局行 -->
+                        <div class="form-row">
+                            <!-- 呈阅领导 -->
+                            <div class="form-group">
+                                <label for="review_leader">呈阅领导：</label>
+                                <select id="pop-review_leader" required>
+                                </select>
+                            </div>
+
+                            <!-- 密级 -->
+                            <div class="form-group">
+                                <label for="secrecy_level">密级：</label>
+                                <select id="pop-secrecy_level" required>
+                                    <option value="普通">普通</option>
+                                    <option value="秘密">秘密</option>
+                                    <option value="机密">机密</option>
+                                    <option value="绝密">绝密</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <!-- 审核领导 -->
+                            <div class="form-group">
+                                <label for="crgency_level">紧急程度：</label>
+                                <select id="pop-crgency_level" required>
+                                    <option value="普通">普通</option>
+                                    <option value="加急">加急</option>
+                                    <option value="特急">特急</option>
+                                </select>
+                            </div>
+                            <!-- 保密期限 -->
+                            <div class="form-group">
+                                <label for="secrecy_period">保密期限：</label>
+                                <select id="pop-secrecy_period" required>
+                                    <option value="1年">1年</option>
+                                    <option value="5年">5年</option>
+                                    <option value="10年">10年</option>
+                                    <option value="20年">20年</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="newDoc-btn cancel">取消</button>
+                            <button type="submit" class="newDoc-btn primary">更新</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="annotate" class="annotate-box">
+        <div class="annotate-bg">
+            <div class="annotate-content">
+                <div class="modal-header">
+                    <span class="annotate-title-header">添加批注</span>
+                </div>
+                <div class="modal-body">
+                    <form id="annotate-Form">
+
+                        <div class="form-group">
+                            <label for="annotate-intype">请选择录入方式：</label>
+                            <select id="annotate-intype">
+                                <option value="1">手动录入</option>
+                                <option value="2">内容不录入</option>
+                                <option value="3">仅圈阅</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annotate-note">姓名：</label>
+                            <select id="annotate-author">
+                                <option value="">请选择</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annotate-content">内容：</label>
+                            <input type="text" id="annotate-content" placeholder="请输入内容..." required></input>
+                        </div>
+                        <div class="form-group">
+                            <label for="annotate-note">备注：</label>
+                            <input type="text" id="annotate-note" placeholder="请输入备注..." required></input>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="annotate-date">批注日期：</label>
+                            <input type="text" id="annotate-date" placeholder="选择日期">
+                        </div>
+
+                        <!-- 双列布局行 -->
+                        <div class="annotate-form-row">
+                            <div class="form-group">
+                                <label for="primary-unit">分发范围：</label>
+                                <select id="primary-unit">
+                                    <option value="">请选择</option>
+                                </select>
+                                <select id="secondary-unit">
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fenfa-date">分发日期：</label>
+                                <input type="text" id="fenfa-date" placeholder="选择日期">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="newDoc-btn cancel">取消</button>
+                            <button type="submit" class="newDoc-btn primary">创建</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="show-allinfo" class="annotate-box">
+        <div class="annotate-bg">
+            <div class="annotate-content">
+                <span id="doc_info"></span>
+                <span id="annotate-info"></span>
+            </div>
+        </div>
+    </div>
+    <!-- 配置管理界面 -->
+    <div id="config-modal" class="annotate-box">
+        <div class="annotate-bg">
+            <div id="annotate-unit" class="annotate-content">
+                <div class="modal-header">
+                    <!-- <div id="close-config">X</div> -->
+                    <span class="pop-title-header">单位配置管理</span>
+                </div>
+                <div class="modal-body">
+                    <!-- 批注配置 -->
+                    <div id="form-annotate" class="config-content">
+                        <div class="config-section">
+                            <h3>单位层级配置</h3>
+                            <div class="add-name">
+                                <input type="text" id="unit" placeholder="请输入单位" class="add-name-real" />
+                                <input type="text" id="unit-son" placeholder="请输入子单位" class="add-name-alias" />
+                                <button id="add-unit-btn" class="btnadd-name">添加</button>
+                            </div>
+                            <div id="unit-tree" class="collapsible-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="newDoc-btn cancel" onclick="hideConfigModal()">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template id="collapsible-item-unit">
+        <div class="collapsible-unit">
+            <div class="collapsible-unit-header">
+                <span class="unit-toggle-icon"></span>
+                <span class="unit-name"></span>
+                <button class="delete-unit" title="删除单位及所有子单位">×</button>
+            </div>
+            <div class="collapsible-unit-content"></div>
+        </div>
+    </template>
+
+    <template id="unitson-item-template">
+        <div class="unitson-item">
+            <span class="unitson-name"></span>
+            <button class="delete-unitson" title="删除该子公司">×</button>
+        </div>
+    </template>
+    <div id="mentionList" class="mention-popup"></div>
+    <script src="../../../node_modules/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="../../../node_modules/flatpickr/dist/l10n/zh.js"></script>
+    <script src="./renderer.js"></script>
+</body>
+
+</html>

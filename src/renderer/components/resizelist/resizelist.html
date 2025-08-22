@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可调整列宽表格组件 - 增强版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .info-panel {
+            background: #eef2ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #d4d8f9;
+        }
+        
+        .info-panel h2 {
+            color: #4f46e5;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.6rem;
+        }
+        
+        .info-panel p {
+            line-height: 1.7;
+            color: #4b5563;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 25px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card h3 {
+            color: #4f46e5;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+        }
+        
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: #eef2ff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #4f46e5;
+        }
+        
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: #f9fafb;
+            padding: 18px 25px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            background: linear-gradient(to bottom, #4f46e5, #7c3aed);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-outline {
+            background: white;
+            border: 2px solid #4f46e5;
+            color: #4f46e5;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: #eef2ff;
+            border-radius: 30px;
+            font-weight: 500;
+            color: #4f46e5;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #6b7280;
+            padding: 20px;
+            font-size: 1.05rem;
+        }
+        
+        /* 右键菜单样式 */
+        .column-context-menu {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            width: 260px;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .menu-header {
+            padding: 18px 20px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.15rem;
+        }
+        
+        .menu-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .menu-item {
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .menu-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .menu-item label {
+            flex: 1;
+            cursor: pointer;
+            color: #374151;
+            font-size: 1.05rem;
+        }
+        
+        .menu-footer {
+            padding: 15px 20px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .table-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .control-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>可调整列宽表格组件</h1>
+            <div class="subtitle">增强版 - 支持右键菜单动态显示/隐藏列，最少保留4列</div>
+        </header>
+        
+        <div class="content">
+            <div class="info-panel">
+                <h2><span class="feature-icon">✨</span> 新增右键菜单功能</h2>
+                <p>现在您可以右键点击表头，通过上下文菜单动态显示或隐藏表格列。系统会确保至少保留4列可见，提供更灵活的表格视图控制。</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <h3><span class="feature-icon">📋</span> 动态列管理</h3>
+                        <p>通过右键菜单轻松切换列的可见性，实时更新表格布局，无需重新加载页面。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><span class="feature-icon">⚙️</span> 最少4列保障</h3>
+                        <p>系统会确保至少保留4列可见，当尝试隐藏最后一列时，会显示警告提示。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3><span class="feature-icon">🔄</span> 即时更新</h3>
+                        <p>列显示状态更改后，表格会立即重新渲染，保持数据完整性和布局一致性。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-controls">
+                <div class="control-group">
+                    <button class="btn">
+                        <span>📥</span> 导出数据
+                    </button>
+                    <button class="btn btn-outline">
+                        <span>🔄</span> 刷新表格
+                    </button>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>当前显示: <span id="visible-count">5</span> 列</span>
+                </div>
+            </div>
+            
+            <div id="table-container">
+                <resizable-table id="main-table"></resizable-table>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>高级表格组件 &copy; 2023 | 右键菜单功能增强版 | 使用纯JavaScript和CSS实现</p>
+    </footer>
+
+    <!-- 右键菜单 -->
+    <div class="column-context-menu" id="context-menu">
+        <div class="menu-header">显示/隐藏列</div>
+        <div class="menu-list" id="menu-list"></div>
+        <div class="menu-footer">至少需要保留4列可见</div>
+    </div>
+
+    <script>
+        class ResizableTable extends HTMLElement {
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open' });
+
+                // 组件状态
+                this.isResizing = false;
+                this.currentHeader = null;
+                this.startX = 0;
+                this.startWidth = 0;
+                this.sortColumn = null;
+                this.sortDirection = null;
+                this.tableData = [];
+                this.headers = [];
+                this.allKeys = [];
+                this.visibleKeys = ['id', 'title', 'sender_number', 'sender_date', 'input_user']; // 默认显示的列
+                this.hiddenKeys = ['status', 'priority', 'category', 'comments']; // 默认隐藏的列
+                this.headerMap = {};
+                this.originalData = [];
+                this.columnWidths = [];
+                this.tableWidth = 0;
+
+                // 渲染组件
+                this.render();
+            }
+
+            connectedCallback() {
+                this.dispatchEvent(new CustomEvent('component-ready', {
+                    bubbles: true,
+                    composed: true
+                }));
+                
+                // 设置示例数据
+                setTimeout(() => {
+                    this.setHeaderMap({
+                        id: "ID",
+                        title: "标题",
+                        sender_number: "发送方",
+                        sender_date: "日期",
+                        input_user: "用户",
+                        status: "状态",
+                        priority: "优先级",
+                        category: "类别",
+                        comments: "备注"
+                    });
+                    
+                    this.setData([
+                        {id: 1001, title: "项目计划书", sender_number: "CTO办公室", sender_date: "2023-08-15", input_user: "张三", status: "进行中", priority: "高", category: "项目", comments: "需要技术评审"},
+                        {id: 1002, title: "财务季度报告", sender_number: "财务部", sender_date: "2023-08-18", input_user: "李四", status: "已完成", priority: "中", category: "财务", comments: "已提交审计"},
+                        {id: 1003, title: "市场分析报告", sender_number: "市场部", sender_date: "2023-08-20", input_user: "王五", status: "待审核", priority: "高", category: "市场", comments: "包含竞争对手分析"},
+                        {id: 1004, title: "技术白皮书", sender_number: "研发部", sender_date: "2023-08-22", input_user: "赵六", status: "进行中", priority: "紧急", category: "技术", comments: "需要添加API文档"},
+                        {id: 1005, title: "客户反馈报告", sender_number: "客服部", sender_date: "2023-08-25", input_user: "钱七", status: "已完成", priority: "中", category: "客户", comments: "客户满意度90%"},
+                        {id: 1006, title: "人力资源计划", sender_number: "HR部门", sender_date: "2023-08-28", input_user: "孙八", status: "待审核", priority: "低", category: "人力资源", comments: "包含招聘计划"}
+                    ]);
+                    
+                    // 初始化时更新可见列数
+                    this.updateVisibleCount();
+                }, 500);
+                
+                // 监听全局点击事件来关闭右键菜单
+                document.addEventListener('click', this.closeContextMenu);
+            }
+
+            setHeaderMap(map) {
+                if (map && typeof map === 'object') {
+                    this.headerMap = map;
+                    this.renderHeaders();
+                }
+            }
+
+            setData(data) {
+                if (!data || !Array.isArray(data)) return;
+                this.originalData = data;
+
+                if (data.length > 0 && typeof data[0] === 'object') {
+                    this.allKeys = Object.keys(data[0]);
+                }
+
+                this.prepareTableData();
+                this.renderHeaders();
+                this.renderBody();
+            }
+            
+            prepareTableData() {
+                // 准备表格数据（只包含可见列）
+                this.tableData = this.originalData.map(item => {
+                    return this.visibleKeys.map(key => item[key]);
+                });
+
+                // 准备表头数据
+                this.headers = this.visibleKeys.map(key => ({
+                    key: key,
+                    text: key,
+                    type: this.detectType(this.originalData[0][key])
+                }));
+
+                this.applyHeaderMapping();
+            }
+            
+            applyHeaderMapping() {
+                this.headers = this.headers.map(header => {
+                    if (this.headerMap[header.key]) {
+                        return {
+                            ...header,
+                            text: this.headerMap[header.key]
+                        };
+                    }
+                    return header;
+                });
+            }
+
+            detectType(value) {
+                if (typeof value === 'number') return 'number';
+                if (!isNaN(Date.parse(value))) return 'date';
+                return 'string';
+            }
+
+            render() {
+                this.shadowRoot.innerHTML = `
+                    <style>   
+                        .table-container {
+                            padding: 3px;
+                            overflow-x: auto;
+                            height: 100%;
+                            display: block;
+                            border-radius: 12px;
+                            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+                            background: white;
+                        }
+                        
+                        table {
+                            border-collapse: collapse;
+                            table-layout: fixed;
+                            width: 100%;
+                            min-width: 100%;
+                            background: white;
+                            border-radius: 2px;
+                            overflow: hidden;
+                        }
+                        
+                        th, td {
+                            border-bottom: 1px solid #e0e0e0;
+                            padding: 14px 18px;
+                            text-align: left;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                            box-sizing: border-box;
+                        }
+                        
+                        thead {
+                            background: linear-gradient(to bottom, #f0f8ff, #eaf5fa);
+                        }
+                        
+                        th {
+                            position: relative;
+                            cursor: pointer;
+                            font-weight: 600;
+                            color: #1a237e;
+                            font-size: 1.1rem;
+                            user-select: none;
+                            transition: background 0.3s;
+                        }
+                        
+                        th:hover {
+                            background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+                        }
+                        
+                        tbody tr {
+                            transition: background-color 0.2s;
+                        }
+                        
+                        tbody tr:hover {
+                            background-color: #f5fbff;
+                        }
+                        
+                        tbody tr:nth-child(even) {
+                            background-color: #f8fdff;
+                        }
+                        
+                        tbody tr:nth-child(even):hover {
+                            background-color: #e8f7ff;
+                        }
+                        
+                        .sort-icon {
+                            display: inline-block;
+                            margin-left: 8px;
+                            font-size: 14px;
+                            transition: transform 0.2s;
+                        }
+                        
+                        .resizer {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            width: 4px;
+                            height: 100%;
+                            background: transparent;
+                            cursor: col-resize;
+                            z-index: 10;
+                        }
+                        
+                        .resizer:hover, .resizer.active {
+                            background: #2196F3;
+                        }
+
+                        .drag-indicator {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            height: 100%;
+                            width: 1px;
+                            background: #bbbbbb;
+                            display: none;
+                            z-index: 100;
+                            pointer-events: none;
+                        }
+                        
+                        .status-cell {
+                            display: inline-block;
+                            padding: 5px 12px;
+                            border-radius: 20px;
+                            font-size: 0.85rem;
+                            font-weight: 500;
+                        }
+                        
+                        .status-completed {
+                            background: #e8f5e9;
+                            color: #2e7d32;
+                        }
+                        
+                        .status-pending {
+                            background: #fffde7;
+                            color: #f9a825;
+                        }
+                        
+                        .status-rejected {
+                            background: #ffebee;
+                            color: #c62828;
+                        }
+                        
+                        .priority-high {
+                            background: #ffebee;
+                            color: #c62828;
+                            font-weight: 600;
+                        }
+                        
+                        .priority-medium {
+                            background: #fff8e1;
+                            color: #f57f17;
+                        }
+                        
+                        .priority-low {
+                            background: #e8f5e9;
+                            color: #2e7d32;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            th, td {
+                                padding: 12px 15px;
+                            }
+                        }
+                    </style>
+                    
+                    <div class="table-container">
+                        <table id="resizable-table">
+                            <thead>
+                                <tr id="table-headers"></tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="drag-indicator" id="drag-indicator"></div>
+                `;
+            }
+
+            renderHeaders() {
+                const headersRow = this.shadowRoot.getElementById('table-headers');
+                if (!headersRow) return;
+                
+                headersRow.innerHTML = '';
+
+                this.headers.forEach((header, index) => {
+                    const th = document.createElement('th');
+                    th.textContent = header.text;
+                    th.setAttribute('data-type', header.type);
+                    th.setAttribute('data-key', header.key);
+
+                    // 如果有保存的宽度，则应用
+                    if (this.columnWidths[index]) {
+                        th.style.width = `${this.columnWidths[index]}px`;
+                    } else {
+                        // 初始宽度设置为均分
+                        th.style.width = `${100 / this.headers.length}%`;
+                    }
+
+                    const sortIcon = document.createElement('span');
+                    sortIcon.classList.add('sort-icon');
+                    sortIcon.textContent = '↕';
+                    th.appendChild(sortIcon);
+
+                    const resizer = document.createElement('div');
+                    resizer.classList.add('resizer');
+                    th.appendChild(resizer);
+
+                    // 添加右键菜单事件
+                    th.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        this.showContextMenu(e, header.key);
+                    });
+
+                    headersRow.appendChild(th);
+                });
+
+                this.initResizableColumns();
+                this.initSortableTable();
+            }
+
+            renderBody() {
+                const tableBody = this.shadowRoot.getElementById('table-body');
+                if (!tableBody) return;
+                
+                tableBody.innerHTML = '';
+
+                this.tableData.forEach((rowData, rowIndex) => {
+                    const row = document.createElement('tr');
+                    const originalItem = this.originalData[rowIndex];
+
+                    rowData.forEach((cellData, index) => {
+                        const cell = document.createElement('td');
+                        const key = this.visibleKeys[index];
+                        
+                        // 特殊格式处理
+                        if (key === 'status') {
+                            cell.innerHTML = `<span class="status-cell status-${cellData === '已完成' ? 'completed' : cellData === '进行中' ? 'pending' : 'rejected'}">${cellData}</span>`;
+                        } else if (key === 'priority') {
+                            const priorityClass = 
+                                cellData === '紧急' || cellData === '高' ? 'priority-high' :
+                                cellData === '中' ? 'priority-medium' : 'priority-low';
+                            cell.innerHTML = `<span class="status-cell ${priorityClass}">${cellData}</span>`;
+                        } else {
+                            cell.textContent = cellData;
+                        }
+                        
+                        // 应用列宽到单元格
+                        if (this.columnWidths[index]) {
+                            cell.style.width = `${this.columnWidths[index]}px`;
+                        }
+                        
+                        row.appendChild(cell);
+                    });
+
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            showContextMenu(e, headerKey) {
+                const contextMenu = document.getElementById('context-menu');
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${e.pageX}px`;
+                contextMenu.style.top = `${e.pageY}px`;
+                
+                const menuList = document.getElementById('menu-list');
+                menuList.innerHTML = '';
+                
+                // 添加所有可能的列到菜单
+                Object.entries(this.headerMap).forEach(([key, text]) => {
+                    const isVisible = this.visibleKeys.includes(key);
+                    
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `col-${key}`;
+                    checkbox.checked = isVisible;
+                    checkbox.disabled = isVisible && this.visibleKeys.length <= 4;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `col-${key}`;
+                    label.textContent = text;
+                    
+                    menuItem.appendChild(checkbox);
+                    menuItem.appendChild(label);
+                    menuList.appendChild(menuItem);
+                    
+                    // 添加事件处理
+                    checkbox.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        this.toggleColumnVisibility(key, checkbox.checked);
+                    });
+                });
+            }
+            
+            toggleColumnVisibility(columnKey, visible) {
+                if (visible) {
+                    // 添加列
+                    if (!this.visibleKeys.includes(columnKey)) {
+                        this.visibleKeys.push(columnKey);
+                    }
+                } else {
+                    // 移除列前检查是否满足最少4列
+                    if (this.visibleKeys.length <= 4) {
+                        alert('必须至少保留4列可见！');
+                        return;
+                    }
+                    
+                    // 移除列
+                    const index = this.visibleKeys.indexOf(columnKey);
+                    if (index !== -1) {
+                        this.visibleKeys.splice(index, 1);
+                    }
+                }
+                
+                // 重新准备表格数据并渲染
+                this.prepareTableData();
+                this.renderHeaders();
+                this.renderBody();
+                
+                // 更新可见列计数
+                this.updateVisibleCount();
+                
+                // 关闭菜单
+                this.closeContextMenu();
+            }
+            
+            updateVisibleCount() {
+                const countElement = document.getElementById('visible-count');
+                if (countElement) {
+                    countElement.textContent = this.visibleKeys.length;
+                }
+            }
+            
+            closeContextMenu() {
+                const contextMenu = document.getElementById('context-menu');
+                contextMenu.style.display = 'none';
+            }
+
+            initResizableColumns() {
+                const table = this.shadowRoot.getElementById('resizable-table');
+                if (!table) return;
+                
+                const headers = table.querySelectorAll('th');
+                const indicator = this.shadowRoot.getElementById('drag-indicator');
+
+                // 初始化列宽数组
+                if (this.columnWidths.length === 0) {
+                    headers.forEach(header => {
+                        const width = header.getBoundingClientRect().width;
+                        this.columnWidths.push(width);
+                    });
+                }
+
+                headers.forEach((header, index) => {
+                    const resizer = header.querySelector('.resizer');
+
+                    resizer.addEventListener('mousedown', (e) => {
+                        this.isResizing = true;
+                        this.currentHeader = header;
+                        this.startX = e.clientX;
+                        this.startWidth = header.getBoundingClientRect().width;
+                        resizer.classList.add('active');
+
+                        // 获取当前列索引
+                        const columnIndex = Array.from(header.parentElement.children).indexOf(header);
+
+                        indicator.style.display = 'block';
+                        indicator.style.left = e.clientX + 'px';
+
+                        document.addEventListener('mousemove', this.doDrag);
+                        document.addEventListener('mouseup', this.stopDrag);
+                        document.addEventListener('mouseleave', this.stopDrag);
+                    });
+                });
+            }
+
+            doDrag = (e) => {
+                if (!this.isResizing) return;
+
+                const newWidth = Math.max(this.startWidth + (e.clientX - this.startX), 50);
+                this.currentHeader.style.width = `${newWidth}px`;
+                
+                // 更新指示线位置
+                const indicator = this.shadowRoot.getElementById('drag-indicator');
+                indicator.style.left = e.clientX + 'px';
+            };
+
+            stopDrag = () => {
+                if (!this.isResizing) return;
+
+                this.isResizing = false;
+                
+                // 保存新的列宽
+                const headers = this.shadowRoot.querySelectorAll('th');
+                this.columnWidths = Array.from(headers).map(header => 
+                    header.getBoundingClientRect().width
+                );
+                
+                this.shadowRoot.querySelectorAll('.resizer').forEach(r => r.classList.remove('active'));
+                this.shadowRoot.getElementById('drag-indicator').style.display = 'none';
+
+                document.removeEventListener('mousemove', this.doDrag);
+                document.removeEventListener('mouseup', this.stopDrag);
+                document.removeEventListener('mouseleave', this.stopDrag);
+                
+                // 重新渲染表体以应用新宽度
+                this.renderBody();
+            };
+
+            initSortableTable() {
+                const table = this.shadowRoot.getElementById('resizable-table');
+                if (!table) return;
+                
+                const headers = table.querySelectorAll('th');
+
+                headers.forEach((header, index) => {
+                    header.addEventListener('click', (e) => {
+                        const isMultiSort = e.shiftKey;
+                        const type = header.getAttribute('data-type');
+                        const icon = header.querySelector('.sort-icon');
+
+                        if (!isMultiSort || this.sortColumn !== index) {
+                            this.sortDirection = this.sortColumn === index ?
+                                (this.sortDirection === 'asc' ? 'desc' : 'asc') :
+                                'asc';
+                        }
+
+                        this.sortColumn = index;
+
+                        headers.forEach((h, i) => {
+                            const ic = h.querySelector('.sort-icon');
+                            if (i === index) {
+                                ic.textContent = this.sortDirection === 'asc' ? '↑' : '↓';
+                            } else if (!isMultiSort) {
+                                ic.textContent = '↕';
+                            }
+                        });
+
+                        this.sortTable(index, type, this.sortDirection);
+
+                        this.dispatchEvent(new CustomEvent('sort', {
+                            detail: {
+                                column: index,
+                                direction: this.sortDirection,
+                                columnName: this.headers[index].text
+                            }
+                        }));
+                    });
+                });
+            }
+
+            sortTable(column, type, direction) {
+                const tableBody = this.shadowRoot.getElementById('table-body');
+                if (!tableBody) return;
+                
+                const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+                rows.sort((a, b) => {
+                    const aValue = a.cells[column].textContent;
+                    const bValue = b.cells[column].textContent;
+
+                    let comparison = 0;
+
+                    switch (type) {
+                        case 'number':
+                            comparison = parseFloat(aValue) - parseFloat(bValue);
+                            break;
+                        case 'date':
+                            comparison = new Date(aValue) - new Date(bValue);
+                            break;
+                        default:
+                            comparison = aValue.localeCompare(bValue);
+                    }
+
+                    return direction === 'asc' ? comparison : -comparison;
+                });
+
+                while (tableBody.firstChild) {
+                    tableBody.removeChild(tableBody.firstChild);
+                }
+
+                rows.forEach(row => tableBody.appendChild(row));
+            }
+        }
+
+        if (!customElements.get('resizable-table')) {
+            customElements.define('resizable-table', ResizableTable);
+        }
+    </script>
+</body>
+</html>

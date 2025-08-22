@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="./dialog.css">
+    </head>
+    <body>
+        <div class="dialog-container">
+            <div class="dialog-title-container">
+                <span id="dialog-title-str" class="dialog-title">提示</span>
+                <img id="dialog-close" src="../assets/image/close.png">
+            </div>
+            <hr>
+            <div class="dialog-body-container">
+                <div class="dialog-msg-container">
+                    <img id="img-notice-icon" src="../assets/image/notice_icon.png">
+                    <span id="dialog-msg">确定删除选中的文件吗</span>
+                </div>
+                <div class="dialog-tbn-container">
+                    <button id="cancelBtn" type="button" class="dialog-btn cancel">取消</button>
+                    <button  id="confirmBtn" type="button" class="dialog-btn confirm">确认</button>
+                </div>
+            </div>
+        </div>
+        <script src="./dialog.js"></script>
+    </body>
+</html>

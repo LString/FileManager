@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可拖拽调整列宽的表格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 25px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        /* 表格外层滚动容器 */
+        .table-scroll-container {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        /* 表头外层容器 - 固定位置 */
+        .table-header-container {
+            overflow-x: hidden; /* 隐藏水平滚动条 */
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* 表体外层容器 - 可滚动 */
+        .table-body-container {
+            overflow: auto;
+            max-height: 400px;
+        }
+        
+        /* 表格样式 */
+        .keyword-list-table {
+            width: auto; /* 关键：宽度自适应内容 */
+            min-width: 100%; /* 最小宽度为容器宽度 */
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        
+        .keyword-list-table th {
+            position: relative;
+            padding: 16px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: default;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .keyword-list-table th:last-child {
+            border-right: none;
+        }
+        
+        .keyword-list-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #eee;
+            word-break: break-word;
+            vertical-align: top;
+        }
+        
+        .keyword-list-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .keyword-list-table tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+        
+        /* 列拖拽手柄样式 */
+        .resize-handle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: col-resize;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+        
+        .resize-handle:hover, .resize-handle.active {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 使用说明样式 */
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+        
+        .instructions h3 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        /* 功能卡片样式 */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #4b6cb7;
+        }
+        
+        .feature-card h3 {
+            color: #182848;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-card h3 i {
+            font-size: 1.4rem;
+            color: #4b6cb7;
+        }
+        
+        .feature-card p {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .table-body-container {
+                max-height: 300px;
+            }
+            
+            .features {
+                flex-direction: column;
+            }
+        }
+        
+        /* 滚动条美化 */
+        .table-body-container::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .table-body-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .table-body-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+            border: 3px solid #f1f1f1;
+        }
+        
+        .table-body-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>可拖拽调整列宽的表格</h1>
+        <p class="subtitle">此表格支持拖拽列宽调整、固定表头、水平和垂直滚动等功能</p>
+    </header>
+    
+    <div class="container">
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>将鼠标悬停在列标题之间的分隔线上，光标会变为可调整大小的样式</li>
+                <li>按住鼠标左键并左右拖动以调整列宽</li>
+                <li>表头在滚动时会保持固定位置</li>
+                <li>表格内容区域支持水平和垂直滚动</li>
+                <li>调整列宽后，表格布局会自动适应</li>
+                <li>当列宽总和超过容器宽度时，会出现水平滚动条</li>
+            </ul>
+        </div>
+        
+        <div class="table-scroll-container">
+            <!-- 表头容器 - 固定位置 -->
+            <div class="table-header-container">
+                <table class="keyword-list-table">
+                    <colgroup>
+                        <col id="col1" style="width: 30%;">
+                        <col id="col2" style="width: 43%;">
+                        <col id="col3" style="width: 27%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>关键词
+                                <div class="resize-handle" data-col="0"></div>
+                            </th>
+                            <th>关键词描述
+                                <div class="resize-handle" data-col="1"></div>
+                            </th>
+                            <th>文件数量
+                                <div class="resize-handle" data-col="2"></div>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            
+            <!-- 表体容器 - 可滚动 -->
+            <div class="table-body-container">
+                <table class="keyword-list-table">
+                    <colgroup>
+                        <col style="width: 30%;">
+                        <col style="width: 43%;">
+                        <col style="width: 27%;">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td>人工智能</td>
+                            <td>研究、开发用于模拟、延伸和扩展人的智能的理论、方法、技术及应用系统</td>
+                            <td>128</td>
+                        </tr>
+                        <tr>
+                            <td>机器学习</td>
+                            <td>人工智能的一个分支，通过经验自动改进的计算机算法研究</td>
+                            <td>96</td>
+                        </tr>
+                        <tr>
+                            <td>深度学习</td>
+                            <td>机器学习的分支，基于样本数据建立模型进行分析学习</td>
+                            <td>87</td>
+                        </tr>
+                        <tr>
+                            <td>自然语言处理</td>
+                            <td>计算机科学、人工智能和语言学的交叉领域，研究人与计算机之间用自然语言进行有效通信</td>
+                            <td>75</td>
+                        </tr>
+                        <tr>
+                            <td>计算机视觉</td>
+                            <td>研究如何让计算机从图像或多维数据中获取信息</td>
+                            <td>68</td>
+                        </tr>
+                        <tr>
+                            <td>神经网络</td>
+                            <td>模仿生物神经网络结构和功能的计算模型，用于估计或近似函数</td>
+                            <td>120</td>
+                        </tr>
+                        <tr>
+                            <td>数据挖掘</td>
+                            <td>从大量数据中通过算法搜索隐藏信息的过程</td>
+                            <td>92</td>
+                        </tr>
+                        <tr>
+                            <td>大数据</td>
+                            <td>无法在一定时间范围内用常规软件工具进行捕捉、管理和处理的数据集合</td>
+                            <td>105</td>
+                        </tr>
+                        <tr>
+                            <td>云计算</td>
+                            <td>基于互联网的计算方式，共享软硬件资源和信息</td>
+                            <td>88</td>
+                        </tr>
+                        <tr>
+                            <td>物联网</td>
+                            <td>将各种信息传感设备与互联网结合形成的巨大网络</td>
+                            <td>76</td>
+                        </tr>
+                        <tr>
+                            <td>区块链</td>
+                            <td>分布式数据存储、点对点传输、共识机制、加密算法等计算机技术的新型应用模式</td>
+                            <td>64</td>
+                        </tr>
+                        <tr>
+                            <td>边缘计算</td>
+                            <td>在靠近物或数据源头的一侧，就近提供最近端服务</td>
+                            <td>52</td>
+                        </tr>
+                        <tr>
+                            <td>量子计算</td>
+                            <td>遵循量子力学规律进行高速数学和逻辑运算、存储及处理量子信息的物理装置</td>
+                            <td>45</td>
+                        </tr>
+                        <tr>
+                            <td>增强现实</td>
+                            <td>将虚拟信息与真实世界巧妙融合的技术，广泛运用多媒体、三维建模、实时跟踪及注册、智能交互、传感等多种技术手段</td>
+                            <td>67</td>
+                        </tr>
+                        <tr>
+                            <td>虚拟现实</td>
+                            <td>创建和体验虚拟世界的计算机仿真系统，利用计算机生成一种模拟环境</td>
+                            <td>58</td>
+                        </tr>
+                        <tr>
+                            <td>数字孪生</td>
+                            <td>充分利用物理模型、传感器更新、运行历史等数据，集成多学科、多物理量、多尺度、多概率的仿真过程</td>
+                            <td>42</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3><i>↔️</i> 拖拽调整列宽</h3>
+                <p>通过拖动手柄轻松调整每列的宽度，提供直观的交互体验。</p>
+            </div>
+            <div class="feature-card">
+                <h3><i>📌</i> 固定表头</h3>
+                <p>当表格内容滚动时，表头保持固定位置，方便查看列标题。</p>
+            </div>
+            <div class="feature-card">
+                <h3><i>🔄</i> 双向滚动</h3>
+                <p>表体支持水平和垂直滚动，确保所有数据都能完整显示。</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>可拖拽调整列宽的表格组件 | 现代Web界面设计示例</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resizeHandles = document.querySelectorAll('.resize-handle');
+            const headerCols = document.querySelector('.table-header-container colgroup').children;
+            const bodyCols = document.querySelector('.table-body-container colgroup').children;
+            
+            let isResizing = false;
+            let currentColIndex;
+            let startX;
+            let startWidth;
+            
+            resizeHandles.forEach(handle => {
+                handle.addEventListener('mousedown', function(e) {
+                    isResizing = true;
+                    currentColIndex = parseInt(this.getAttribute('data-col'));
+                    startX = e.clientX;
+                    startWidth = headerCols[currentColIndex].offsetWidth;
+                    this.classList.add('active');
+                    
+                    document.addEventListener('mousemove', doResize);
+                    document.addEventListener('mouseup', stopResize);
+                });
+            });
+            
+            function doResize(e) {
+                if (!isResizing) return;
+                
+                const diffX = e.clientX - startX;
+                const newWidth = startWidth + diffX;
+                
+                // 设置最小宽度限制
+                if (newWidth > 80) {
+                    // 更新表头和表体的列宽
+                    headerCols[currentColIndex].style.width = newWidth + 'px';
+                    bodyCols[currentColIndex].style.width = newWidth + 'px';
+                }
+            }
+            
+            function stopResize() {
+                isResizing = false;
+                document.querySelectorAll('.resize-handle').forEach(handle => {
+                    handle.classList.remove('active');
+                });
+                
+                document.removeEventListener('mousemove', doResize);
+                document.removeEventListener('mouseup', stopResize);
+            }
+            
+            // 同步表头和表体的水平滚动
+            const tableBodyContainer = document.querySelector('.table-body-container');
+            const tableHeaderContainer = document.querySelector('.table-header-container');
+            
+            tableBodyContainer.addEventListener('scroll', function() {
+                tableHeaderContainer.scrollLeft = this.scrollLeft;
+            });
+        });
+    </script>
+</body>
+</html>

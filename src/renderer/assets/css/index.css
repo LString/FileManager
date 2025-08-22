@@ -1,0 +1,984 @@
+/* 基础样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* 标题栏样式 */
+#titlebar {
+  height: 30px;
+  background: #3fd3b3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: white;
+  -webkit-app-region: drag;
+  /* 可拖拽区域 */
+}
+
+.close {
+  color: #aaa;
+  font-size: 28px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close:hover {
+  color: #e94a57;
+}
+
+#drag-region {
+  padding: 0 10px;
+  color: white;
+}
+
+/* 窗口控制按钮 */
+#window-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+  /* 排除拖拽区域 */
+}
+
+.control-btn {
+  width: 40px;
+  height: 100%;
+  border: none;
+  color: white;
+  background-color: transparent;
+  transition: background 0.2s;
+}
+
+.control-btn:hover {
+  background: #4a4a4a;
+  border-radius: 8px;
+}
+
+#close:hover {
+  background: #e94a57 !important;
+  border-radius: 8px;
+}
+
+.main-container {
+  display: flex;
+  height: calc(100vh - 30px);
+  width: 100vw;
+  overflow: hidden;
+  /* 防止整体溢出 */
+}
+
+.vertical-tabbar {
+  width: 60px;
+  /* 固定宽度 */
+  min-width: 60px;
+  /* 禁止缩小 */
+  max-width: 60px;
+  /* 禁止扩大 */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+.tab-btn {
+  width: 100%;
+  /* 继承父级宽度 */
+  flex: none;
+  /* 禁用flex伸缩 */
+  height: 100px;
+  /* 固定按钮高度 */
+  padding: 15px 0;
+  /* 调整内边距 */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  min-height: auto;
+  padding: 20px 0;
+  border: none;
+  background: none;
+  transition: all 0.2s;
+  text-orientation: upright;
+  letter-spacing: 2px;
+  line-height: 1.5;
+}
+
+
+/* 带图标的版本 */
+.tab-btn.with-icon {
+  flex-direction: column;
+  writing-mode: horizontal-tb;
+  /* 图标保持横向排列 */
+}
+
+.tab-btn.with-icon span {
+  writing-mode: vertical-rl;
+  /* 仅文字垂直 */
+  margin: 8px 0;
+}
+
+/* 激活状态 */
+.tab-btn.active {
+  background: rgba(63, 211, 179, 0.1);
+  border-right: 3px solid #3fd3b3;
+  color: #2a9d8f;
+}
+
+.tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tab-container {
+  position: relative;
+  width: 200%;
+  height: 100%;
+  display: flex;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.content-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* 允许容器收缩 */
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .vertical-tabbar {
+    width: 80px;
+  }
+
+  .tab-btn {
+    writing-mode: vertical-lr;
+    padding: 15px 0;
+  }
+}
+
+.tab-content {
+  display: none;
+  /* 默认隐藏 */
+  opacity: 0;
+  height: 100%;
+  transition: opacity 0.3s ease;
+}
+
+.tab-content.active {
+  display: block;
+  /* 显示内容 */
+  opacity: 1;
+}
+
+/* .tab-container[data-active="create"] {
+  transform: translateX(0);
+}
+
+.tab-container[data-active="view"] {
+  transform: translateX(-50%);
+}
+ */
+.name-manager-container {
+  background-color: #47cdd6;
+  width: 100%;
+  height: 100%;
+  /* 预留滚动条空间 */
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.add-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  /* 输入框和按钮之间的间距 */
+  width: calc(100% - 24px);
+  height: 44px;
+  margin: 12px;
+  /* 与容器 padding 匹配 */
+}
+
+.add-name input {
+  width: 100%;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #a8a8a8;
+  color: #5c5c5c;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.btnadd-name {
+  background: #10cc94;
+  border: 1px solid #a8a8a8;
+  border-radius: 4px;
+  width: 100px;
+  height: 100%;
+}
+
+.name-list {
+  flex: 1;
+  padding: 8px;
+  height: calc(100% - 68px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.doc-list {
+  padding: 8px;
+  height: calc(100% - 40px);
+  overflow-y: auto;
+}
+
+.newDoc-content {
+  background-color: #47cdd6;
+  /*上下边距百分是相对于父控件 左右边距自动计算*/
+  padding: 20px;
+  border: 1px solid #444;
+  min-height: 0;
+  height: calc(100% - 20px);
+  border-radius: 8px;
+  margin: 10px;
+  display: flex;
+  /* 新增flex布局 */
+  flex-direction: column;
+  /* 垂直排列 */
+  overflow: hidden;
+  box-sizing: border-box;
+  /* 包含内边距 */
+  animation: modalOpen 0.5s ease-out;
+}
+
+@keyframes modalOpen {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.newDoc-body {
+  flex: 1;
+  /* 撑满剩余空间 */
+  overflow-y: auto;
+  min-height: 200px;
+  padding: 10px;
+  margin: 0 -20px;
+}
+
+/* 调整表单容器高度 */
+#newDoc-docForm {
+  width: auto;
+  height: auto;
+  min-height: 100%;
+  /* 保证最小高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+.form-actions {
+  margin-top: auto;
+  /* 将操作按钮推到表单底部 */
+}
+
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  color: #5c5c5c;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #a8a8a8;
+  color: #5c5c5c;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.annotate-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+
+/* 响应式适配 */
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 调整原有样式 */
+.modal-content {
+  width: 90%;
+  max-width: 600px;
+  /* 保持最大宽度不变 */
+}
+
+.form-group {
+  margin-bottom: 0;
+  /* 行内间距由外层容器控制 */
+}
+
+input[type="text"],
+select {
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  /* 统一高度 */
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+  line-height: 1.5;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.newDoc-btn {
+  padding: 5px;
+  font-size: 15px;
+  border: white;
+  border-radius: 3px;
+}
+
+.newDoc-btn.primary {
+  background: #2196F3;
+}
+
+.newDoc-btn.primary:hover {
+  background: #1976D2;
+}
+
+/* 操作按钮样式 */
+.doc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin: 8px 8px;
+  background: #5becd4;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: background 0.2s;
+}
+
+.doc-item:hover {
+  background: #44ddc4;
+}
+
+.doc-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
+}
+
+.doc-date {
+  margin-left: 15px;
+  font-size: 15px;
+  color: #929292;
+}
+
+.doc-meta {
+  margin-top: 8px;
+}
+
+.doc-info {
+  margin-left: 8px;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.doc-item:hover .doc-actions {
+  opacity: 1;
+}
+
+/* 重要样式 */
+.doc-item-important {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin: 8px 8px;
+  background: #5becd4;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: background 0.2s;
+}
+
+.doc-item-important:hover {
+  background: #44ddc4;
+}
+
+.doc-title-important {
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
+}
+
+.doc-date-important {
+  margin-left: 15px;
+  font-size: 15px;
+  color: #929292;
+}
+
+.doc-meta-important {
+  margin-top: 8px;
+}
+
+.doc-info-important {
+  margin-left: 8px;
+}
+
+.doc-actions-important {
+  display: flex;
+  gap: 8px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.doc-item-important:hover .doc-actions-important {
+  opacity: 1;
+}
+
+
+.action-btn {
+  padding: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.delete-btn:hover {
+  color: #ff4444;
+}
+
+.edit-btn:hover {
+  color: #2196F3;
+}
+
+.edit-btn:hover {
+  color: #2196F3;
+}
+
+.annotate-btn:hover {
+  color: #4CAF50;
+}
+
+#pop-docForm {
+  width: 100%;
+  height: 100%;
+  /* 保证最小高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 模态弹窗样式 */
+.modal {
+  display: none;
+  z-index: 1000;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.pop-bg {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+
+}
+
+.pop-content {
+  background-color: #47cdd6;
+  /*上下边距百分是相对于父控件 左右边距自动计算*/
+  padding: 20px;
+  border: 1px solid #444;
+  min-height: 0;
+  border-radius: 8px;
+  width: 80%;
+  height: 70%;
+  margin: 10px;
+  display: flex;
+  /* 新增flex布局 */
+  flex-direction: column;
+  /* 垂直排列 */
+  overflow: hidden;
+  box-sizing: border-box;
+  /* 包含内边距 */
+  animation: modalOpen 0.5s ease-out;
+}
+
+/* 显示时设置为flex */
+.modal.show {
+  display: flex !important;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pop-title-header {
+  text-align: center;
+  /* 标题默认居中 */
+}
+
+.annotate-box {
+  display: none;
+  z-index: 1500;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
+
+.annotate-bg {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+
+}
+
+.form-group.hidden {
+  display: none;
+}
+
+.annotate-content {
+  background-color: #47cdd6;
+  /*上下边距百分是相对于父控件 左右边距自动计算*/
+  padding: 20px;
+  border: 1px solid #444;
+  min-height: 0;
+  border-radius: 8px;
+  width: 80%;
+  height: 70%;
+  margin: 10px;
+  display: flex;
+  /* 新增flex布局 */
+  flex-direction: column;
+  /* 垂直排列 */
+  overflow: hidden;
+  box-sizing: border-box;
+  overflow-y: auto;
+  /* 包含内边距 */
+  animation: modalOpen 0.5s ease-out;
+}
+
+.annotate-Form .form-group input {
+  width: 100%;
+  height: 100px;
+  overflow-y: auto;
+  margin-top: 5px;
+}
+
+.annotate-Form .form-group label {
+  margin-top: 10px;
+}
+
+.config-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.config-tabs .config-tab-btn {
+  width: 50%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.config-tabs .config-tab-btn.active {
+  border-bottom: 2px solid #409eff;
+}
+
+.config-content {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+
+.array-editor {
+  margin: 1rem 0;
+}
+
+.array-item {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  gap: 8px;
+}
+
+.tree-editor {
+  margin: 1rem 0;
+}
+
+.unit-node {
+  margin-left: 20px;
+  padding: 8px;
+  border-left: 2px solid #eee;
+}
+
+.add-btn {
+  background: #409eff;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 姓名管理样式 */
+.author-item {
+  margin: 10px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.author-main {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.author-name {
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+.alias-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: 20px;
+}
+
+.alias-item {
+  background: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.delete-author,
+.delete-alias {
+  color: #dc3545;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.delete-author:hover,
+.delete-alias:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+/* ==================== 错误提示 ==================== */
+.error,
+.error-item {
+  padding: 1rem;
+  color: #dc3545;
+  background: #ffeef0;
+  border-radius: 4px;
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* ==================== 树形结构 ==================== */
+.name-tree {
+  padding-left: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.collapsible-container {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-top: 15px;
+}
+
+/* ==================== 折叠项 ==================== */
+.collapsible-item {
+  margin: 8px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #f8f8f8;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &.active {
+    background: #f5f5f5;
+
+    .toggle-icon {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+/* ==================== 折叠动画 ==================== */
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding-left: 20px;
+}
+
+/* ==================== 箭头图标 ==================== */
+.toggle-icon {
+  display: inline-block;
+  width: 16px;
+  margin-right: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* ==================== 操作按钮 ==================== */
+.delete-author,
+.delete-alias {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 2px 8px;
+  transition: opacity 0.2s;
+
+  &:hover {
+    color: #dc3545;
+    opacity: 1;
+  }
+}
+
+/* ==================== 别名项 ==================== */
+.alias-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  span:empty::before {
+    content: "未命名别名";
+    color: #6c757d;
+    font-style: italic;
+  }
+}
+
+#mentionList {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+  /* 默认隐藏 */
+  opacity: 1;
+  /* 强制可见 */
+}
+
+.mention-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mention-item:hover,
+.mention-item.active {
+  background-color: #f0f0f0;
+}
+
+/* 全部信息弹窗 */
+.author {
+  font-size: 18px;
+  font-weight: bold;
+  color: black;
+}
+
+.date {
+  font-size: 12px;
+  font-weight: normal;
+  color: gray;
+}
+.annotation{
+  margin-top: 10px;
+}
+
+
+
+/* 单位管理 */
+.collapsible-header-unit {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #f8f8f8;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &.active {
+    background: #f5f5f5;
+
+    .toggle-icon {
+      transform: rotate(90deg);
+    }
+  }
+}
+.unit-toggle-icon {
+  display: inline-block;
+  width: 16px;
+  margin-right: 8px;
+  transition: transform 0.2s ease-in-out;
+}
+.unitson-item {
+  background: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+}
+/* ==================== 折叠项 ==================== */
+.collapsible-unit {
+  margin: 8px 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+}
+
+.collapsible-unit-header {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #f8f8f8;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &.active {
+    background: #f5f5f5;
+
+    .unit-toggle-icon {
+      transform: rotate(90deg);
+    }
+  }
+}
+.unit-tree {
+  padding-left: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* ==================== 折叠动画 ==================== */
+.collapsible-unit-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  padding-left: 20px;
+}
+
+.delete-unit,
+.delete-unitson {
+  color: #dc3545;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.delete-unit:hover,
+.delete-unitson:hover {
+  background: rgba(220, 53, 69, 0.1);
+}

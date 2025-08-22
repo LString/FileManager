@@ -1,0 +1,61 @@
+body {
+    height: 100vh;
+    width: 100vw;
+}
+
+.container {
+    width: 300px;
+    /* 固定宽度 */
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    padding: 8px;
+    overflow: hidden;
+    /* 初始状态隐藏溢出内容 */
+}
+
+.text {
+    white-space: nowrap;
+    /* 禁止换行 */
+    text-overflow: ellipsis;
+    /* 溢出显示省略号 */
+    overflow: hidden;
+    flex: 1;
+    /* 占据剩余空间 */
+}
+
+.arrow {
+    flex-shrink: 0;
+    /* 防止箭头被压缩 */
+    cursor: pointer;
+    padding-left: 4px;
+    display: none;
+    /* 默认隐藏 */
+}
+
+.container.expanded .text {
+    white-space: normal;
+    /* 允许换行 */
+    overflow: visible;
+    /* 显示全部内容 */
+    text-overflow: clip;
+}
+
+.arrow.visible {
+    display: block;
+    /* 显示箭头 */
+}
+
+
+.text-after {
+    width: 50px;
+    color: coral;
+}
+
+
+.text-after::after {
+    content: attr(data-ccc);
+    position: relative;
+    top: 10px;
+    left: -10px;
+}

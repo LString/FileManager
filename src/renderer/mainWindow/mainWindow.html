@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../../../node_modules/flatpickr/dist/flatpickr.min.css">
+</head>
+
+<body>
+    <div class="left-box">
+        <img src="../assets/image/elelogo.png" class="logo">
+        <div class="vertical-tabbar">
+            <button class="tab-btn active" data-tab="create" style="size:28px 28px;">
+                <img src="../assets/image/new_doc_active.png" />
+                <span class="btn-text">新建文档</span>
+            </button>
+            <button class="tab-btn" data-tab="view-normal" style="size:30px 28px;">
+                <img src="../assets/image/nor_doc.png" />
+                <span class="btn-text">普通文档</span>
+            </button>
+            <button class="tab-btn" data-tab="view-important" style="size:28px 28px;">
+                <img src="../assets/image/imp_doc.png" />
+                <span class="btn-text">重要文档</span>
+            </button>
+            <!-- <button id="name-manager" class="tab-btn" data-tab="name-manager" style="size:32px 28px;">
+                <img src="../assets/image/name_mag.png" />
+                <span class="btn-text">姓名管理</span>
+            </button>
+            <button id="unit-manager" class="tab-btn" data-tab="unit-manager" style="size:34px 25px;">
+                <img src="../assets/image/unit_mag.png" />
+                <span class="btn-text">单位管理</span>
+            </button> -->
+            <button id="analysis" class="tab-btn" data-tab="data-analysis" style="size:34px 25px;">
+                <img src="../assets/image/data_analysis.png" />
+                <span class="btn-text">数据分析</span>
+            </button>
+            <!-- <button id="analysis" class="tab-btn" data-tab="data-audit" style="size:34px 25px;">
+                <img src="../assets/image/data_analysis.png" />
+                <span class="btn-text">数据审计</span>
+            </button> -->
+            <button id="data-manager" class="tab-btn" data-tab="data-manager" style="size:34px 25px;">
+                <img src="../assets/image/data_mag.png" />
+                <span class="btn-text">数据管理</span>
+            </button>
+        </div>
+    </div>
+    <div id="data-manager-popup" class="data-manager-popup">
+        <div class="popup-content">
+            <button class="popup-item" data-tab="name-manager">
+                <span>姓名管理</span>
+            </button>
+            <button class="popup-item" data-tab="unit-manager">
+                <span>单位管理</span>
+            </button>
+            <button class="popup-item" data-tab="data-audit">
+                <span>数据审计</span>
+            </button>
+            <button class="popup-item" data-tab="keyword-manager">
+                <span>标签管理</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="right-box">
+        <div id="drag-region" class="top-box">
+            <span style="color: #000000;font-weight: 700;font-size: 22px; margin-left: 23px;">文档录入系统</span>
+            <div class="top-right">
+                <div id="window-controls">
+                    <button id="minimize" class="control-btn">-</button>
+                    <button id="maximize" class="control-btn">□</button>
+                    <button id="close" class="control-btn">x</button>
+                </div>
+                <div class="setting-box">
+                    <img id="setting-icon" class="setting-icon" src="../assets/image/setting.png" alt="设置">
+                    <span id="userName" class="setting-btn"
+                        style="font-weight: bold;font-size: 18px;color: #353535">用户名</span>
+                    <span id="login-out" class="setting-btn"
+                        style="font-size: 12px; color: #888888;cursor: pointer;margin-bottom: 1px;">退出</span>
+                </div>
+            </div>
+        </div>
+        <!-- 右侧内容区 -->
+        <div class="content-panel">
+            <!-- 新建文档内容 -->
+            <div id="create-tab" class="tab-content active">
+                <div class="newDoc-content">
+                    <div class="newDoc-body">
+                        <form id="newDoc-docForm">
+                            <div class="form-group">
+                                <label for="docTitle">标题</label>
+                                <input type="text" placeholder="请输入标题" id="docTitle" required maxlength="100">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sender_number">来文编号</label>
+                                    <input type="text" placeholder="请输入编号" id="sender_number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sender_date">来文时间</label>
+                                    <input type="text" placeholder="选择日期" id="sender_date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sender_unit">来文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="secrecy_level">保密等级：</label>
+                                    <div class="secrecy_level_container">
+                                        <select id="secrecy_level" required>
+                                            <option value="普通">普通</option>
+                                            <option value="秘密">秘密</option>
+                                            <option value="机密">机密</option>
+                                            <option value="绝密">绝密</option>
+                                        </select>
+                                        <select id="secrecy_period" required>
+                                            <option value="1年">1年</option>
+                                            <option value="5年">5年</option>
+                                            <option value="10年">10年</option>
+                                            <option value="20年">20年</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="form-group">
+                                    <label for="drafting_unit">制文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="crgency_level">紧急程度：</label>
+                                    <select id="crgency_level" required>
+                                        <option value="普通">普通</option>
+                                        <option value="加急">加急</option>
+                                        <option value="特急">特急</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <!-- 呈阅领导 -->
+                                <div class="form-group">
+                                    <label for="review_leader">呈阅领导：</label>
+                                    <div class="input_with_add">
+                                        <div class="review_leader_container" id="review_leader_container">
+                                            <div class="input-wrapper">
+                                                <input type="text" id="review_leader" list="review_leader_list"
+                                                    placeholder="请输入姓名">
+                                            </div>
+
+                                        </div>
+                                        <img id="add_review_leader" style="width: 15px;height: 15px;cursor: pointer;"
+                                            src="../assets/image/add_icon.png">
+                                    </div>
+                                    <datalist id="review_leader_list">
+                                    </datalist>
+
+                                </div>
+                                <!-- 关键词 -->
+                                <div class="form-group">
+                                    <label for="key_words">关键词：</label>
+                                    <div class="input_with_add">
+                                        <div id="key_words_container" class="review_leader_container">
+                                            <div class="input-wrapper">
+                                                <input type="text" id="key_words" list="key_words_list"
+                                                    placeholder="请输入关键词"></input>
+                                            </div>
+                                        </div>
+                                        <img id="add_key_words" style="width: 15px;height: 15px;cursor: pointer;"
+                                            src=" ../assets/image/add_icon.png">
+                                    </div>
+                                    <datalist id="key_words_list">
+                                    </datalist>
+                                </div>
+                                <div class="form-group">
+                                    <label for="remarks">备注：</label>
+                                    <input type="text" placeholder="请输入备注" id="remarks" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="secrecy_period">批注：</label>
+                                    <div class="new-doc-add-annotate-contaniner">
+                                        <div class="new-doc-add-annotate-contaniner">
+                                            <img id="new_doc_add_annotate"
+                                                src="../assets/image/new_doc_add_annotate.png"
+                                                style="width: 45px;height: 45px;margin-top: 6px;margin-right: 20px;">
+                                            <span>点击添加备注</span>
+                                        </div>
+                                        <span id="hasAnnotate" class="hasAnnotate">已有0条批注</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="print" class="newDoc-btn cancel">打印</button>
+                                <button type="reset" class="newDoc-btn cancel">重置</button>
+                                <button type="submit" name="docType" value="normal"
+                                    class="newDoc-btn primary">普通文件</button>
+                                <button type="submit" name="docType" value="important"
+                                    class="newDoc-btn primary">重要文件</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 查阅文档内容 -->
+            <div id="view-normal-tab" class="tab-content">
+                <div class="view-normal-body">
+                    <div class="view-keyword-body">
+                        <div class="normal-top">
+                            <span style="font-size: 20px;font-weight: 500;">查阅普通文档</span>
+                            <div class="search-container">
+                                <select id="search_field" class="search_key">
+                                    <option value="all">全部</option>
+                                    <option value="title">标题</option>
+                                    <option value="sender_unit">来文单位</option>
+                                    <option value="sender_number">来文编号</option>
+                                    <option value="drafting_unit">制文单位</option>
+                                    <option value="review_leader">制文单位</option>
+                                    <option value="input_user">录入人</option>
+                                    <option value="secrecy_level">秘密等级</option>
+                                    <option value="crgency_level">紧急程度</option>
+                                    <option value="secrecy_period">保密期限</option>
+                                    <option value="remarks">备注</option>
+                                </select>
+                                <div class="normal-serach">
+                                    <input id="search_inuput_normal" type="text" class="search-input"
+                                        placeholder="搜索...">
+                                    <button id="search-normal" type="submit" class="search-button">
+                                        <img src="../assets/image/search.png" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="view-doc-body">
+                            <div id="view-doc-nor-left" class="view-doc-left">
+                                <div class="docList-body">
+                                    <resizable-table id="norTable" style="width: 100%;height: 100%;"></resizable-table>
+                                </div>
+                            </div>
+                            <div id="view-doc-nor-right" class="view-doc-right">
+                                <div class="view-doc-right-body">
+                                    <div class="view-doc-right-top">
+                                        <span class="annotate-list-title">批注</span>
+                                        <div class="search-anno-contianer">
+                                            <input id="search-anno-input" type="text" placeholder="请输入"
+                                                class="search-anno-input">
+                                            <button id="search-anno" class="search-anno-btn">
+                                                <img src="../assets/image/search-gray.png">
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <ol id="annotate-list"></ol>
+                                    <div class="anno-add-btn-container">
+                                        <button id="anno-add-btn" class="anno-add-btn">添加</button>
+                                    </div>
+                                </div>
+                                <button id="shink-anno" class="collapse collapse-key"
+                                    style="width: 8px;height: 20px;cursor: pointer;">
+                                    <img src="../assets/image/collapse.png">
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- 查阅文档内容 -->
+            <div id="view-important-tab" class="tab-content">
+                <div class="view-normal-body">
+                    <div class="view-keyword-body">
+                        <div class="normal-top">
+                            <span style="font-size: 20px;font-weight: 500;">查阅文档</span>
+                            <div class="search-container">
+                                <div class="normal-serach">
+                                    <input id="search_inuput_important" type="text" class="search-input"
+                                        placeholder="搜索...">
+                                    <button id="search-important" type="submit" class="search-button">
+                                        <img src="../assets/image/search.png" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="docList-body">
+                            <resizable-table id="impTable" style="width: 100%;height: 100%;"></resizable-table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 姓名管理 -->
+            <div id="name-manager-tab" class="tab-content">
+                <div class="name-manager-body">
+                    <div class="add-name">
+                        <div>
+                            <span>姓名</span>
+                            <input type="text" id="add-name-name" placeholder="请输入姓名" class="add-name-real" />
+                        </div>
+                        <div>
+                            <span>常用称呼</span>
+                            <input type="text" id="add-name-alias" placeholder="请输入常用称呼" class="add-name-real" />
+                        </div>
+                        <div>
+                            <span>公司</span>
+                            <select id="add-name-unit" placeholder="请选择公司"></select>
+                            <select id="add-name-unitSon" placeholder="请选择子公司"></select>
+                        </div>
+                        <button id="add-name-btn" class="add-btn">添加</button>
+                    </div>
+                    <div class="name-list-body">
+                        <div class="name-list-title">
+                            <div class="name-list-title-colum">姓名</div>
+                            <div class="name-list-title-colum">常用名</div>
+                            <div class="name-list-title-colum">公司</div>
+                            <div class="name-list-title-colum">操作</div>
+                        </div>
+                        <ol id="name-list"></ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 单位管理 -->
+            <div id="unit-manager-tab" class="tab-content">
+                <div class="unit-manager-body">
+                    <div class="add-unit">
+                        <div>
+                            <span>一级单位</span>
+                            <input type="text" id="add-unit-unit" placeholder="请输入一级单位" class="add-name-real" />
+                        </div>
+                        <div>
+                            <span>二级单位</span>
+                            <input type="text" id="add-unit-unitSon" placeholder="请输入二级单位" class="add-name-real" />
+                        </div>
+                        <button id="add-unit-btn" class="add-btn">添加</button>
+                    </div>
+                    <div class="unit-list-body">
+                        <div class="unit-list-title">
+                            <div class="name-list-title-colum">一级单位</div>
+                            <div class="name-list-title-colum">二级单位</div>
+                            <div class="name-list-title-colum">操作</div>
+                        </div>
+                        <ol id="unit-list"></ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据分析 -->
+            <div id="data-analysis-tab" class="tab-content">
+                <div class="newDoc-content">
+                    <div class="data-show">
+                        <img src="../assets/image/data_show.png">
+                        <span>功能正在开发中...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="data-audit-tab" class="tab-content">
+                <div class="view-normal-body">
+                    <div class="normal-top">
+                        <span style="font-size: 20px;font-weight: 500;">数据审计</span>
+                        <div class="search-container">
+                            <div class="normal-serach">
+                                <input id="search_inuput_normal" type="text" class="search-input" placeholder="搜索...">
+                                <button id="search-normal" type="submit" class="search-button">
+                                    <img src="../assets/image/search.png" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="docList-body">
+                        <div id="docList_normal_title_container" class="auditList-title">
+                            <div class="docList-title-colum">
+                                <span>时间</span>
+                            </div>
+                            <div class="docList-title-colum">
+                                <span>姓名</span>
+                            </div>
+                            <div class="docList-title-colum">
+                                <span>操作细节</span>
+                            </div>
+                        </div>
+                        <ol id="audit-List" class="doc-list"></ol>
+                    </div>
+                </div>
+            </div>
+            <!-- 关键词管理 -->
+            <div id="keyword-manager-tab" class="tab-content">
+                <div class="view-normal-body">
+                    <div class="view-keyword-body">
+                        <div class="normal-top">
+                            <span class="tab-lefttitle">标签管理</span>
+                            <div class="search-container">
+                                <div class="normal-serach">
+                                    <input id="search_inuput_normal" type="text" class="search-input"
+                                        placeholder="搜索...">
+                                    <button id="search-normal" type="submit" class="search-button">
+                                        <img src="../assets/image/search.png" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="keywordList-body">
+                            <div class="keyword-left">
+                                <button class="add-keyword">添加</button>
+                                <div class="keyword-list-container">
+                                    <keyword-resizable-table id="keyword-list"></keyword-resizable-table>
+                                </div>
+                            </div>
+                            <div class="keyword-right">
+                                <button id="shink-keyword" class="collapse collapse-key"
+                                    style="width: 8px;height: 20px;">
+                                    <img src="../assets/image/collapse.png">
+                                </button>
+
+                                <div class="keyword-detail">
+                                    <span>文件名</span>
+                                    <div class="keyword-detail-table-container">
+                                        <table class="keyword-detail-table">
+                                            <colgroup>
+                                                <col style="width: 18.6%;">
+                                                <col style="width: 81.4%;">
+                                            </colgroup>
+                                            <thead class="keyword-detail-thead">
+                                                <th>序号</th>
+                                                <th>文件名称</th>
+                                            </thead>
+                                            <tbody id="keyword-detail-tbody">
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 编辑文件 -->
+            <div id="docModal" class="modal">
+                <div class="pop-bg">
+                    <div class="pop-content">
+                        <div class="modal-header">
+                            <span class="annotate-title-header">详情</span>
+                            <img id="eidt-close" src="../assets/image/close.png" />
+                        </div>
+                        <hr>
+                        <div class="modal-body">
+                            <form id="pop-docForm">
+                                <div class="form-group">
+                                    <label for="pop-docTitle">标题</label>
+                                    <input type="text" placeholder="请输入标题" id="pop-docTitle" required maxlength="100"
+                                        disabled>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="pop-origin_number">文件序号</label>
+                                        <input type="text" placeholder="请输入编号" id="pop-origin_number" disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pop-sender_number">来文编号</label>
+                                        <input type="text" placeholder="请输入编号" id="pop-sender_number" required disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pop-sender_date">来文时间</label>
+                                        <input type="text" placeholder="选择日期" id="pop-sender_date" required disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pop-sender_unit">来文单位</label>
+                                        <input type="text" placeholder="请输入单位" id="pop-sender_unit" required disabled>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="pop-secrecy_level">保密密级</label>
+                                        <div class="pop-secrecy_level_container">
+                                            <select id="pop-secrecy_level" required disabled>
+                                                <option value="普通">普通</option>
+                                                <option value="秘密">秘密</option>
+                                                <option value="机密">机密</option>
+                                                <option value="绝密">绝密</option>
+                                            </select>
+                                            <select id="pop-secrecy_period" required disabled>
+                                                <option value="1年">1年</option>
+                                                <option value="5年">5年</option>
+                                                <option value="10年">10年</option>
+                                                <option value="20年">20年</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pop-drafting_unit">制文单位</label>
+                                        <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <!-- 审核领导 -->
+                                    <div class="form-group">
+                                        <label for="crgency_level">紧急程度</label>
+                                        <select id="pop-crgency_level" required disabled>
+                                            <option value="普通">普通</option>
+                                            <option value="加急">加急</option>
+                                            <option value="特急">特急</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pop-review_leader">呈阅领导</label>
+                                        <div class="pop-input_with_add">
+                                            <!-- <div id="review_leader_container">
+                                            <input id="review_leader" list="review_leader_list" required></input>
+                                            <div id="review_leader_list_labels" class="review_leader_list_labels"></div>
+                                        </div> -->
+                                            <div class="pop-review_leader_container" id="pop-review_leader_container">
+                                                <div class="input-wrapper">
+                                                    <input type="text" id="pop-review_leader"
+                                                        list="pop-review_leader_list" placeholder="请输入姓名" disabled>
+                                                </div>
+                                                <datalist id="pop-review_leader_list">
+                                                </datalist>
+                                            </div>
+                                            <img id="pop-add_review_leader" style="width: 15px;height: 15px;"
+                                                src="../assets/image/add_icon.png" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="key_words">关键词</label>
+                                        <div class="pop-input_with_add">
+                                            <div id="pop-key_words_container" class="review_leader_container">
+                                                <div class="input-wrapper">
+                                                    <input type="text" id="pop-key_words" placeholder="请输入关键词"
+                                                        disabled></input>
+                                                </div>
+                                            </div>
+                                            <img id="pop-add_key_words" style="width: 15px;height: 15px;"
+                                                src=" ../assets/image/add_icon.png" disabled>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="secrecy_period">备注</label>
+                                        <input type="text" placeholder="请输入备注" id="pop-remarks" required disabled>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-actions">
+                                    <button type="submit" class="docModal-actions primary">编辑</button>
+                                    <button type="button" id="pop-deleteDoc" class="docModal-actions cancel">删除</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="annotate_look" class="allinfo-box">
+            <div class="annotate-bg">
+                <div class="allinfo-content">
+                    <div class="allinfo-header">
+                        <div class="allinfo-tab-content">
+                            <span id="annotate-title">查看批注</span>
+                        </div>
+                        <img id="annotate-close-look" src="../assets/image/close.png"
+                            style="width: 15px;height: 15px;" />
+                    </div>
+                    <hr>
+                    <div class="annotate-tab-containt">
+                        <div class="look-annotate-container">
+                            <div class="look-annotate-body">
+                                <div class="normal-serach">
+                                    <input id="search-input-anno" type="text" class="search-input" placeholder="搜索...">
+                                    <button id="search-anno" type="submit" class="search-button">
+                                        <img src="../assets/image/search.png" />
+                                    </button>
+                                </div>
+                                <div style="width: 100%;">
+                                    <span style="font-size: 16px;font-weight: 500;color:black;">批注</span>
+                                </div>
+
+                                <div class="look-annotate-bg">
+                                    <div class="look-annotate-list-title">
+                                        <span>姓名</span>
+                                        <span>审阅时间</span>
+                                        <span>批注内容</span>
+                                        <span>备注</span>
+                                    </div>
+                                    <ol id="annotate-list"></ol>
+                                </div>
+                                <img id="to-add-annotate" style="size: 58px 58px; margin-top: 10px;"
+                                    src="../assets/image/add-annotate-icon.png">
+                            </div>
+                            <template id="type_byhand">
+                                <div class="type-byhand-content">
+                                    <div id="annotate-name-container" class="annotate-name-container">姓名</div>
+                                    <span id="annotate-date-container">审阅时间</span>
+                                    <div id="annotate-content-container" class="annotate-content-container">批注内容
+                                    </div>
+                                    <div id="annotate-remark-container" class="annotate-remark-container">备注</div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="annotate_add" class="allinfo-box">
+            <div class="annotate-bg">
+                <div class="allinfo-content">
+                    <div class="allinfo-header">
+                        <div class="allinfo-tab-content">
+                            <span id="annotate-title">批注</span>
+                        </div>
+                        <img id="annotate-close-add" src="../assets/image/close.png" />
+                    </div>
+                    <hr>
+                    <div class="annotate-tab-containt">
+                        <div class="add-annotate-container">
+                            <div class="add-annotate-body">
+                                <form id="annotate-Form">
+                                    <div class="form-row annotate-form-row">
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <label for="annotate-intype">录入方式</label>
+                                                <select id="annotate-intype">
+                                                    <option value="1">手动录入</option>
+                                                    <option value="2">内容不录入</option>
+                                                    <option value="3">仅圈阅</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-row-unit">
+                                                <div class="form-group">
+                                                    <label for="annotate-note">姓名</label>
+                                                    <input id="annotate-author" list="annotate_author_list"
+                                                        required></input>
+                                                    <datalist id="annotate_author_list">
+                                                    </datalist>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="annotate-date">批注日期</label>
+                                                    <input type="text" id="annotate-date" placeholder="选择日期" required>
+                                                </div>
+
+                                            </div>
+                                            <div id="form_row_dispatch" class="form-group">
+                                                <div class="form-group">
+                                                    <label for="dispatch-unit-input">分发范围</label>
+                                                    <div id="dispatch-unit-inputwithadd-container"
+                                                        class="input_with_add">
+                                                        <div id="dispatch-unit-container">
+                                                            <div class="input-wrapper">
+                                                                <input type="text" id="dispatch-unit-add-input"
+                                                                    placeholder="请输入分发单位"  list="anno-unit-datalist"></input>
+                                                            </div>
+                                                        </div>
+                                                        <img id="dispatch-unit-add"
+                                                            style="width: 15px;height: 15px;cursor: pointer;"
+                                                            src=" ../assets/image/add_icon.png">
+                                                    </div>
+                                                    <datalist id="anno-unit-datalist">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="annotate-note">备注</label>
+                                                <textarea id="annotate-note"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="annotate-content-special">
+                                            <label for="annotate-content">内容</label>
+                                            <textarea id="annotate-content" name="请输入内容"
+                                                class="annotate-content-annocontent"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="annotate-actions primary">创建</button>
+                                        <button type="button" class="annotate-actions cancel">取消</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="annotate_edit" class="allinfo-box">
+            <div class="annotate-bg-trans">
+                <div class="allinfo-content">
+                    <div class="allinfo-header">
+                        <div class="allinfo-tab-content">
+                            <span id="annotate-title">批注</span>
+                        </div>
+                        <img id="annotate-edit-close-add" src="../assets/image/close.png" />
+                    </div>
+                    <hr>
+                    <div class="annotate-tab-containt">
+                        <div class="add-annotate-container">
+                            <div class="add-annotate-body">
+                                <form id="annotate-edit-Form">
+                                    <div class="form-row annotate-form-row">
+                                        <div class="form-group">
+                                            <label for="annotate-edit-intype">录入方式</label>
+                                            <select id="annotate-edit-intype">
+                                                <option value="1">手动录入</option>
+                                                <option value="2">内容不录入</option>
+                                                <option value="3">仅圈阅</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row annotate-form-row">
+                                        <div class="form-group">
+                                            <label for="annotate-edit-note">姓名</label>
+                                            <input id="annotate-edit-author" list="annotate_edit_author_list"
+                                                required></input>
+                                            <datalist id="annotate_edit_author_list">
+                                            </datalist>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="annotate-edit-date">批注日期</label>
+                                            <input type="text" id="annotate-edit-date" placeholder="选择日期" required>
+                                        </div>
+                                    </div>
+
+                                    <div id="annotate-edit-content-container" class="form-row annotate-form-row">
+                                        <div class="form-group">
+                                            <label for="annotate-edit-content">内容：</label>
+                                            <textarea id="annotate-edit-content" name="请输入内容"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="annotate-edit-note">备注</label>
+                                            <textarea id="annotate-edit-note"></textarea>
+                                        </div>
+                                    </div>
+
+
+                                    <div id="form_row_edit_dispatch" class="form-row annotate-form-row">
+                                        <div class="form-group">
+                                            <label for="primary-unit">分发范围：</label>
+                                            <div class="form-row-unit">
+                                                <select id="primary-edit-unit" class="annotate-unit-select">
+                                                    <option value="">请选择</option>
+                                                </select>
+                                                <select id="secondary-edit-unit" class="annotate-unit-select">
+                                                    <option value="">请选择</option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="fenfa-edit-date">分发日期：</label>
+                                            <input type="text" id="fenfa-edit-date" placeholder="选择日期">
+                                        </div>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="submit" class="annotate-actions primary">编辑</button>
+                                        <button type="button" id="annotate-edit-delete"
+                                            class="annotate-actions cancel">删除</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- <div id="docinfo" class="allinfo-box">
+            <div class="annotate-bg">
+                <div class="allinfo-content">
+                    <div class="allinfo-header">
+                        <span class="annotate-title-header">详情</span>
+                        <img id="docinfo-close" src="../assets/image/close.png" />
+                    </div>
+                    <hr>
+                    <span class="docinfo-body-title">文档信息</span>
+                    <div class="doc-info-body">
+                        <div class="doc-info-body-grid">
+                            <span id="doc-info-title">标题：撒发达发达高大上嘎嘎德国撒嘎嘎</span>
+                            <span id="doc-info-date">时间：sgagdadgabazdbgzdfhfdjsj</span>
+                            <span id="doc-info-sender_unit">来文单位：sgagdadgabazdbgzdfhfdjsj</span>
+                            <span id="doc-info-sender_number">来文编号：sgagdadgabazdbgzdfhfdjsj</span>
+                            <span id="doc-info-original_number">源文件号：sgagdadgabazdbgzdfhfdjsj</span>
+                            <span id="doc-info-drafting_unit">制文单位：sgagdadgabazdbgzdfhfdjsj</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- <div id="nameinfo" class="allinfo-box">
+            <div class="annotate-bg">
+                <div class="allinfo-content">
+                    <div class="allinfo-header">
+                        <span class="annotate-title-header">详情</span>
+                        <img id="nameinfo-close" src="../assets/image/close.png" />
+                    </div>
+                    <hr>
+                    <div class="name-info-body">
+                        <span id="name-info-title">姓名信息</span>
+                        <span id="name-info-name"></span>
+                        <span id="name-info-alias"></span>
+                        <span id="name-info-unit"></span>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <div id="nameEidt" class="allinfo-box">
+            <div class="annotate-bg">
+                <div class="nameEdit-content">
+                    <div class="nameEdit-header">
+                        <span class="annotate-title-header">编辑</span>
+                        <img id="nameEdit-close" src="../assets/image/close.png" />
+                    </div>
+                    <hr>
+                    <div class="name-edit-body">
+                        <div class="name-edit-container">
+                            <div class="name-edit-name-container">
+                                <label for="name-edit-name">姓名</label>
+                                <input id="name-edit-name" type="text" disabled />
+                            </div>
+                            <div id="nameEdit-alias-container" class="name-edit-name-container">
+                                <label for="name-edit-alias">常用名</label>
+                                <div class="input_with_add">
+                                    <div id="name-edit-alias-container">
+                                        <div class="input-wrapper">
+                                            <input type="text" id="name-edit-add-input" placeholder="请输入别名"
+                                                disabled></input>
+                                        </div>
+                                    </div>
+                                    <img id="name-edit-add-btn" style="width: 15px;height: 15px;cursor: pointer;"
+                                        src=" ../assets/image/add_icon.png" disabled>
+                                </div>
+
+                            </div>
+                            <div class="name-edit-name-container">
+                                <label for="name-edit-primary-unit">一级单位</label>
+                                <select id="name-edit-primary-unit" class="annotate-unit-select" disabled>
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                            <div class="name-edit-name-container">
+                                <label for="name-edit-secondary-unit">二级单位</label>
+                                <select id="name-edit-secondary-unit" class="annotate-unit-select" disabled>
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="name-edit-btn-actions">
+                            <button id="edit-save-name">编辑</button>
+                            <button id="delete-name-eidt">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="unitEdit" class="allinfo-box">
+            <div class="annotate-bg">
+                <div class="nameEdit-content">
+                    <div class="nameEdit-header">
+                        <span class="annotate-title-header">编辑</span>
+                        <img id="unitEdit-close" src="../assets/image/close.png" />
+                    </div>
+                    <hr>
+                    <div class="name-edit-body">
+                        <div class="unit-edit-container">
+                            <div class="unit-edit-unit-container">
+                                <label for="unit-edit-primary-unit">一级单位</label>
+                                <input id="unit-edit-primary-unit" disabled>
+                            </div>
+                            <div class="unit-edit-unit-container">
+                                <label for="unit-edit-secondary-unit">二级单位</label>
+                                <input id="unit-edit-secondary-unit" disabled>
+                            </div>
+                        </div>
+                        <div class="name-edit-btn-actions">
+                            <button id="save-unit-eidt">编辑</button>
+                            <button id="delete-unit-eidt">删除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+        <template id="annoItemTemplateTwo">
+            <div class="anno-item-body">
+                <div style="width: 17px;height: 4px;background-color: #4287F2;"></div>
+                <div class="anno-item-content">
+                    <div class="anno-name-and-date">
+                        <span id="two-anno-name-span">陈平安</span>
+                        <span id="two-anno-date-span">2025-10-25</span>
+                    </div>
+                    <div id="annoContent" class="anno-content-and-marks">
+                        <span style="color: #86909C;">内容：</span>
+                        <span>未录入</span>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template id="annoItemTemplateThree">
+            <div class="anno-item-body">
+                <div style="width: 17px;height: 4px;background-color: #4287F2;"></div>
+                <div class="anno-item-content">
+                    <div class="anno-name-and-date">
+                        <span id="three-anno-name-span">陈平安</span>
+                        <span id="three-anno-date-span">2025-10-25</span>
+                    </div>
+                    <div id="annoContent" class="anno-content-and-marks">
+                        <span>仅圈阅</span>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template id="nameListTemplate">
+            <div id="nameList-item" class="nameList-item-body">
+                <div class="name-list-item">
+                    <div id="name-list-item-name" class="name-list-item-colum">张三</div>
+                    <div id="name-list-item-alias" class="name-list-item-colum">张三，张三，张三，张三，张三</div>
+                    <div id="name-list-item-unit" class="name-list-item-colum">三信-网吧</div>
+                    <div class="name-list-item-colum">
+                        <butt on id="editName" class="action-btn edit-btn" title="编辑">
+                            <img src="../assets/image/edit_icon.png" />
+                            </button>
+                            <button id="deleteName" class="action-btn delete-btn" title="删除姓名及别名">
+                                <img src="../assets/image/delete_icon.png" />
+                            </button>
+                    </div>
+                </div>
+                <hr>
+            </div>
+        </template>
+        <template id="unitListTemplate">
+            <div id="unitList-item" class="nameList-item-body">
+                <div class="unit-list-item">
+                    <div id="unit-list-item-name" class="name-list-item-colum">张三</div>
+                    <div id="unit-list-item-son" class="name-list-item-colum">张三，张三，张三，张三，张三</div>
+                    <div class="unit-list-item-colum">
+                        <button id="editUnit" class="action-btn edit-btn" title="编辑">
+                            <img src="../assets/image/edit_icon.png" />
+                        </button>
+                        <button id="deleteUnit" class="action-btn delete-btn" title="删除单位及其子单位">
+                            <img src="../assets/image/delete_icon.png" />
+                        </button>
+                    </div>
+                </div>
+                <hr>
+            </div>
+        </template>
+        <template id="alias-tag-item">
+            <div class="alias-tag">
+                <span id="tag-content">hhhhhhhh</span>
+                <img class="alias-tag-delete-btn" src="../assets/image/tag-delete.png">
+            </div>
+        </template>
+        <template id="auditListTemplate">
+            <div class="docList-item-body">
+                <div id="doc_list_item" class="auditList-item">
+                    <div id="audit-date" class="docList-item-colum"></div>
+                    <div id="audit-operator" class="docList-item-colum"></div>
+                    <div id="audit-detail" class="docList-item-colum"></div>
+                </div>
+                <hr>
+            </div>
+        </template>
+        <div id="keywordListTemplate">
+
+        </div>
+        <div id="mentionList" class="mention-popup"></div>
+        <div id="dialog-mask" class="dialog-mask">
+            <div class="dialog-container">
+                <div class="dialog-title-container">
+                    <span id="dialog-title-str" class="dialog-title">提示</span>
+                    <img id="dialog-close" src="../assets/image/close.png">
+                </div>
+                <hr>
+                <div class="dialog-body-container">
+                    <div class="dialog-msg-container">
+                        <img id="img-notice-icon" src="../assets/image/notice_icon.png">
+                        <span id="dialog-msg">确定删除选中的文件吗</span>
+                    </div>
+                    <div class="dialog-tbn-container">
+                        <button id="cancelBtn" type="button" class="dialog-btn dialogcancel">取消</button>
+                        <button id="confirmBtn" type="button" class="dialog-btn confirm">确认</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../../node_modules/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="../../../node_modules/flatpickr/dist/l10n/zh.js"></script>
+    <script src="./mainWindow.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../assets/css/index.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/login.css">
+<script defer src="/login_window/index.js"></script></head>
+
+<body>
+    <div id="titlebar">
+        <div id="drag-region">数据库管理系统</div>
+        <div id="window-controls">
+            <button id="minimize" class="control-btn">_</button>
+            <button id="maximize" class="control-btn">□</button>
+            <button id="close" class="control-btn">x</button>
+        </div>
+    </div>
+    <div class="login-content">
+        <span class="login-title">登录</span>
+        <input type="text" placeholder="用户名" class="login-input login-name" id="login-username" required>
+        <input type="password" placeholder="密码" class="login-input login-pwd" id="login-password" required>
+        <button id="btn-login">登录</button>
+    </div>
+    <script src="./login.js"></script>
+</body>
+
+</html>

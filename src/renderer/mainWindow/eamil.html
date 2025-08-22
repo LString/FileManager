@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .email-container {
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 4px;
+            width: 400px;
+            display: flex;
+            overflow-x: overlay;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            /* Firefox滚动条变细 */
+            scrollbar-color: #c1c1c1 transparent;
+            /* Firefox滑块颜色 */
+            scrollbar-gutter: stable;
+        }
+
+
+        .tag {
+            background: #e0e0e0;
+            border-radius: 3px;
+            padding: 2px 5px;
+            margin: 2px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            margin-left: 5px;
+            color: #666;
+        }
+
+        .input-wrapper {
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        #emailInput {
+            border: none;
+            outline: none;
+            padding: 5px;
+            min-width: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container" id="container">
+        <div class="input-wrapper">
+            <input type="text" id="emailInput" placeholder="输入邮箱">
+        </div>
+    </div>
+    <button onclick="addTag()">添加</button>
+
+    <script>
+        const container = document.getElementById('container');
+        const input = document.getElementById('emailInput');
+        let tags = [];
+
+        function addTag() {
+            const value = input.value.trim();
+            if (!value) return;
+
+            // 创建标签元素
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `
+                ${value}
+                <span class="tag-remove" onclick="removeTag(this)">×</span>
+            `;
+
+            // 在输入框前插入标签
+            container.insertBefore(tag, input.parentNode);
+            tags.push(value);
+
+            // 清空输入并保持焦点
+            input.value = '';
+            input.focus();
+
+            // 滚动到最右端
+            container.scrollLeft = container.scrollWidth;
+        }
+
+        function removeTag(element) {
+            const tag = element.parentNode;
+            const index = Array.from(container.children).indexOf(tag);
+
+            tags.splice(index, 1);
+            container.removeChild(tag);
+            input.focus();
+        }
+
+        // 回车键监听
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                addTag();
+            }
+            if (e.key === 'Backspace' && input.value === '') {
+                // 删除最后一个标签
+                if (tags.length > 0) {
+                    const lastTag = container.children[container.children.length - 2];
+                    lastTag.remove();
+                    tags.pop();
+                }
+            }
+        });
+
+        // 自动滚动处理
+        input.addEventListener('input', () => {
+            container.scrollLeft = container.scrollWidth;
+        });
+    </script>
+</body>
+
+</html>

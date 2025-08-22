@@ -1,0 +1,208 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* 标题栏样式 */
+#titlebar {
+    width: 100%;
+    height: 40px;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: white;
+    -webkit-app-region: drag;
+    /* 可拖拽区域 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close:hover {
+    color: #e94a57;
+}
+
+#drag-region {
+    padding: 0 10px;
+    color: white;
+    flex: 1;
+}
+
+
+
+/* 窗口控制按钮 */
+#window-controls {
+    display: flex;
+    height: 100%;
+    -webkit-app-region: no-drag;
+    /* 排除拖拽区域 */
+}
+
+.control-btn {
+    width: 40px;
+    height: 100%;
+    border: none;
+    color: white;
+    background-color: transparent;
+    transition: background 0.2s;
+}
+
+.control-btn:hover {
+    background: #4a4a4a;
+    border-radius: 8px;
+}
+
+#close:hover {
+    background: #e94a57 !important;
+    border-radius: 8px;
+}
+
+.login-container {
+    width: 100%;
+    height: 100%;
+    background-image: url(../image/login_bg.png);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-title {
+    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+    /** 文本1 */
+    font-size: 60px;
+    font-weight: 900;
+    letter-spacing: 9px;
+    line-height: 86.88px;
+    color: rgba(255, 255, 255, 1);
+    text-align: left;
+}
+
+.login-input-container {
+    margin-top: 37px;
+    width: 714px;
+    height: 411px;
+    opacity: 1;
+    border-radius: 15.74px;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 7.11px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.login-input-container-title {
+    opacity: 1;
+    /** 文本1 */
+    font-size: 31.87px;
+    font-weight: 500;
+    letter-spacing: 0px;
+    line-height: 46.14px;
+    color: rgb(29, 29, 29);
+    text-align: left;
+    vertical-align: top;
+}
+
+.login-input-container>input {
+    opacity: 1;
+    border-radius: 11.87px;
+    border: 1.48px solid rgba(0, 0, 0, 0.1);
+    width: 558px;
+    height: 63px;
+    box-sizing: border-box;
+    color: black;
+}
+
+.login-input-container>input:focus {
+   outline: 1.48px solid #e4a316;
+}
+
+.input-account-icon {
+    background: url("../image/account_icon.png") no-repeat 17px center;
+    /* 图标位置 */
+    background-size: 22px 26px;
+    /* 图标大小 */
+    padding-left: 75px;
+    /* 避免文字覆盖图标 */
+    margin-top: 28px;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 28.96px;
+    color: rgba(194, 199, 204, 1);
+}
+
+.input-password-container {
+    width: 558px;
+    height: 63px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 11.87px;
+    border: 1.48px solid rgba(0, 0, 0, 0.1);
+    margin-top: 13px;
+    box-sizing: border-box;
+}
+
+.input-password-container>input {
+    flex-grow: 1;
+    height: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    opacity: 1;
+    /** 文本1 */
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 28.96px;
+    color: rgb(0, 0, 0);;
+    margin-left: 33px;
+}
+
+.input-password-lock {
+    width: 23px;
+    height: 26px;
+    margin-left: 17px;
+}
+
+.input-password-eye {
+    width: 26px;
+    height: 17px;
+    margin-right: 24px;
+}
+
+.btn-login {
+    width: 302px;
+    height: 56px;
+    opacity: 1;
+    border-radius: 9.35px;
+    background: rgba(63, 159, 255, 1);
+    box-shadow: 0px 4.68px 9.35px rgba(63, 159, 255, 0.2);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    line-height: 28.96px;
+    color: rgba(255, 255, 255, 1);
+    text-align: center;
+    border: none;
+    margin-top: 48px;
+}
+
+.input-password-container:focus-within {
+    border-color: #e4a316; 
+    border-radius: 11.87px;
+}
