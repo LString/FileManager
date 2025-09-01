@@ -608,6 +608,10 @@ async function initResizableTable() {
 
     // 为普通文档表添加行点击监听
     const norTable = document.getElementById('norTable');
+    const norMenu = document.getElementById('normal-context-menu');
+    const convertItem = document.getElementById('normal-to-important');
+    let contextDocId = null;
+
     norTable.addEventListener('row-click', (event) => {
       // const rowData = event.detail.data;
       // showEditModal(rowData);
@@ -626,6 +630,29 @@ async function initResizableTable() {
       // 强制重绘（确保动画流畅）
       void rightContainer.offsetHeight;
       loadAnnotateList();
+    });
+
+    // 普通文档表行右键菜单
+    norTable.addEventListener('contextmenu', (e) => {
+      const path = e.composedPath();
+      const row = path.find(el => el.tagName === 'TR' && el.dataset.index !== undefined);
+      if (!row) return;
+      e.preventDefault();
+      contextDocId = norTable.originalData[row.dataset.index].uuid;
+      norMenu.style.display = 'block';
+      norMenu.style.left = `${e.clientX}px`;
+      norMenu.style.top = `${e.clientY}px`;
+    });
+
+    document.addEventListener('click', () => {
+      norMenu.style.display = 'none';
+    });
+
+    convertItem.addEventListener('click', async () => {
+      norMenu.style.display = 'none';
+      if (contextDocId) {
+        await handleToImportant(contextDocId);
+      }
     });
 
     // 为重要文档表添加行点击监听
