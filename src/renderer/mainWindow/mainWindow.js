@@ -593,9 +593,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideAnnotateAdd();
   });
 
-  // document.getElementById('annotate-edit-close-add').addEventListener('click', () => {
-  //   hideAnnotateEdit();
-  // });
+  document.getElementById('annotate-edit-close-add').addEventListener('click', () => {
+    hideAnnotateEdit();
+  });
   //权限控制
   checkPermission()
   /**
@@ -1721,17 +1721,17 @@ document.getElementById('search-anno-imp').addEventListener('click', async () =>
   loadAnnotateList(isSearch)
 });
 
-function handleAnnotateListClick(e) {
+function handleAnnotateListDblClick(e) {
   const card = e.target.closest('.anno-card');
-  if (card && !e.target.classList.contains('annotate-content-container') && !e.target.classList.contains('annotate-remark-container')) {
+  if (card) {
     const annoJson = card.dataset.anno;
     const anno = JSON.parse(annoJson);
     showAnnotateEdit(anno);
   }
 }
 
-annotateListNor.addEventListener('click', handleAnnotateListClick);
-annotateListImp.addEventListener('click', handleAnnotateListClick);
+annotateListNor.addEventListener('dblclick', handleAnnotateListDblClick);
+annotateListImp.addEventListener('dblclick', handleAnnotateListDblClick);
 
 annotate_content.normalize();
 annotate_content.addEventListener('input', handleInput);

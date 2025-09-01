@@ -1201,15 +1201,6 @@ input:-webkit-autofill:focus {
     align-items: center;
 }
 
-.annotate-bg-trans {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0);
-    justify-content: center;
-    align-items: center;
-}
-
 .annotate-content {
     background-color: white;
     /*上下边距百分是相对于父控件 左右边距自动计算*/
@@ -1627,7 +1618,8 @@ input:-webkit-autofill:focus {
     color: rgba(29, 33, 41, 1);
 }
 
-#annotate-list {
+#annotate-list,
+#annotate-list-imp {
     padding: 0 0 8px 0;
     margin: 0;
     height: calc(100% - 40px);
