@@ -1545,7 +1545,7 @@ function checkTextOverflow() {
 }
 
 async function loadAnnotateList(isSearch = false) {
-  let annotations
+  let annotations;
   if (!isSearch) {
     if (currentDocId) {
       annotations = await window.electronAPI.db.getAnnotations({
@@ -1553,73 +1553,60 @@ async function loadAnnotateList(isSearch = false) {
         annotate_type: currentType
       });
     } else {
-      annotations = annotateTemp
+      annotations = annotateTemp;
     }
-    tempListForSearch_Anno = annotations
+    tempListForSearch_Anno = annotations;
   } else {
-    annotations = tempListForSearch_Anno
+    annotations = tempListForSearch_Anno;
   }
 
   annotateList.innerHTML = '';
-  //加载模板
-  const annoItemTemplateOne = document.getElementById('annoItemTemplateOne');
-  const annoItemTemplateTwo = document.getElementById('annoItemTemplateTwo');
-  const annoItemTemplateThree = document.getElementById('annoItemTemplateThree');
+  const template = document.getElementById('annoCardTemplate');
 
   annotations.forEach(annotate => {
-    if (annotate.processing_mode == 1) {
-      const clone = annoItemTemplateOne.content.cloneNode(true)
-      const item = clone.querySelector('.anno-item-content')
-      item.dataset.anno = JSON.stringify(annotate);
-      //填充数据
-      clone.getElementById('one-anno-name-span').textContent = annotate.author
-      clone.getElementById('one-anno-date-span').textContent = annotate.annotate_at
-      clone.getElementById('one-anno-content-span').textContent = annotate.content
-      clone.getElementById('one-anno-remark-span').textContent = annotate.annotate_note
+    const clone = template.content.cloneNode(true);
+    const card = clone.querySelector('.anno-card');
+    card.dataset.anno = JSON.stringify(annotate);
 
-      annotateList.appendChild(clone);
-    } else if (annotate.processing_mode == 2) {
-      const clone = annoItemTemplateTwo.content.cloneNode(true)
-      const item = clone.querySelector('.anno-item-content')
-      item.dataset.anno = JSON.stringify(annotate);
+    const authorEl = clone.querySelector('.anno-author');
+    const dateEl = clone.querySelector('.anno-date');
+    const contentEl = clone.querySelector('.annotate-content-container');
+    const remarkEl = clone.querySelector('.annotate-remark-container');
 
-      clone.getElementById('two-anno-name-span').textContent = annotate.author
-      clone.getElementById('two-anno-date-span').textContent = annotate.annotate_at
-      annotateList.appendChild(clone);
-    } else {
-      const clone = annoItemTemplateThree.content.cloneNode(true)
-      const item = clone.querySelector('.anno-item-content')
-      item.dataset.anno = JSON.stringify(annotate);
-      clone.getElementById('three-anno-name-span').textContent = annotate.author
-      clone.getElementById('three-anno-date-span').textContent = annotate.annotate_at
-      annotateList.appendChild(clone);
-    }
+    authorEl.textContent = annotate.author;
+    dateEl.textContent = annotate.annotate_at;
+    contentEl.textContent = annotate.content || '未录入';
+    remarkEl.textContent = annotate.annotate_note || '未录入';
 
-    // 点击后永久展开
-    document.getElementById('annotate-name-container').addEventListener('click', () => {
-      const container = document.getElementById('annotate-name-container');
-      if (container.classList.contains('overflow')) {
-        container.classList.add('expanded');
-        container.classList.remove('overflow');
+    annotateList.appendChild(clone);
+
+    applyEllipsis(contentEl, 2);
+    applyEllipsis(remarkEl, 1);
+
+    contentEl.addEventListener('click', (e) => {
+      if (contentEl.classList.contains('overflow')) {
+        contentEl.classList.add('expanded');
+        contentEl.classList.remove('overflow');
       }
+      e.stopPropagation();
     });
-    // 点击后永久展开
-    document.getElementById('annotate-content-container').addEventListener('click', () => {
-      const container = document.getElementById('annotate-content-container');
-      if (container.classList.contains('overflow')) {
-        container.classList.add('expanded');
-        container.classList.remove('overflow');
+
+    remarkEl.addEventListener('click', (e) => {
+      if (remarkEl.classList.contains('overflow')) {
+        remarkEl.classList.add('expanded');
+        remarkEl.classList.remove('overflow');
       }
+      e.stopPropagation();
     });
-    // 点击后永久展开
-    document.getElementById('annotate-remark-container').addEventListener('click', () => {
-      const container = document.getElementById('annotate-remark-container');
-      if (container.classList.contains('overflow')) {
-        container.classList.add('expanded');
-        container.classList.remove('overflow');
-      }
-    });
-  })
+  });
+}
+
+function applyEllipsis(element, lines) {
+  const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+  const maxHeight = lineHeight * lines;
+  if (element.scrollHeight > maxHeight) {
+    element.classList.add('overflow');
+  }
 }
 
 document.getElementById('search-anno').addEventListener('click', async () => {
@@ -1651,10 +1638,11 @@ document.getElementById('search-anno').addEventListener('click', async () => {
 
 
 document.getElementById('annotate-list').addEventListener('click', (e) => {
-  if (e.target.closest('.type-byhand-content')) {
-    const annoJson = e.target.closest('.type-byhand-content').dataset.anno
-    const anno = JSON.parse(annoJson)
-    showAnnotateEdit(anno)
+  const card = e.target.closest('.anno-card');
+  if (card && !e.target.classList.contains('annotate-content-container') && !e.target.classList.contains('annotate-remark-container')) {
+    const annoJson = card.dataset.anno;
+    const anno = JSON.parse(annoJson);
+    showAnnotateEdit(anno);
   }
 })
 
