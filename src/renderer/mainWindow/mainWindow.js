@@ -517,12 +517,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadAuthorsWithAliasesToNameManager()
   loadUnitWithSonToUnitManager()
   loadAudit()
-  //备注处理方式
-  // toggleFields();
-  intypeSelect.addEventListener('change', toggleFields);
-  //备注处理方式
-  // toggleEditFields();
-  // intypeEditSelect.addEventListener('change', toggleEditFields);
+//备注处理方式
+// toggleFields();
+//备注处理方式
+// toggleEditFields();
+// intypeEditSelect.addEventListener('change', toggleEditFields);
 
   const initialTab = document.querySelector('.tab-btn.active');
   if (initialTab) {
@@ -1413,6 +1412,8 @@ const intypeSelect = document.getElementById('annotate-intype');
 const annotate_content = document.getElementById('annotate-content');
 const mentionList = document.getElementById('mentionList');
 
+intypeSelect?.addEventListener('change', toggleFields);
+
 const intypeEditSelect = document.getElementById('annotate-edit-intype');
 
 const annotateEdit_content = document.getElementById('annotate-edit-content');
@@ -1492,11 +1493,13 @@ function showAnnotateEdit(anno = null) { //类型 0添加 1展示数据
     document.getElementById('annotate-edit-note').value = anno.annotate_note;
     document.getElementById('fenfa-edit-date').value = anno.distribution_at;
     document.getElementById('annotate-edit-author').value = anno.author;
-    if (anno.distribution_scope != null) {
-      const primaryAndsecondary = anno.distribution_scope.split('-')
-      if (primaryAndsecondary.length > 0) {
-        setSelectValue('#primary-edit-unit', primaryAndsecondary[0]);
-        setSelectValue('#secondary-edit-unit', primaryAndsecondary[1]);
+    if (anno.distribution_scope) {
+      const units = anno.distribution_scope.split(',');
+      if (units.length > 0) {
+        setSelectValue('#primary-edit-unit', units[0]);
+      }
+      if (units.length > 1) {
+        setSelectValue('#secondary-edit-unit', units[1]);
       }
     }
     //禁用状态
@@ -1810,7 +1813,7 @@ function hideMentionList() {
 
 // 处理方式
 function toggleFields() {
-  const showFields = intypeSelect.value;
+  const showFields = intypeSelect?.value;
 
   if (showFields == "1") {
 
@@ -1929,12 +1932,12 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
       authorId = newAuthor;
     }
-    const type = intypeSelect.value === '1';
+    const type = intypeSelect?.value === '1';
     let data;
+    const distributionScope = dispatch_units.length > 0
+      ? dispatch_units.map(u => u.name).join(',')
+      : null;
     if (currentDocId) {
-      const primaryUnit = getDataSelectValue('#primary-unit');
-      const secondaryUnit = getDataSelectValue('#secondary-unit');
-      const distributionScope = primaryUnit && secondaryUnit ? `${primaryUnit}-${secondaryUnit}` : null;
       data = {
         annotate_type: currentType,
         processing_mode: getValidatedSelectValue('#annotate-intype'),
@@ -1957,12 +1960,11 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
 
         loadAnnotateList();
         document.getElementById('annotate-Form').reset();
+        dispatch_units = [];
+        dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
         hideAnnotateAdd();
       }
     } else {
-      const primaryUnit = getDataSelectValue('#primary-unit');
-      const secondaryUnit = getDataSelectValue('#secondary-unit');
-      const distributionScope = primaryUnit && secondaryUnit ? `${primaryUnit}-${secondaryUnit}` : null;
       data = { //新建文档时缓存的批注
         annotate_type: currentType,
         processing_mode: getValidatedSelectValue('#annotate-intype'),
@@ -1978,6 +1980,9 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       };
       annotateTemp.push(data);
       loadAnnotateList()
+      document.getElementById('annotate-Form').reset();
+      dispatch_units = [];
+      dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
       hideAnnotateAdd();
     }
   } catch (error) {
@@ -2006,12 +2011,12 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
         const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
         authorId = newAuthor;
       }
-      const type = intypeSelect.value === '1';
+      const type = intypeSelect?.value === '1';
       let data;
       if (currentAnnoId) {
         const primaryUnit = getDataSelectValue('#primary-edit-unit');
         const secondaryUnit = getDataSelectValue('#secondary-edit-unit');
-        const distributionScope = primaryUnit && secondaryUnit ? `${primaryUnit}-${secondaryUnit}` : null;
+        const distributionScope = [primaryUnit, secondaryUnit].filter(Boolean).join(',') || null;
         data = {
           annotate_type: currentType,
           processing_mode: getValidatedSelectValue('#annotate-edit-intype'),
@@ -2045,7 +2050,7 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
           const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
           authorId = newAuthor;
         }
-        const type = intypeSelect.value === '1';
+        const type = intypeSelect?.value === '1';
         // 直接修改对象的属性
         annotateTemp[currentAnnoId].annotate_type = currentType;
         annotateTemp[currentAnnoId].processing_mode = getValidatedSelectValue('#annotate-edit-intype');
@@ -2055,7 +2060,7 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
         annotateTemp[currentAnnoId].authorId = authorId;
         const primaryUnitTemp = getDataSelectValue('#primary-edit-unit');
         const secondaryUnitTemp = getDataSelectValue('#secondary-edit-unit');
-        annotateTemp[currentAnnoId].distribution_scope = primaryUnitTemp && secondaryUnitTemp ? `${primaryUnitTemp}-${secondaryUnitTemp}` : null;
+        annotateTemp[currentAnnoId].distribution_scope = [primaryUnitTemp, secondaryUnitTemp].filter(Boolean).join(',') || null;
         annotateTemp[currentAnnoId].distribution_at = document.getElementById('fenfa-edit-date').value;
         await loadAnnotateList()
         hideAnnotateEdit()
