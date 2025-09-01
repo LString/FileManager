@@ -517,12 +517,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadAuthorsWithAliasesToNameManager()
   loadUnitWithSonToUnitManager()
   loadAudit()
-  //备注处理方式
-  // toggleFields();
-  intypeSelect.addEventListener('change', toggleFields);
-  //备注处理方式
-  // toggleEditFields();
-  // intypeEditSelect.addEventListener('change', toggleEditFields);
+//备注处理方式
+// toggleFields();
+//备注处理方式
+// toggleEditFields();
+// intypeEditSelect.addEventListener('change', toggleEditFields);
 
   const initialTab = document.querySelector('.tab-btn.active');
   if (initialTab) {
@@ -1039,8 +1038,8 @@ const getValidatedSelectValue = (selector) => {
 const getDataSelectValue = (selector) => {
   const select = document.querySelector(selector);
   if (!select) {
-    console.error(`找不到选择框元素: ${selector}`);
-    throw new Error('表单配置错误');
+    console.warn(`找不到选择框元素: ${selector}`);
+    return null;
   }
 
   const value = select.value.trim();
@@ -1413,6 +1412,8 @@ const intypeSelect = document.getElementById('annotate-intype');
 const annotate_content = document.getElementById('annotate-content');
 const mentionList = document.getElementById('mentionList');
 
+intypeSelect?.addEventListener('change', toggleFields);
+
 const intypeEditSelect = document.getElementById('annotate-edit-intype');
 
 const annotateEdit_content = document.getElementById('annotate-edit-content');
@@ -1492,11 +1493,13 @@ function showAnnotateEdit(anno = null) { //类型 0添加 1展示数据
     document.getElementById('annotate-edit-note').value = anno.annotate_note;
     document.getElementById('fenfa-edit-date').value = anno.distribution_at;
     document.getElementById('annotate-edit-author').value = anno.author;
-    if (anno.distribution_scope != null) {
-      const primaryAndsecondary = anno.distribution_scope.split('-')
-      if (primaryAndsecondary.length > 0) {
-        setSelectValue('#primary-edit-unit', primaryAndsecondary[0]);
-        setSelectValue('#secondary-edit-unit', primaryAndsecondary[1]);
+    if (anno.distribution_scope) {
+      const units = anno.distribution_scope.split(',');
+      if (units.length > 0) {
+        setSelectValue('#primary-edit-unit', units[0]);
+      }
+      if (units.length > 1) {
+        setSelectValue('#secondary-edit-unit', units[1]);
       }
     }
     //禁用状态
@@ -1545,7 +1548,7 @@ function checkTextOverflow() {
 }
 
 async function loadAnnotateList(isSearch = false) {
-  let annotations
+  let annotations;
   if (!isSearch) {
     if (currentDocId) {
       annotations = await window.electronAPI.db.getAnnotations({
@@ -1553,73 +1556,60 @@ async function loadAnnotateList(isSearch = false) {
         annotate_type: currentType
       });
     } else {
-      annotations = annotateTemp
+      annotations = annotateTemp;
     }
-    tempListForSearch_Anno = annotations
+    tempListForSearch_Anno = annotations;
   } else {
-    annotations = tempListForSearch_Anno
+    annotations = tempListForSearch_Anno;
   }
 
   annotateList.innerHTML = '';
-  //加载模板
-  const annoItemTemplateOne = document.getElementById('annoItemTemplateOne');
-  const annoItemTemplateTwo = document.getElementById('annoItemTemplateTwo');
-  const annoItemTemplateThree = document.getElementById('annoItemTemplateThree');
+  const template = document.getElementById('annoCardTemplate');
 
   annotations.forEach(annotate => {
-    if (annotate.processing_mode == 1) {
-      const clone = annoItemTemplateOne.content.cloneNode(true)
-      const item = clone.querySelector('.anno-item-content')
-      item.dataset.anno = JSON.stringify(annotate);
-      //填充数据
-      clone.getElementById('one-anno-name-span').textContent = annotate.author
-      clone.getElementById('one-anno-date-span').textContent = annotate.annotate_at
-      clone.getElementById('one-anno-content-span').textContent = annotate.content
-      clone.getElementById('one-anno-remark-span').textContent = annotate.annotate_note
+    const clone = template.content.cloneNode(true);
+    const card = clone.querySelector('.anno-card');
+    card.dataset.anno = JSON.stringify(annotate);
 
-      annotateList.appendChild(clone);
-    } else if (annotate.processing_mode == 2) {
-      const clone = annoItemTemplateTwo.content.cloneNode(true)
-      const item = clone.querySelector('.anno-item-content')
-      item.dataset.anno = JSON.stringify(annotate);
+    const authorEl = clone.querySelector('.anno-author');
+    const dateEl = clone.querySelector('.anno-date');
+    const contentEl = clone.querySelector('.annotate-content-container');
+    const remarkEl = clone.querySelector('.annotate-remark-container');
 
-      clone.getElementById('two-anno-name-span').textContent = annotate.author
-      clone.getElementById('two-anno-date-span').textContent = annotate.annotate_at
-      annotateList.appendChild(clone);
-    } else {
-      const clone = annoItemTemplateThree.content.cloneNode(true)
-      const item = clone.querySelector('.anno-item-content')
-      item.dataset.anno = JSON.stringify(annotate);
-      clone.getElementById('three-anno-name-span').textContent = annotate.author
-      clone.getElementById('three-anno-date-span').textContent = annotate.annotate_at
-      annotateList.appendChild(clone);
-    }
+    authorEl.textContent = annotate.author;
+    dateEl.textContent = annotate.annotate_at;
+    contentEl.textContent = annotate.content || '未录入';
+    remarkEl.textContent = annotate.annotate_note || '未录入';
 
-    // 点击后永久展开
-    document.getElementById('annotate-name-container').addEventListener('click', () => {
-      const container = document.getElementById('annotate-name-container');
-      if (container.classList.contains('overflow')) {
-        container.classList.add('expanded');
-        container.classList.remove('overflow');
+    annotateList.appendChild(clone);
+
+    applyEllipsis(contentEl, 2);
+    applyEllipsis(remarkEl, 1);
+
+    contentEl.addEventListener('click', (e) => {
+      if (contentEl.classList.contains('overflow')) {
+        contentEl.classList.add('expanded');
+        contentEl.classList.remove('overflow');
       }
+      e.stopPropagation();
     });
-    // 点击后永久展开
-    document.getElementById('annotate-content-container').addEventListener('click', () => {
-      const container = document.getElementById('annotate-content-container');
-      if (container.classList.contains('overflow')) {
-        container.classList.add('expanded');
-        container.classList.remove('overflow');
+
+    remarkEl.addEventListener('click', (e) => {
+      if (remarkEl.classList.contains('overflow')) {
+        remarkEl.classList.add('expanded');
+        remarkEl.classList.remove('overflow');
       }
+      e.stopPropagation();
     });
-    // 点击后永久展开
-    document.getElementById('annotate-remark-container').addEventListener('click', () => {
-      const container = document.getElementById('annotate-remark-container');
-      if (container.classList.contains('overflow')) {
-        container.classList.add('expanded');
-        container.classList.remove('overflow');
-      }
-    });
-  })
+  });
+}
+
+function applyEllipsis(element, lines) {
+  const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+  const maxHeight = lineHeight * lines;
+  if (element.scrollHeight > maxHeight) {
+    element.classList.add('overflow');
+  }
 }
 
 document.getElementById('search-anno').addEventListener('click', async () => {
@@ -1651,10 +1641,11 @@ document.getElementById('search-anno').addEventListener('click', async () => {
 
 
 document.getElementById('annotate-list').addEventListener('click', (e) => {
-  if (e.target.closest('.type-byhand-content')) {
-    const annoJson = e.target.closest('.type-byhand-content').dataset.anno
-    const anno = JSON.parse(annoJson)
-    showAnnotateEdit(anno)
+  const card = e.target.closest('.anno-card');
+  if (card && !e.target.classList.contains('annotate-content-container') && !e.target.classList.contains('annotate-remark-container')) {
+    const annoJson = card.dataset.anno;
+    const anno = JSON.parse(annoJson);
+    showAnnotateEdit(anno);
   }
 })
 
@@ -1822,7 +1813,7 @@ function hideMentionList() {
 
 // 处理方式
 function toggleFields() {
-  const showFields = intypeSelect.value;
+  const showFields = intypeSelect?.value;
 
   if (showFields == "1") {
 
@@ -1941,8 +1932,11 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
       authorId = newAuthor;
     }
-    const type = intypeSelect.value === '1';
+    const type = intypeSelect?.value === '1';
     let data;
+    const distributionScope = dispatch_units.length > 0
+      ? dispatch_units.map(u => u.name).join(',')
+      : null;
     if (currentDocId) {
       data = {
         annotate_type: currentType,
@@ -1951,8 +1945,8 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
         annotate_at: document.getElementById('annotate-date').value,
         authorId: authorId,
-        distribution_scope: `${getDataSelectValue('#primary-unit')}-${getDataSelectValue('#secondary-unit')}`,
-        distribution_at: document.getElementById('fenfa-date').value,
+        distribution_scope: distributionScope,
+        distribution_at: document.getElementById('fenfa-date')?.value || null,
         uuid: currentDocId
       };
 
@@ -1966,6 +1960,8 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
 
         loadAnnotateList();
         document.getElementById('annotate-Form').reset();
+        dispatch_units = [];
+        dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
         hideAnnotateAdd();
       }
     } else {
@@ -1976,14 +1972,17 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
         annotate_at: document.getElementById('annotate-date').value,
         authorId: authorId,
-        distribution_scope: `${getDataSelectValue('#primary-unit')}-${getDataSelectValue('#secondary-unit')}`,
-        distribution_at: document.getElementById('fenfa-date').value,
+        distribution_scope: distributionScope,
+        distribution_at: document.getElementById('fenfa-date')?.value || null,
         uuid: null,
         author: name, //仅在查阅的时候显示
         id: annotateTemp.length
       };
       annotateTemp.push(data);
       loadAnnotateList()
+      document.getElementById('annotate-Form').reset();
+      dispatch_units = [];
+      dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
       hideAnnotateAdd();
     }
   } catch (error) {
@@ -2012,9 +2011,12 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
         const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
         authorId = newAuthor;
       }
-      const type = intypeSelect.value === '1';
+      const type = intypeSelect?.value === '1';
       let data;
       if (currentAnnoId) {
+        const primaryUnit = getDataSelectValue('#primary-edit-unit');
+        const secondaryUnit = getDataSelectValue('#secondary-edit-unit');
+        const distributionScope = [primaryUnit, secondaryUnit].filter(Boolean).join(',') || null;
         data = {
           annotate_type: currentType,
           processing_mode: getValidatedSelectValue('#annotate-edit-intype'),
@@ -2022,7 +2024,7 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
           annotate_note: type ? document.getElementById('annotate-edit-note').value.trim() : null,
           annotate_at: document.getElementById('annotate-edit-date').value,
           authorId: authorId,
-          distribution_scope: `${getDataSelectValue('#primary-edit-unit')}-${getDataSelectValue('#secondary-edit-unit')}`,
+          distribution_scope: distributionScope,
           distribution_at: document.getElementById('fenfa-edit-date').value,
           uuid: currentDocId,
           id: currentAnnoId
@@ -2048,7 +2050,7 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
           const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
           authorId = newAuthor;
         }
-        const type = intypeSelect.value === '1';
+        const type = intypeSelect?.value === '1';
         // 直接修改对象的属性
         annotateTemp[currentAnnoId].annotate_type = currentType;
         annotateTemp[currentAnnoId].processing_mode = getValidatedSelectValue('#annotate-edit-intype');
@@ -2056,7 +2058,9 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
         annotateTemp[currentAnnoId].annotate_note = type ? document.getElementById('annotate-edit-note').value.trim() : null;
         annotateTemp[currentAnnoId].annotate_at = document.getElementById('annotate-edit-date').value;
         annotateTemp[currentAnnoId].authorId = authorId;
-        annotateTemp[currentAnnoId].distribution_scope = `${getDataSelectValue('#primary-edit-unit')}-${getDataSelectValue('#secondary-edit-unit')}`;
+        const primaryUnitTemp = getDataSelectValue('#primary-edit-unit');
+        const secondaryUnitTemp = getDataSelectValue('#secondary-edit-unit');
+        annotateTemp[currentAnnoId].distribution_scope = [primaryUnitTemp, secondaryUnitTemp].filter(Boolean).join(',') || null;
         annotateTemp[currentAnnoId].distribution_at = document.getElementById('fenfa-edit-date').value;
         await loadAnnotateList()
         hideAnnotateEdit()
