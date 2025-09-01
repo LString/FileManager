@@ -233,6 +233,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const submitter = e.submitter;
     const docType = submitter?.value || 'normal'; // 默认值
 
+    // 更新缓存批注的类型以匹配当前文档类型
+    annotateTemp = annotateTemp.map(anno => ({
+      ...anno,
+      annotate_type: docType === 'normal' ? 1 : 2
+    }));
+
     try {
 
       //默认不输入+号时，添加输入内容
@@ -587,9 +593,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideAnnotateAdd();
   });
 
-  // document.getElementById('annotate-edit-close-add').addEventListener('click', () => {
-  //   hideAnnotateEdit();
-  // });
+  document.getElementById('annotate-edit-close-add').addEventListener('click', () => {
+    hideAnnotateEdit();
+  });
   //权限控制
   checkPermission()
   /**
@@ -600,6 +606,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 })
 let currentType;
+let currentDocId = null; // 当前操作的文档ID
+
+function hideAnnoSidebar(leftContainer, rightContainer) {
+  rightContainer.classList.add('force-hidden');
+  rightContainer.classList.remove('active');
+  setTimeout(() => {
+    rightContainer.style.display = 'none';
+    rightContainer.classList.remove('force-hidden');
+  }, 400);
+  leftContainer.classList.remove('split-view');
+}
+
+function toggleAnnoSidebar(leftId, rightId, rowData) {
+  const leftContainer = document.getElementById(leftId);
+  const rightContainer = document.getElementById(rightId);
+  const uuid = rowData.uuid;
+  const docType = rowData.docType || rowData.doc_type || rowData.type;
+
+  if (currentDocId === uuid && rightContainer.style.display === 'flex') {
+    hideAnnoSidebar(leftContainer, rightContainer);
+    currentDocId = null;
+    return;
+  }
+
+  currentDocId = uuid;
+  currentType = docType;
+  leftContainer.classList.add('split-view');
+  rightContainer.style.display = 'flex';
+  void rightContainer.offsetHeight;
+  rightContainer.classList.add('active');
+  loadAnnotateList();
+}
+
 async function initResizableTable() {
   try {
 
@@ -609,26 +648,12 @@ async function initResizableTable() {
     const norTable = document.getElementById('norTable');
     const norMenu = document.getElementById('normal-context-menu');
     const convertItem = document.getElementById('normal-to-important');
+    const editItem = document.getElementById('normal-edit-doc');
     let contextDocId = null;
+    let contextDoc = null;
 
     norTable.addEventListener('row-click', (event) => {
-      // const rowData = event.detail.data;
-      // showEditModal(rowData);
-
-      //批注弹出
-      const uuid = event.detail.data.uuid;
-      currentType = event.detail.data.docType
-
-      const leftContainer = document.getElementById('view-doc-nor-left');
-      const rightContainer = document.getElementById('view-doc-nor-right');
-
-      // 添加动画类
-      leftContainer.classList.add('split-view');
-      // 先显示右侧面板（设置为 flex）
-      rightContainer.style.display = 'flex';
-      // 强制重绘（确保动画流畅）
-      void rightContainer.offsetHeight;
-      loadAnnotateList();
+      toggleAnnoSidebar('view-doc-nor-left', 'view-doc-nor-right', event.detail.data);
     });
 
     // 普通文档表行右键菜单
@@ -637,14 +662,11 @@ async function initResizableTable() {
       const row = path.find(el => el.tagName === 'TR' && el.dataset.index !== undefined);
       if (!row) return;
       e.preventDefault();
-      contextDocId = norTable.originalData[row.dataset.index].uuid;
+      contextDoc = norTable.originalData[row.dataset.index];
+      contextDocId = contextDoc.uuid;
       norMenu.style.display = 'block';
       norMenu.style.left = `${e.clientX}px`;
       norMenu.style.top = `${e.clientY}px`;
-    });
-
-    document.addEventListener('click', () => {
-      norMenu.style.display = 'none';
     });
 
     convertItem.addEventListener('click', async () => {
@@ -654,11 +676,46 @@ async function initResizableTable() {
       }
     });
 
+    editItem.addEventListener('click', () => {
+      norMenu.style.display = 'none';
+      if (contextDoc) {
+        const doc = { ...contextDoc, type: contextDoc.docType || contextDoc.doc_type || contextDoc.type };
+        showEditModal(doc);
+      }
+    });
+
     // 为重要文档表添加行点击监听
     const impTable = document.getElementById('impTable');
+    const impMenu = document.getElementById('important-context-menu');
+    const impEditItem = document.getElementById('important-edit-doc');
+    let contextDocImp = null;
+
     impTable.addEventListener('row-click', (event) => {
-      const rowData = event.detail.data;
-      showEditModal(rowData);
+      toggleAnnoSidebar('view-doc-imp-left', 'view-doc-imp-right', event.detail.data);
+    });
+
+    impTable.addEventListener('contextmenu', (e) => {
+      const path = e.composedPath();
+      const row = path.find(el => el.tagName === 'TR' && el.dataset.index !== undefined);
+      if (!row) return;
+      e.preventDefault();
+      contextDocImp = impTable.originalData[row.dataset.index];
+      impMenu.style.display = 'block';
+      impMenu.style.left = `${e.clientX}px`;
+      impMenu.style.top = `${e.clientY}px`;
+    });
+
+    impEditItem.addEventListener('click', () => {
+      impMenu.style.display = 'none';
+      if (contextDocImp) {
+        const doc = { ...contextDocImp, type: contextDocImp.docType || contextDocImp.doc_type || contextDocImp.type };
+        showEditModal(doc);
+      }
+    });
+
+    document.addEventListener('click', () => {
+      norMenu.style.display = 'none';
+      impMenu.style.display = 'none';
     });
 
     // 加载脚本并等待完成
@@ -673,21 +730,16 @@ async function initResizableTable() {
 document.getElementById('shink-anno').addEventListener('click', async (_e) => {
   const leftContainer = document.getElementById('view-doc-nor-left');
   const rightContainer = document.getElementById('view-doc-nor-right');
+  hideAnnoSidebar(leftContainer, rightContainer);
+  currentDocId = null;
+});
 
-  // 添加强制隐藏的 CSS 类
-  rightContainer.classList.add('force-hidden');
-  // 移除active类开始收缩动画
-  rightContainer.classList.remove('active');
-
-  // 监听动画结束事件
-  setTimeout(() => {
-    rightContainer.style.display = 'none';
-    rightContainer.classList.remove('force-hidden');
-  }, 400);
-
-  // 恢复左侧全屏宽度
-  leftContainer.classList.remove('split-view');
-})
+document.getElementById('shink-anno-imp').addEventListener('click', async (_e) => {
+  const leftContainer = document.getElementById('view-doc-imp-left');
+  const rightContainer = document.getElementById('view-doc-imp-right');
+  hideAnnoSidebar(leftContainer, rightContainer);
+  currentDocId = null;
+});
 
 
 
@@ -733,7 +785,6 @@ async function printDoc(formData) {
 
 let tempListForSearch_Normal = null;//搜索/排序功能的临时数组
 let tempListForSearch_Important = null;//搜索/排序功能的临时数组
-let currentDocId = null;//当前操作的文档ID
 let currentSortCloum = null;
 let currentSortDir = 'asc'
 async function refreshDocList(type = 1, searchResult = null, _searchKey = null) {
@@ -741,18 +792,21 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     let docs
     if (searchResult == null) {
       docs = await window.electronAPI.db.getDocumentsByTypeWithKeywords(type)
-      if (type == 1) {
-        tempListForSearch_Normal = docs
-      } else {
-        tempListForSearch_Important = docs
-      }
     } else {
       docs = searchResult
-      if (type == 1) {
-        tempListForSearch_Normal = docs
-      } else {
-        tempListForSearch_Important = docs
-      }
+    }
+
+    // 确保每条记录都包含文档类型
+    docs = docs.map(doc => ({
+      ...doc,
+      doc_type: doc.doc_type ?? doc.docType ?? doc.type ?? type,
+      docType: doc.docType ?? doc.doc_type ?? doc.type ?? type
+    }))
+
+    if (type == 1) {
+      tempListForSearch_Normal = docs
+    } else {
+      tempListForSearch_Important = docs
     }
 
     let table
@@ -1402,6 +1456,9 @@ async function handleToImportant(docId) {
 document.getElementById('anno-add-btn').addEventListener('click', () => {
   showAnnotateAdd()
 });
+document.getElementById('anno-add-btn-imp').addEventListener('click', () => {
+  showAnnotateAdd()
+});
 
 // //查看备注
 const annotate_look = document.getElementById('annotate_look');
@@ -1418,7 +1475,8 @@ const intypeEditSelect = document.getElementById('annotate-edit-intype');
 
 const annotateEdit_content = document.getElementById('annotate-edit-content');
 const form_row_fenfa = document.getElementById('form_row_dispatch')
-const annotateList = document.getElementById('annotate-list')
+const annotateListNor = document.getElementById('annotate-list');
+const annotateListImp = document.getElementById('annotate-list-imp');
 let currentMentionPos = null;
 
 const contentField = document.getElementById('annotate-content');
@@ -1563,7 +1621,8 @@ async function loadAnnotateList(isSearch = false) {
     annotations = tempListForSearch_Anno;
   }
 
-  annotateList.innerHTML = '';
+  const listEl = currentType === 1 ? annotateListNor : annotateListImp;
+  listEl.innerHTML = '';
   const template = document.getElementById('annoCardTemplate');
 
   annotations.forEach(annotate => {
@@ -1581,7 +1640,7 @@ async function loadAnnotateList(isSearch = false) {
     contentEl.textContent = annotate.content || '未录入';
     remarkEl.textContent = annotate.annotate_note || '未录入';
 
-    annotateList.appendChild(clone);
+    listEl.appendChild(clone);
 
     applyEllipsis(contentEl, 2);
     applyEllipsis(remarkEl, 1);
@@ -1626,7 +1685,6 @@ document.getElementById('search-anno').addEventListener('click', async () => {
       anno.author,
     ];
 
-    // 检查字段是否包含关键词（空关键词返回全部）
     return searchKey === '' ||
       searchFields.some(field =>
         String(field).toLowerCase().includes(searchKey)
@@ -1636,18 +1694,44 @@ document.getElementById('search-anno').addEventListener('click', async () => {
   tempListForSearch_Anno = filteredAnno
   let isSearch = searchKey == '' ? false : true
   loadAnnotateList(isSearch)
+});
 
-})
+document.getElementById('search-anno-imp').addEventListener('click', async () => {
+  const searchKey = document.getElementById('search-anno-input-imp')
+    .value
+    .trim()
+    .toLowerCase();
 
+  let filteredAnno = tempListForSearch_Anno.filter(anno => {
+    const searchFields = [
+      anno.annotate_at,
+      anno.content,
+      anno.annotate_note,
+      anno.author,
+    ];
 
-document.getElementById('annotate-list').addEventListener('click', (e) => {
+    return searchKey === '' ||
+      searchFields.some(field =>
+        String(field).toLowerCase().includes(searchKey)
+      );
+  });
+  filteredAnno = searchKey == '' ? null : filteredAnno
+  tempListForSearch_Anno = filteredAnno
+  let isSearch = searchKey == '' ? false : true
+  loadAnnotateList(isSearch)
+});
+
+function handleAnnotateListDblClick(e) {
   const card = e.target.closest('.anno-card');
-  if (card && !e.target.classList.contains('annotate-content-container') && !e.target.classList.contains('annotate-remark-container')) {
+  if (card) {
     const annoJson = card.dataset.anno;
     const anno = JSON.parse(annoJson);
     showAnnotateEdit(anno);
   }
-})
+}
+
+annotateListNor.addEventListener('dblclick', handleAnnotateListDblClick);
+annotateListImp.addEventListener('dblclick', handleAnnotateListDblClick);
 
 annotate_content.normalize();
 annotate_content.addEventListener('input', handleInput);
@@ -1917,6 +2001,11 @@ dispatch_input_container.addEventListener('click', async (e) => {
 document.getElementById('annotate-Form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
+    // 如果当前文档类型未知，则根据文档ID补全
+    if (currentDocId && (currentType === undefined || currentType === null)) {
+      const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
+      currentType = docInfo?.doc_type || docInfo?.docType || docInfo?.type || 1;
+    }
     let name;
     let authorId;
 
@@ -1998,6 +2087,11 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
 
   if (isEditingAnno) {
     if (currentDocId) {
+      // 如果当前文档类型未知，则根据文档ID补全
+      if (currentType === undefined || currentType === null) {
+        const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
+        currentType = docInfo?.doc_type || docInfo?.docType || docInfo?.type || 1;
+      }
       let authorId;
       let name = getValidatedSelectValue('#annotate-edit-author');
       // 检查是否存在同名作者

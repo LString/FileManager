@@ -266,6 +266,7 @@
                 <!-- 普通文档右键菜单 -->
                 <ul id="normal-context-menu" class="doc-context-menu">
                     <li id="normal-to-important">转为重要文件</li>
+                    <li id="normal-edit-doc">修改文件信息</li>
                 </ul>
 
             </div>
@@ -285,12 +286,41 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="docList-body">
-                            <resizable-table id="impTable" style="width: 100%;height: 100%;"></resizable-table>
+                        <div class="view-doc-body">
+                            <div id="view-doc-imp-left" class="view-doc-left">
+                                <div class="docList-body">
+                                    <resizable-table id="impTable" style="width: 100%;height: 100%;"></resizable-table>
+                                </div>
+                            </div>
+                            <div id="view-doc-imp-right" class="view-doc-right">
+                                <div class="view-doc-right-body">
+                                    <div class="view-doc-right-top">
+                                        <span class="annotate-list-title">批注</span>
+                                        <div class="search-anno-contianer">
+                                            <input id="search-anno-input-imp" type="text" placeholder="请输入" class="search-anno-input">
+                                            <button id="search-anno-imp" class="search-anno-btn">
+                                                <img src="../assets/image/search-gray.png">
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <ol id="annotate-list-imp"></ol>
+                                    <div class="anno-add-btn-container">
+                                        <button id="anno-add-btn-imp" class="anno-add-btn">添加</button>
+                                    </div>
+                                </div>
+                                <button id="shink-anno-imp" class="collapse collapse-key" style="width: 8px;height: 20px;cursor: pointer;">
+                                    <img src="../assets/image/collapse.png">
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 重要文档右键菜单 -->
+            <ul id="important-context-menu" class="doc-context-menu">
+                <li id="important-edit-doc">修改文件信息</li>
+            </ul>
 
             <!-- 姓名管理 -->
             <div id="name-manager-tab" class="tab-content">
@@ -695,7 +725,7 @@
         </div>
 
         <div id="annotate_edit" class="allinfo-box">
-            <div class="annotate-bg-trans">
+            <div class="annotate-bg">
                 <div class="allinfo-content">
                     <div class="allinfo-header">
                         <div class="allinfo-tab-content">
