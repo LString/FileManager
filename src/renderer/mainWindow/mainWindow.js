@@ -233,6 +233,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const submitter = e.submitter;
     const docType = submitter?.value || 'normal'; // 默认值
 
+    // 更新缓存批注的类型以匹配当前文档类型
+    annotateTemp = annotateTemp.map(anno => ({
+      ...anno,
+      annotate_type: docType === 'normal' ? 1 : 2
+    }));
+
     try {
 
       //默认不输入+号时，添加输入内容
@@ -786,18 +792,21 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     let docs
     if (searchResult == null) {
       docs = await window.electronAPI.db.getDocumentsByTypeWithKeywords(type)
-      if (type == 1) {
-        tempListForSearch_Normal = docs
-      } else {
-        tempListForSearch_Important = docs
-      }
     } else {
       docs = searchResult
-      if (type == 1) {
-        tempListForSearch_Normal = docs
-      } else {
-        tempListForSearch_Important = docs
-      }
+    }
+
+    // 确保每条记录都包含文档类型
+    docs = docs.map(doc => ({
+      ...doc,
+      doc_type: doc.doc_type ?? doc.docType ?? doc.type ?? type,
+      docType: doc.docType ?? doc.doc_type ?? doc.type ?? type
+    }))
+
+    if (type == 1) {
+      tempListForSearch_Normal = docs
+    } else {
+      tempListForSearch_Important = docs
     }
 
     let table
@@ -1992,6 +2001,11 @@ dispatch_input_container.addEventListener('click', async (e) => {
 document.getElementById('annotate-Form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
+    // 如果当前文档类型未知，则根据文档ID补全
+    if (currentDocId && (currentType === undefined || currentType === null)) {
+      const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
+      currentType = docInfo?.doc_type || docInfo?.docType || docInfo?.type || 1;
+    }
     let name;
     let authorId;
 
@@ -2073,6 +2087,11 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
 
   if (isEditingAnno) {
     if (currentDocId) {
+      // 如果当前文档类型未知，则根据文档ID补全
+      if (currentType === undefined || currentType === null) {
+        const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
+        currentType = docInfo?.doc_type || docInfo?.docType || docInfo?.type || 1;
+      }
       let authorId;
       let name = getValidatedSelectValue('#annotate-edit-author');
       // 检查是否存在同名作者
