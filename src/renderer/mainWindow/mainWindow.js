@@ -1039,8 +1039,8 @@ const getValidatedSelectValue = (selector) => {
 const getDataSelectValue = (selector) => {
   const select = document.querySelector(selector);
   if (!select) {
-    console.error(`找不到选择框元素: ${selector}`);
-    throw new Error('表单配置错误');
+    console.warn(`找不到选择框元素: ${selector}`);
+    return null;
   }
 
   const value = select.value.trim();
@@ -1932,6 +1932,9 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
     const type = intypeSelect.value === '1';
     let data;
     if (currentDocId) {
+      const primaryUnit = getDataSelectValue('#primary-unit');
+      const secondaryUnit = getDataSelectValue('#secondary-unit');
+      const distributionScope = primaryUnit && secondaryUnit ? `${primaryUnit}-${secondaryUnit}` : null;
       data = {
         annotate_type: currentType,
         processing_mode: getValidatedSelectValue('#annotate-intype'),
@@ -1939,7 +1942,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
         annotate_at: document.getElementById('annotate-date').value,
         authorId: authorId,
-        distribution_scope: `${getDataSelectValue('#primary-unit')}-${getDataSelectValue('#secondary-unit')}`,
+        distribution_scope: distributionScope,
         distribution_at: document.getElementById('fenfa-date').value,
         uuid: currentDocId
       };
@@ -1957,6 +1960,9 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         hideAnnotateAdd();
       }
     } else {
+      const primaryUnit = getDataSelectValue('#primary-unit');
+      const secondaryUnit = getDataSelectValue('#secondary-unit');
+      const distributionScope = primaryUnit && secondaryUnit ? `${primaryUnit}-${secondaryUnit}` : null;
       data = { //新建文档时缓存的批注
         annotate_type: currentType,
         processing_mode: getValidatedSelectValue('#annotate-intype'),
@@ -1964,7 +1970,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
         annotate_at: document.getElementById('annotate-date').value,
         authorId: authorId,
-        distribution_scope: `${getDataSelectValue('#primary-unit')}-${getDataSelectValue('#secondary-unit')}`,
+        distribution_scope: distributionScope,
         distribution_at: document.getElementById('fenfa-date').value,
         uuid: null,
         author: name, //仅在查阅的时候显示
@@ -2003,6 +2009,9 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
       const type = intypeSelect.value === '1';
       let data;
       if (currentAnnoId) {
+        const primaryUnit = getDataSelectValue('#primary-edit-unit');
+        const secondaryUnit = getDataSelectValue('#secondary-edit-unit');
+        const distributionScope = primaryUnit && secondaryUnit ? `${primaryUnit}-${secondaryUnit}` : null;
         data = {
           annotate_type: currentType,
           processing_mode: getValidatedSelectValue('#annotate-edit-intype'),
@@ -2010,7 +2019,7 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
           annotate_note: type ? document.getElementById('annotate-edit-note').value.trim() : null,
           annotate_at: document.getElementById('annotate-edit-date').value,
           authorId: authorId,
-          distribution_scope: `${getDataSelectValue('#primary-edit-unit')}-${getDataSelectValue('#secondary-edit-unit')}`,
+          distribution_scope: distributionScope,
           distribution_at: document.getElementById('fenfa-edit-date').value,
           uuid: currentDocId,
           id: currentAnnoId
@@ -2044,7 +2053,9 @@ document.getElementById('annotate-edit-Form').addEventListener('submit', async (
         annotateTemp[currentAnnoId].annotate_note = type ? document.getElementById('annotate-edit-note').value.trim() : null;
         annotateTemp[currentAnnoId].annotate_at = document.getElementById('annotate-edit-date').value;
         annotateTemp[currentAnnoId].authorId = authorId;
-        annotateTemp[currentAnnoId].distribution_scope = `${getDataSelectValue('#primary-edit-unit')}-${getDataSelectValue('#secondary-edit-unit')}`;
+        const primaryUnitTemp = getDataSelectValue('#primary-edit-unit');
+        const secondaryUnitTemp = getDataSelectValue('#secondary-edit-unit');
+        annotateTemp[currentAnnoId].distribution_scope = primaryUnitTemp && secondaryUnitTemp ? `${primaryUnitTemp}-${secondaryUnitTemp}` : null;
         annotateTemp[currentAnnoId].distribution_at = document.getElementById('fenfa-edit-date').value;
         await loadAnnotateList()
         hideAnnotateEdit()
