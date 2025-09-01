@@ -1946,7 +1946,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         annotate_at: document.getElementById('annotate-date').value,
         authorId: authorId,
         distribution_scope: distributionScope,
-        distribution_at: document.getElementById('fenfa-date').value,
+        distribution_at: document.getElementById('fenfa-date')?.value || null,
         uuid: currentDocId
       };
 
@@ -1973,7 +1973,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
         annotate_at: document.getElementById('annotate-date').value,
         authorId: authorId,
         distribution_scope: distributionScope,
-        distribution_at: document.getElementById('fenfa-date').value,
+        distribution_at: document.getElementById('fenfa-date')?.value || null,
         uuid: null,
         author: name, //仅在查阅的时候显示
         id: annotateTemp.length
