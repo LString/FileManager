@@ -695,6 +695,9 @@ if (!customElements.get('resizable-table')) {
                 const key = header.getAttribute('data-key');
                 const resizer = header.querySelector('.resizer');
 
+                // Skip non-resizable columns like the fixed sequence column
+                if (!resizer) return;
+
                 resizer.addEventListener('mousedown', (e) => {
                     this.isResizing = true;
                     this.currentHeader = header;
