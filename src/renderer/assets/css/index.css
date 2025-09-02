@@ -48,24 +48,6 @@ body {
   /* 排除拖拽区域 */
 }
 
-.control-btn {
-  width: 40px;
-  height: 100%;
-  border: none;
-  color: white;
-  background-color: transparent;
-  transition: background 0.2s;
-}
-
-.control-btn:hover {
-  background: #4a4a4a;
-  border-radius: 8px;
-}
-
-#close:hover {
-  background: #e94a57 !important;
-  border-radius: 8px;
-}
 
 .main-container {
   display: flex;
@@ -128,9 +110,9 @@ body {
 
 /* 激活状态 */
 .tab-btn.active {
-  background: rgba(63, 211, 179, 0.1);
-  border-right: 3px solid #3fd3b3;
-  color: #2a9d8f;
+  background: rgba(245, 246, 247, 1);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .tab-btn:hover {

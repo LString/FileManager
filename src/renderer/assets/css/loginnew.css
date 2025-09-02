@@ -49,24 +49,7 @@ body {
     /* 排除拖拽区域 */
 }
 
-.control-btn {
-    width: 40px;
-    height: 100%;
-    border: none;
-    color: white;
-    background-color: transparent;
-    transition: background 0.2s;
-}
 
-.control-btn:hover {
-    background: #4a4a4a;
-    border-radius: 8px;
-}
-
-#close:hover {
-    background: #e94a57 !important;
-    border-radius: 8px;
-}
 
 .login-container {
     width: 100%;

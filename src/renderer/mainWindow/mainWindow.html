@@ -68,7 +68,6 @@
             <div class="top-right">
                 <div id="window-controls">
                     <button id="minimize" class="control-btn">-</button>
-                    <button id="maximize" class="control-btn">□</button>
                     <button id="close" class="control-btn">x</button>
                 </div>
                 <div class="setting-box">
@@ -278,6 +277,19 @@
                         <div class="normal-top">
                             <span style="font-size: 20px;font-weight: 500;">查阅文档</span>
                             <div class="search-container">
+                                <select id="search_field_imp" class="search_key">
+                                    <option value="all">全部</option>
+                                    <option value="title">标题</option>
+                                    <option value="sender_unit">来文单位</option>
+                                    <option value="sender_number">来文编号</option>
+                                    <option value="drafting_unit">制文单位</option>
+                                    <option value="review_leader">制文单位</option>
+                                    <option value="input_user">录入人</option>
+                                    <option value="secrecy_level">秘密等级</option>
+                                    <option value="crgency_level">紧急程度</option>
+                                    <option value="secrecy_period">保密期限</option>
+                                    <option value="remarks">备注</option>
+                                </select>
                                 <div class="normal-serach">
                                     <input id="search_inuput_important" type="text" class="search-input"
                                         placeholder="搜索...">
@@ -358,72 +370,90 @@
 
             <!-- 姓名管理 -->
             <div id="name-manager-tab" class="tab-content">
-                <div class="name-manager-body">
-                    <div class="add-name">
-                        <div>
-                            <span>姓名</span>
-                            <input type="text" id="add-name-name" placeholder="请输入姓名" class="add-name-real" />
-                        </div>
-                        <div>
-                            <span>常用称呼</span>
-                            <input type="text" id="add-name-alias" placeholder="请输入常用称呼" class="add-name-real" />
-                        </div>
-                        <div>
-                            <span>公司</span>
-                            <select id="add-name-unit" placeholder="请选择公司"></select>
-                            <select id="add-name-unitSon" placeholder="请选择子公司"></select>
-                        </div>
-                        <button id="add-name-btn" class="add-btn">添加</button>
+                <div class="view-normal-body">
+                    <div class="normal-top">
+                        <span class="tab-lefttitle">姓名管理</span>
                     </div>
-                    <div class="name-list-body">
-                        <div class="name-list-title">
-                            <div class="name-list-title-colum">姓名</div>
-                            <div class="name-list-title-colum">常用名</div>
-                            <div class="name-list-title-colum">公司</div>
-                            <div class="name-list-title-colum">操作</div>
+                    <div class="name-manager-body">
+                        <div class="add-name">
+                            <div>
+                                <span>姓名</span>
+                                <input type="text" id="add-name-name" placeholder="请输入姓名" class="add-name-real" />
+                            </div>
+                            <div>
+                                <span>常用称呼</span>
+                                <input type="text" id="add-name-alias" placeholder="请输入常用称呼" class="add-name-real" />
+                            </div>
+                            <div>
+                                <span>公司</span>
+                                <select id="add-name-unit" placeholder="请选择公司"></select>
+                                <select id="add-name-unitSon" placeholder="请选择子公司"></select>
+                            </div>
+                            <button id="add-name-btn" class="add-btn">添加</button>
                         </div>
-                        <ol id="name-list"></ol>
+                        <div class="name-list-body">
+                            <table class="name-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>姓名</th>
+                                        <th>常用名</th>
+                                        <th>公司</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="name-list"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- 单位管理 -->
             <div id="unit-manager-tab" class="tab-content">
-                <div class="unit-manager-body">
-                    <div class="unit-left">
-                        <div class="add-unit">
-                            <div>
-                                <span>单位名称</span>
-                                <input type="text" id="add-unit-name" placeholder="请输入单位名称" class="add-name-real" />
-                            </div>
-                            <button id="add-unit-btn" class="add-btn">添加</button>
-                        </div>
-                        <div class="unit-list-body">
-                            <div class="unit-list-title">
-                                <div class="name-list-title-colum">单位名称</div>
-                                <div class="name-list-title-colum">经手文件数</div>
-                            </div>
-                            <ol id="unit-list"></ol>
-                        </div>
+                <div class="view-normal-body">
+                    <div class="normal-top">
+                        <span class="tab-lefttitle">单位管理</span>
                     </div>
-                    <div class="unit-right">
-                        <button id="shink-unit" class="collapse collapse-unit" style="width: 8px;height: 20px;">
-                            <img src="../assets/image/collapse.png">
-                        </button>
-                        <div class="unit-detail">
-                            <span>文件名</span>
-                            <div class="unit-detail-table-container">
-                                <table class="unit-detail-table">
-                                    <thead class="unit-detail-thead">
+                    <div class="unit-manager-body">
+                        <div class="unit-left">
+                            <div class="add-unit">
+                                <div>
+                                    <span>单位名称</span>
+                                    <input type="text" id="add-unit-name" placeholder="请输入单位名称" class="add-name-real" />
+                                </div>
+                                <button id="add-unit-btn" class="add-btn">添加</button>
+                            </div>
+                            <div class="unit-list-body">
+                                <table class="unit-list-table">
+                                    <thead>
                                         <tr>
-                                            <th>序号</th>
-                                            <th>文件名称</th>
-                                            <th>分发时间</th>
-                                            <th>返回时间</th>
+                                            <th>单位名称</th>
+                                            <th>经手文件数</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="unit-detail-tbody"></tbody>
+                                    <tbody id="unit-list"></tbody>
                                 </table>
+                            </div>
+                        </div>
+                        <div class="unit-right">
+                            <button id="shink-unit" class="collapse collapse-unit" style="width: 8px;height: 20px;">
+                                <img src="../assets/image/collapse.png">
+                            </button>
+                            <div class="unit-detail">
+                                <span>文件名</span>
+                                <div class="unit-detail-table-container">
+                                    <table class="unit-detail-table">
+                                        <thead class="unit-detail-thead">
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>文件名称</th>
+                                                <th>分发时间</th>
+                                                <th>返回时间</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="unit-detail-tbody"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -934,31 +964,25 @@
             </div>
         </template>
         <template id="nameListTemplate">
-            <div id="nameList-item" class="nameList-item-body">
-                <div class="name-list-item">
-                    <div id="name-list-item-name" class="name-list-item-colum">张三</div>
-                    <div id="name-list-item-alias" class="name-list-item-colum">张三，张三，张三，张三，张三</div>
-                    <div id="name-list-item-unit" class="name-list-item-colum">三信-网吧</div>
-                    <div class="name-list-item-colum">
-                        <butt on id="editName" class="action-btn edit-btn" title="编辑">
-                            <img src="../assets/image/edit_icon.png" />
-                            </button>
-                            <button id="deleteName" class="action-btn delete-btn" title="删除姓名及别名">
-                                <img src="../assets/image/delete_icon.png" />
-                            </button>
-                    </div>
-                </div>
-                <hr>
-            </div>
+            <tr class="name-list-item">
+                <td id="name-list-item-name">张三</td>
+                <td id="name-list-item-alias">张三，张三，张三，张三，张三</td>
+                <td id="name-list-item-unit">三信-网吧</td>
+                <td>
+                    <button id="editName" class="action-btn edit-btn" title="编辑">
+                        <img src="../assets/image/edit_icon.png" />
+                    </button>
+                    <button id="deleteName" class="action-btn delete-btn" title="删除姓名及别名">
+                        <img src="../assets/image/delete_icon.png" />
+                    </button>
+                </td>
+            </tr>
         </template>
         <template id="unitListTemplate">
-            <div id="unitList-item" class="nameList-item-body">
-                <div class="unit-list-item">
-                    <div id="unit-list-item-name" class="name-list-item-colum">单位</div>
-                    <div id="unit-list-item-count" class="name-list-item-colum">0</div>
-                </div>
-                <hr>
-            </div>
+            <tr class="unit-list-item">
+                <td id="unit-list-item-name">单位</td>
+                <td id="unit-list-item-count">0</td>
+            </tr>
         </template>
         <template id="alias-tag-item">
             <div class="alias-tag">

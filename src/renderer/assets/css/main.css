@@ -78,9 +78,9 @@ hr {
 
 /* 激活状态 */
 .tab-btn.active {
-    border-right: 3px solid rgba(66, 135, 242, 1);
-    color: black;
     background-color: rgba(245, 246, 247, 1);
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
 /* 数据管理弹出窗口样式 */
@@ -201,19 +201,6 @@ hr {
     margin-right: 16px;
 }
 
-.control-btn {
-    width: 18px;
-    height: 18px;
-    border: none;
-    color: rgb(44, 44, 44);
-    background-color: transparent;
-    margin-left: 5px;
-    transition: background 0.2s;
-}
-
-.control-btn:hover {
-    background: #4a4a4a;
-}
 
 .setting-box {
     margin-right: 38px;
@@ -540,7 +527,7 @@ input:-webkit-autofill:focus {
 }
 
 .search_key {
-    width: 85px;
+    width: 120px;
     height: 20px;
     margin-right: 15px
 }
@@ -963,97 +950,8 @@ input:-webkit-autofill:focus {
 }
 
 .name-list-body {
-    display: flex;
-    width: calc(100% - 46px);
-    height: calc(100% - 137px);
-    flex-direction: column;
-    align-items: center;
-    justify-content: start;
-    border-radius: 5px;
-    margin-top: 27px;
-    margin-left: 23px;
-    margin-right: 23px;
-    margin-bottom: 28px;
-    padding: 7px;
-    background-color: rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.25);
-    box-sizing: border-box;
-}
-
-.name-list-title {
-    display: grid;
-    grid-template-columns: 0.7fr 2fr 1.2fr 0.7fr;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    height: 44px;
-    padding-left: 109px;
-    background: rgba(230, 240, 252, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-}
-
-#name-list {
-    width: 100%;
-    height: calc(100% - 44px);
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
-}
-
-.name-list-title-colum {
-    font-size: 14px;
-    font-weight: 400;
-}
-
-.name-list-item-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    height: 47px;
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.25);
-    box-sizing: border-box;
-}
-
-.nameList-item-body {
-    width: 100%;
-}
-
-.name-list-item {
-    display: grid;
-    grid-template-columns: 0.7fr 2fr 1.2fr 0.7fr;
-    align-items: center;
-    width: 100%;
-    height: 44px;
-    padding-left: 109px;
-    border: none;
-    background: rgba(255, 255, 255, 1);
-    box-sizing: border-box;
-}
-
-.nameList-item-body>hr {
-    border: 0;
-    height: 1px;
-    background-color: rgb(223, 223, 223);
-    width: 100%;
-    opacity: 0.5;
-    margin: 0;
-    padding: 0;
-}
-
-.name-list-item-colum {
-    font-size: 12px;
-    font-weight: 400;
-    max-height: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    word-break: break-all;
-    text-overflow: ellipsis;
-    padding-right: 8px;
-    box-sizing: border-box;
+    margin: 24px;
+    background-color: #fff;
 }
 
 
@@ -1184,55 +1082,8 @@ input:-webkit-autofill:focus {
 }
 
 .unit-list-body {
-    display: flex;
-    width: calc(100% - 46px);
-    height: calc(100% - 137px);
-    flex-direction: column;
-    align-items: center;
-    justify-content: start;
-    border-radius: 5px;
-    margin-top: 27px;
-    margin-left: 23px;
-    margin-right: 23px;
-    margin-bottom: 28px;
-    padding: 7px;
-    background-color: rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.25);
-    box-sizing: border-box;
-}
-
-.unit-list-title {
-    display: grid;
-    grid-template-columns: 1fr 0.5fr;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    height: 44px;
-    padding-left: 109px;
-    background: rgba(230, 240, 252, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-}
-
-#unit-list {
-    width: 100%;
-    height: calc(100% - 44px);
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
-}
-
-.unit-list-item {
-    display: grid;
-    grid-template-columns: 1fr 0.5fr;
-    align-items: center;
-    width: 100%;
-    height: 44px;
-    padding-left: 109px;
-    border: none;
-    background: rgba(255, 255, 255, 1);
-    box-sizing: border-box;
+    margin: 24px;
+    background-color: #fff;
 }
 
 .nameList-item-body>hr {

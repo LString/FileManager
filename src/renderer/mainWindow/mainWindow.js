@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 获取控制按钮
   const minimizeBtn = getElement('minimize')
-  const maximizeBtn = getElement('maximize')
   const closeBtn = getElement('close')
 
   // 验证API可用性
@@ -56,24 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     minimizeBtn.addEventListener('click', () => {
       console.log('[事件] 点击最小化按钮')
       window.electronAPI.minimize()
-    })
-  }
-  // 最大化/还原按钮
-  if (maximizeBtn) {
-    maximizeBtn.addEventListener('click', () => {
-      console.log('[事件] 点击最大化按钮')
-      window.electronAPI.maximize()
-    })
-
-    // 状态同步
-    window.electronAPI.onMaximized(() => {
-      maximizeBtn.textContent = '❐'
-      console.log('[状态] 窗口最大化')
-    })
-
-    window.electronAPI.onUnmaximized(() => {
-      maximizeBtn.textContent = '□'
-      console.log('[状态] 窗口还原')
     })
   }
   // 关闭按钮
@@ -1386,31 +1367,40 @@ document.getElementById('search-normal').addEventListener('click', async () => {
 })
 
 document.getElementById('search-important').addEventListener('click', async () => {
+  const searchField = document.getElementById('search_field_imp').value;
   const searchKey = document.getElementById('search_inuput_important')
     .value
     .trim()
     .toLowerCase();
 
-  let filteredDocs = tempListForSearch_Important.filter(doc => {
-    const searchFields = [
-      doc.title,
-      doc.sender_unit,
-      doc.sender_number,
-      doc.drafting_unit,
-      doc.review_leader,
-      doc.secrecy_level,
-      doc.crgency_level,
-      doc.secrecy_period
-    ];
+  if (searchKey === '') {
+    refreshDocList(2, null);
+    return;
+  }
 
-    // 检查字段是否包含关键词（空关键词返回全部）
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
+  let filteredDocs = tempListForSearch_Important.filter(doc => {
+    if (searchField === 'all') {
+      const searchFields = [
+        doc.title,
+        doc.sender_unit,
+        doc.sender_number,
+        doc.original_number,
+        doc.drafting_unit,
+        doc.review_leader,
+        doc.input_user,
+        doc.secrecy_level,
+        doc.crgency_level,
+        doc.secrecy_period,
+        doc.remarks
+      ];
+      return searchFields.some(field => String(field).trim() === searchKey);
+    } else {
+      const fieldValue = doc[searchField] ? String(doc[searchField]).trim() : '';
+      return fieldValue === searchKey;
+    }
   });
-  filteredDocs = searchKey == '' ? null : filteredDocs
-  refreshDocList(2, filteredDocs, searchKey)
+
+  refreshDocList(2, filteredDocs);
 })
 
 
