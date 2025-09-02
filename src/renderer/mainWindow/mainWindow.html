@@ -293,7 +293,7 @@
                                 </div>
                             </div>
                             <div id="view-doc-imp-right" class="view-doc-right">
-                                <div class="view-doc-right-body">
+                                <div id="imp-anno-panel" class="view-doc-right-body">
                                     <div class="view-doc-right-top">
                                         <span class="annotate-list-title">批注</span>
                                         <div class="search-anno-contianer">
@@ -308,6 +308,31 @@
                                         <button id="anno-add-btn-imp" class="anno-add-btn">添加</button>
                                     </div>
                                 </div>
+                                <div id="imp-flow-panel" class="view-doc-right-body" style="display:none;">
+                                    <div class="view-doc-right-top" style="justify-content: space-between;">
+                                        <span class="annotate-list-title">文件流转</span>
+                                        <button id="flow-add-btn" class="flow-add-btn">流转录入</button>
+                                    </div>
+                                    <div id="flow-form" class="flow-form" style="display:none;">
+                                        <input id="flow-unit" type="text" placeholder="单位名称" list="flow-unit-datalist" />
+                                        <input id="flow-distributed" type="date" placeholder="分发时间" />
+                                        <input id="flow-back" type="date" placeholder="返回时间" />
+                                        <button id="flow-save-btn" class="flow-btn flow-save-btn">保存</button>
+                                        <button id="flow-cancel-btn" class="flow-btn flow-cancel-btn">取消</button>
+                                        <datalist id="flow-unit-datalist"></datalist>
+                                    </div>
+                                    <table id="flow-table" class="flow-table">
+                                        <thead>
+                                            <tr>
+                                                <th>序号</th>
+                                                <th>单位名称</th>
+                                                <th>分发时间</th>
+                                                <th>返回时间</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
                                 <button id="shink-anno-imp" class="collapse collapse-key" style="width: 8px;height: 20px;cursor: pointer;">
                                     <img src="../assets/image/collapse.png">
                                 </button>
@@ -320,6 +345,11 @@
             <!-- 重要文档右键菜单 -->
             <ul id="important-context-menu" class="doc-context-menu">
                 <li id="important-edit-doc">修改文件信息</li>
+                <li id="important-show-flow">查看文件流转</li>
+            </ul>
+
+            <ul id="flow-context-menu" class="doc-context-menu">
+                <li id="flow-delete-record">删除</li>
             </ul>
 
             <!-- 姓名管理 -->

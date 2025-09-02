@@ -607,6 +607,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 let currentType;
 let currentDocId = null; // 当前操作的文档ID
+// 文件流转记录
+let currentFlowList = [];
 
 function hideAnnoSidebar(leftContainer, rightContainer) {
   rightContainer.classList.add('force-hidden');
@@ -616,6 +618,7 @@ function hideAnnoSidebar(leftContainer, rightContainer) {
     rightContainer.classList.remove('force-hidden');
   }, 400);
   leftContainer.classList.remove('split-view');
+  rightContainer.dataset.mode = '';
 }
 
 function toggleAnnoSidebar(leftId, rightId, rowData) {
@@ -636,8 +639,195 @@ function toggleAnnoSidebar(leftId, rightId, rowData) {
   rightContainer.style.display = 'flex';
   void rightContainer.offsetHeight;
   rightContainer.classList.add('active');
+  if (rightId === 'view-doc-imp-right') {
+    rightContainer.dataset.mode = 'anno';
+    const annoPanel = document.getElementById('imp-anno-panel');
+    const flowPanel = document.getElementById('imp-flow-panel');
+    if (annoPanel && flowPanel) {
+      annoPanel.style.display = 'flex';
+      flowPanel.style.display = 'none';
+    }
+  }
   loadAnnotateList();
 }
+
+// 展示文件流转侧栏
+function toggleFlowSidebar(leftId, rightId, rowData) {
+  const leftContainer = document.getElementById(leftId);
+  const rightContainer = document.getElementById(rightId);
+  const uuid = rowData.uuid;
+  const docType = rowData.docType || rowData.doc_type || rowData.type;
+
+  if (
+    currentDocId === uuid &&
+    rightContainer.style.display === 'flex' &&
+    rightContainer.dataset.mode === 'flow'
+  ) {
+    hideAnnoSidebar(leftContainer, rightContainer);
+    currentDocId = null;
+    rightContainer.dataset.mode = '';
+    return;
+  }
+
+  currentDocId = uuid;
+  currentType = docType;
+  leftContainer.classList.add('split-view');
+  rightContainer.style.display = 'flex';
+  void rightContainer.offsetHeight;
+  rightContainer.classList.add('active');
+  rightContainer.dataset.mode = 'flow';
+  const annoPanel = document.getElementById('imp-anno-panel');
+  const flowPanel = document.getElementById('imp-flow-panel');
+  if (annoPanel && flowPanel) {
+    annoPanel.style.display = 'none';
+    flowPanel.style.display = 'flex';
+  }
+  const flowFormEl = document.getElementById('flow-form');
+  if (flowFormEl) {
+    flowFormEl.style.display = 'none';
+    document.getElementById('flow-unit').value = '';
+    document.getElementById('flow-distributed').value = '';
+    document.getElementById('flow-back').value = '';
+  }
+  loadFlowList();
+}
+
+async function loadFlowList() {
+  const tableBody = document.querySelector('#flow-table tbody');
+  if (!tableBody || !currentDocId) return;
+  tableBody.innerHTML = '';
+  currentFlowList = await window.electronAPI.db.getFlowRecords({ document_uuid: currentDocId });
+  currentFlowList.forEach((rec, index) => {
+    const tr = document.createElement('tr');
+    tr.dataset.id = rec.id;
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${rec.unit || ''}</td>
+      <td class="editable" data-field="distributed_at">${rec.distributed_at || ''}</td>
+      <td class="editable" data-field="back_at">${rec.back_at || ''}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+const flowAddBtn = document.getElementById('flow-add-btn');
+const flowForm = document.getElementById('flow-form');
+const flowSaveBtn = document.getElementById('flow-save-btn');
+const flowCancelBtn = document.getElementById('flow-cancel-btn');
+
+flowAddBtn?.addEventListener('click', () => {
+  if (!currentDocId) return;
+  flowForm.style.display = 'flex';
+  document.getElementById('flow-unit').focus();
+});
+
+flowSaveBtn?.addEventListener('click', async () => {
+  if (!currentDocId) return;
+  const unitInput = document.getElementById('flow-unit');
+  const distributedInput = document.getElementById('flow-distributed');
+  const backInput = document.getElementById('flow-back');
+  const unit = unitInput.value.trim();
+  const distributed_at = distributedInput.value.trim();
+  const back_at = backInput.value.trim();
+  if (!unit) {
+    unitInput.value = '';
+    distributedInput.value = '';
+    backInput.value = '';
+    flowForm.style.display = 'none';
+    return;
+  }
+  if (distributed_at && back_at && back_at < distributed_at) {
+    alert('返回时间不能早于分发时间');
+    backInput.focus();
+    return;
+  }
+  await window.electronAPI.db.addFlowRecord({
+    document_uuid: currentDocId,
+    unit,
+    distributed_at,
+    back_at
+  });
+  await loadFlowList();
+  unitInput.value = '';
+  distributedInput.value = '';
+  backInput.value = '';
+  flowForm.style.display = 'none';
+});
+
+flowCancelBtn?.addEventListener('click', () => {
+  document.getElementById('flow-unit').value = '';
+  document.getElementById('flow-distributed').value = '';
+  document.getElementById('flow-back').value = '';
+  flowForm.style.display = 'none';
+});
+
+document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
+  const td = e.target;
+  if (td.tagName !== 'TD' || !td.classList.contains('editable')) return;
+  const oldValue = td.textContent;
+  const input = document.createElement('input');
+  input.type = 'date';
+  input.value = oldValue;
+  const panel = document.getElementById('imp-flow-panel');
+  const scrollTop = panel ? panel.scrollTop : 0;
+  td.textContent = '';
+  td.appendChild(input);
+  input.focus();
+  input.addEventListener('blur', async () => {
+    const value = input.value;
+    const field = td.dataset.field;
+    const row = td.parentElement;
+    const rowIndex = row.rowIndex - 1;
+    const record = currentFlowList[rowIndex] || {};
+    let valid = true;
+    if (field === 'distributed_at' && record.back_at && value && value > record.back_at) {
+      alert('分发时间不能晚于返回时间');
+      valid = false;
+    }
+    if (field === 'back_at' && record.distributed_at && value && value < record.distributed_at) {
+      alert('返回时间不能早于分发时间');
+      valid = false;
+    }
+    td.removeChild(input);
+    if (valid) {
+      td.textContent = value;
+      record[field] = value;
+      await window.electronAPI.db.updateFlowRecord({ id: record.id, [field]: value });
+    } else {
+      td.textContent = record[field] || '';
+    }
+    if (panel) panel.scrollTop = scrollTop;
+  });
+});
+
+// 右键删除流转记录
+const flowTable = document.getElementById('flow-table');
+const flowCtxMenu = document.getElementById('flow-context-menu');
+let flowContextId = null;
+
+flowTable?.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const tr = e.target.closest('tr');
+  if (!tr || tr.parentElement.tagName === 'THEAD') return;
+  flowContextId = tr.dataset.id;
+  flowCtxMenu.style.top = `${e.pageY}px`;
+  flowCtxMenu.style.left = `${e.pageX}px`;
+  flowCtxMenu.style.display = 'block';
+});
+
+document.addEventListener('click', () => {
+  if (flowCtxMenu) flowCtxMenu.style.display = 'none';
+});
+
+document.getElementById('flow-delete-record')?.addEventListener('click', async () => {
+  flowCtxMenu.style.display = 'none';
+  if (!flowContextId) return;
+  const confirm = await showConfirmDialog('确定删除该流转记录吗？');
+  if (confirm) {
+    await window.electronAPI.db.deleteFlowRecord({ id: flowContextId });
+    await loadFlowList();
+  }
+});
 
 async function initResizableTable() {
   try {
@@ -688,6 +878,7 @@ async function initResizableTable() {
     const impTable = document.getElementById('impTable');
     const impMenu = document.getElementById('important-context-menu');
     const impEditItem = document.getElementById('important-edit-doc');
+    const impFlowItem = document.getElementById('important-show-flow');
     let contextDocImp = null;
 
     impTable.addEventListener('row-click', (event) => {
@@ -710,6 +901,13 @@ async function initResizableTable() {
       if (contextDocImp) {
         const doc = { ...contextDocImp, type: contextDocImp.docType || contextDocImp.doc_type || contextDocImp.type };
         showEditModal(doc);
+      }
+    });
+
+    impFlowItem.addEventListener('click', () => {
+      impMenu.style.display = 'none';
+      if (contextDocImp) {
+        toggleFlowSidebar('view-doc-imp-left', 'view-doc-imp-right', contextDocImp);
       }
     });
 
@@ -2226,6 +2424,7 @@ async function loadUnit() {
   const units = await window.electronAPI.db.getUnits()
   globalUnits = units;
   populateUnitDatalist('#anno-unit-datalist', units)
+  populateUnitDatalist('#flow-unit-datalist', units)
 }
 //填充选项 单位
 async function loadSelectUnit(primaryId, secondaryId, units, selectedValue = null) {

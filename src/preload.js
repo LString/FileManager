@@ -94,6 +94,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     createKeyWords: (data) => ipcRenderer.invoke('database', { action: 'createKeyWords', data }),
     getDocumentsByKeywordId: (data) => ipcRenderer.invoke('database', { action: 'getDocumentsByKeywordId', data }),
 
+    // 文件流转
+    addFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'addFlowRecord', data }),
+    getFlowRecords: (data) => ipcRenderer.invoke('database', { action: 'getFlowRecords', data }),
+    updateFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'updateFlowRecord', data }),
+    deleteFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'deleteFlowRecord', data }),
+
   },
   // store: {
   //   saveCredentials: (data) => ipcRenderer.invoke('store', { action: 'saveCredentials', data }),

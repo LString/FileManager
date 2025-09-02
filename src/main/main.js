@@ -979,6 +979,24 @@ ipcMain.handle('database', async (_, { action, data }) => {
         }));
       }
 
+      case 'getFlowRecords': {
+        return dbInstance.statements.getFlowRecords.all({ document_uuid: data.document_uuid });
+      }
+
+      case 'addFlowRecord': {
+        return dbInstance.statements.addFlowRecord.run(data).lastInsertRowid;
+      }
+
+      case 'updateFlowRecord': {
+        dbInstance.statements.updateFlowRecord.run(data);
+        return;
+      }
+
+      case 'deleteFlowRecord': {
+        dbInstance.statements.deleteFlowRecord.run({ id: data.id });
+        return;
+      }
+
       default:
         throw new Error('未知的数据库操作');
     }
