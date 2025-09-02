@@ -2849,6 +2849,7 @@ input:-webkit-autofill:focus {
     background: #f5f5f5;
 }
 
+
 .flow-add-btn {
     padding: 6px 16px;
     background: #1890ff;
@@ -2857,6 +2858,7 @@ input:-webkit-autofill:focus {
     border-radius: 4px;
     cursor: pointer;
     font-size: 13px;
+    margin-bottom: 10px;
 }
 
 .flow-add-btn:hover {
@@ -2879,16 +2881,37 @@ input:-webkit-autofill:focus {
     font-size: 14px;
 }
 
-.flow-btn {
-    padding: 6px 16px;
-    border: 1px solid #d1d5db;
-    background: #f9fafb;
-    border-radius: 4px;
-    cursor: pointer;
+.flow-form input::placeholder {
+    color: #999;
 }
 
-.flow-btn:hover {
-    background: #e6f7ff;
+.flow-form input[type="date"]::-webkit-datetime-edit {
+    color: #666;
+    opacity: 0.8;
+}
+
+.flow-btn {
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+}
+
+.flow-save-btn {
+    background: #52c41a;
+}
+
+.flow-save-btn:hover {
+    background: #73d13d;
+}
+
+.flow-cancel-btn {
+    background: #ff4d4f;
+}
+
+.flow-cancel-btn:hover {
+    background: #ff7875;
 }
 
 .flow-table {
@@ -2899,6 +2922,7 @@ input:-webkit-autofill:focus {
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     overflow: hidden;
+    table-layout: fixed;
 }
 
 .flow-table th,

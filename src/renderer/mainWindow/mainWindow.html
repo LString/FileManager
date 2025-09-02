@@ -314,11 +314,12 @@
                                         <button id="flow-add-btn" class="flow-add-btn">流转录入</button>
                                     </div>
                                     <div id="flow-form" class="flow-form" style="display:none;">
-                                        <input id="flow-unit" type="text" placeholder="单位名称" />
+                                        <input id="flow-unit" type="text" placeholder="单位名称" list="flow-unit-datalist" />
                                         <input id="flow-distributed" type="date" placeholder="分发时间" />
                                         <input id="flow-back" type="date" placeholder="返回时间" />
-                                        <button id="flow-save-btn" class="flow-btn">保存</button>
-                                        <button id="flow-cancel-btn" class="flow-btn">取消</button>
+                                        <button id="flow-save-btn" class="flow-btn flow-save-btn">保存</button>
+                                        <button id="flow-cancel-btn" class="flow-btn flow-cancel-btn">取消</button>
+                                        <datalist id="flow-unit-datalist"></datalist>
                                     </div>
                                     <table id="flow-table" class="flow-table">
                                         <thead>

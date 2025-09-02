@@ -733,10 +733,15 @@ flowSaveBtn?.addEventListener('click', () => {
   const distributed_at = distributedInput.value.trim();
   const back_at = backInput.value.trim();
   if (!unit) {
-    flowForm.style.display = 'none';
     unitInput.value = '';
     distributedInput.value = '';
     backInput.value = '';
+    flowForm.style.display = 'none';
+    return;
+  }
+  if (distributed_at && back_at && back_at < distributed_at) {
+    alert('返回时间不能早于分发时间');
+    backInput.focus();
     return;
   }
   const list = flowRecordsMap[currentDocId] || [];
@@ -764,20 +769,35 @@ document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
   const input = document.createElement('input');
   input.type = 'date';
   input.value = oldValue;
+  const panel = document.getElementById('imp-flow-panel');
+  const scrollTop = panel ? panel.scrollTop : 0;
   td.textContent = '';
   td.appendChild(input);
   input.focus();
   input.addEventListener('blur', () => {
     const value = input.value;
     const field = td.dataset.field;
-    td.removeChild(input);
-    td.textContent = value;
     const rowIndex = td.parentElement.rowIndex - 1;
     const list = flowRecordsMap[currentDocId] || [];
-    if (list[rowIndex]) {
-      list[rowIndex][field] = value;
-      saveFlowRecords();
+    const record = list[rowIndex] || {};
+    let valid = true;
+    if (field === 'distributed_at' && record.back_at && value && value > record.back_at) {
+      alert('分发时间不能晚于返回时间');
+      valid = false;
     }
+    if (field === 'back_at' && record.distributed_at && value && value < record.distributed_at) {
+      alert('返回时间不能早于分发时间');
+      valid = false;
+    }
+    td.removeChild(input);
+    if (valid) {
+      td.textContent = value;
+      record[field] = value;
+      saveFlowRecords();
+    } else {
+      td.textContent = record[field] || '';
+    }
+    if (panel) panel.scrollTop = scrollTop;
   });
 });
 
@@ -2376,6 +2396,7 @@ async function loadUnit() {
   const units = await window.electronAPI.db.getUnits()
   globalUnits = units;
   populateUnitDatalist('#anno-unit-datalist', units)
+  populateUnitDatalist('#flow-unit-datalist', units)
 }
 //填充选项 单位
 async function loadSelectUnit(primaryId, secondaryId, units, selectedValue = null) {
