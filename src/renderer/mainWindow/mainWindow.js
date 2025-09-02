@@ -748,6 +748,7 @@ flowSaveBtn?.addEventListener('click', async () => {
     back_at
   });
   await loadFlowList();
+  await refreshDocList(2);
   unitInput.value = '';
   distributedInput.value = '';
   backInput.value = '';
@@ -793,6 +794,7 @@ document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
       td.textContent = value;
       record[field] = value;
       await window.electronAPI.db.updateFlowRecord({ id: record.id, [field]: value });
+      await refreshDocList(2);
     } else {
       td.textContent = record[field] || '';
     }
@@ -826,6 +828,7 @@ document.getElementById('flow-delete-record')?.addEventListener('click', async (
   if (confirm) {
     await window.electronAPI.db.deleteFlowRecord({ id: flowContextId });
     await loadFlowList();
+    await refreshDocList(2);
   }
 });
 
@@ -1001,6 +1004,20 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       docType: doc.docType ?? doc.doc_type ?? doc.type ?? type
     }))
 
+    // 获取文件状态，仅针对重要文件列表
+    if (type === 2) {
+      docs = await Promise.all(docs.map(async doc => {
+        const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid })
+        let status = '已办结'
+        if (!flows || flows.length === 0) {
+          status = '待分发'
+        } else if (flows.some(r => !r.back_at)) {
+          status = '流转中'
+        }
+        return { ...doc, status }
+      }))
+    }
+
     if (type == 1) {
       tempListForSearch_Normal = docs
     } else {
@@ -1014,22 +1031,32 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       table = document.getElementById('impTable');
     }
 
-    table.setHeaderMap({
+    const headerMap = {
       id: '序号',
-      title: "标题",
-      sender_unit: "来文单位",
-      sender_number: "来文编号",
-      drafting_unit: "制文单位",
-      input_user: "录入人",
-      sender_date: "来文时间",
-      secrecy_level: "秘密等级",
-      crgency_level: "紧急程度",
-      secrecy_period: "保密期限",
-      review_leader: "呈阅领导",
-      remarks: "标记",
-    })
+      title: '标题',
+      sender_unit: '来文单位',
+      sender_number: '来文编号',
+      drafting_unit: '制文单位',
+      input_user: '录入人',
+      sender_date: '来文时间',
+      secrecy_level: '秘密等级',
+      crgency_level: '紧急程度',
+      secrecy_period: '保密期限',
+      review_leader: '呈阅领导',
+      remarks: '标记'
+    }
+
+    if (type === 2) {
+      headerMap.status = '文件状态'
+    }
+
+    table.setHeaderMap(headerMap)
 
     table.setData(docs)
+
+    if (type === 2) {
+      table.toggleColumnVisibility('status', true)
+    }
 
   } catch (error) {
     console.error('刷新文档列表失败:', error);

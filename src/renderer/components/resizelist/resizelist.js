@@ -487,7 +487,15 @@ if (!customElements.get('resizable-table')) {
                 row.dataset.index = rowIndex;
                 this.visibleKeys.forEach((key, index) => {
                     const cell = document.createElement('td');
-                    cell.textContent = rowData[index];
+                    const value = rowData[index];
+                    cell.textContent = value;
+                    if (key === 'status') {
+                        if (value === '待分发') {
+                            cell.style.color = 'red';
+                        } else if (value === '流转中') {
+                            cell.style.color = '#faad14';
+                        }
+                    }
                     row.appendChild(cell);
                 });
                 // 添加行点击事件
