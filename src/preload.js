@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     console.log('[Preload] 发送关闭请求')
     ipcRenderer.send('close-window')
   },
+  logout: () => {
+    ipcRenderer.send('logout')
+  },
   onMaximized: (callback) => {
     ipcRenderer.on('window-maximized', callback)
     return () => ipcRenderer.removeListener('window-maximized', callback)
@@ -99,6 +102,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getFlowRecords: (data) => ipcRenderer.invoke('database', { action: 'getFlowRecords', data }),
     updateFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'updateFlowRecord', data }),
     deleteFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'deleteFlowRecord', data }),
+    updatePassword: (data) => ipcRenderer.invoke('database', { action: 'updatePassword', data }),
 
   },
   // store: {
