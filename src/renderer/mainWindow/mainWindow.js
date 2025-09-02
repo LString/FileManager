@@ -786,6 +786,11 @@ flowSaveBtn?.addEventListener('click', async () => {
     flowForm.style.display = 'none';
     return;
   }
+  if (!distributed_at && back_at) {
+    alert('没有分发时间不能设置返回时间');
+    backInput.focus();
+    return;
+  }
   if (distributed_at && back_at && back_at < distributed_at) {
     alert('返回时间不能早于分发时间');
     backInput.focus();
@@ -832,13 +837,23 @@ document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
     const rowIndex = row.rowIndex - 1;
     const record = currentFlowList[rowIndex] || {};
     let valid = true;
-    if (field === 'distributed_at' && record.back_at && value && value > record.back_at) {
-      alert('分发时间不能晚于返回时间');
-      valid = false;
+    if (field === 'distributed_at') {
+      if (record.back_at && !value) {
+        alert('存在返回时间时，分发时间不能为空');
+        valid = false;
+      } else if (record.back_at && value && value > record.back_at) {
+        alert('分发时间不能晚于返回时间');
+        valid = false;
+      }
     }
-    if (field === 'back_at' && record.distributed_at && value && value < record.distributed_at) {
-      alert('返回时间不能早于分发时间');
-      valid = false;
+    if (field === 'back_at') {
+      if (!record.distributed_at && value) {
+        alert('没有分发时间不能设置返回时间');
+        valid = false;
+      } else if (record.distributed_at && value && value < record.distributed_at) {
+        alert('返回时间不能早于分发时间');
+        valid = false;
+      }
     }
     td.removeChild(input);
     if (valid) {
@@ -1078,10 +1093,12 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       docs = await Promise.all(docs.map(async doc => {
         const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid })
         let status = '已办结'
-        if (!flows || flows.length === 0) {
-          status = '待分发'
-        } else if (flows.some(r => !r.back_at)) {
-          status = '流转中'
+        if (flows && flows.length > 0) {
+          if (flows.some(r => !r.distributed_at)) {
+            status = '待分发'
+          } else if (flows.some(r => !r.back_at)) {
+            status = '流转中'
+          }
         }
         return { ...doc, status }
       }))
@@ -2280,6 +2297,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
             }
           }
           await loadFlowList();
+          await refreshDocList(2);
         }
         await loadAnnotateList();
       } else {
@@ -2333,6 +2351,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
               }
             }
             await loadFlowList();
+            await refreshDocList(2);
           }
           await loadAnnotateList();
           hideAnnotateModal();
