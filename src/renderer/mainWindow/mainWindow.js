@@ -643,15 +643,15 @@ let currentDocId = null; // 当前操作的文档ID
 let currentFlowList = [];
 
 function hideAnnoSidebar(leftContainer, rightContainer) {
-  rightContainer.classList.add('force-hidden');
+  rightContainer.dataset.lastWidth = rightContainer.getBoundingClientRect().width;
   rightContainer.classList.remove('active');
+  rightContainer.style.width = '0px';
   setTimeout(() => {
     rightContainer.style.display = 'none';
-    rightContainer.classList.remove('force-hidden');
+    rightContainer.style.width = '';
   }, 300);
   leftContainer.classList.remove('split-view');
   leftContainer.style.width = '';
-  rightContainer.style.width = '';
   rightContainer.dataset.mode = '';
 
   const table = leftContainer.querySelector('resizable-table');
@@ -673,10 +673,11 @@ function toggleAnnoSidebar(leftId, rightId, rowData) {
   currentDocId = uuid;
   currentType = docType;
   leftContainer.classList.add('split-view');
+  rightContainer.style.width = '0px';
   rightContainer.style.display = 'flex';
-  void rightContainer.offsetHeight;
+  void rightContainer.offsetWidth;
   rightContainer.classList.add('active');
-  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  const defaultWidth = parseInt(rightContainer.dataset.lastWidth) || 360;
   rightContainer.style.width = defaultWidth + 'px';
   leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   if (rightId === 'view-doc-imp-right') {
@@ -712,10 +713,11 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
   currentDocId = uuid;
   currentType = docType;
   leftContainer.classList.add('split-view');
+  rightContainer.style.width = '0px';
   rightContainer.style.display = 'flex';
-  void rightContainer.offsetHeight;
+  void rightContainer.offsetWidth;
   rightContainer.classList.add('active');
-  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  const defaultWidth = parseInt(rightContainer.dataset.lastWidth) || 360;
   rightContainer.style.width = defaultWidth + 'px';
   leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   rightContainer.dataset.mode = 'flow';
