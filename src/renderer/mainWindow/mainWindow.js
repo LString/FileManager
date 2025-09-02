@@ -1083,7 +1083,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     table.setHeaderMap(headerMap)
 
     const columnWidths = {
-      id: 60,
+      id: 70,
       title: 280,
       sender_unit: 180,
       sender_number: 140,

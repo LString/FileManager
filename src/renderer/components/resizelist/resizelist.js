@@ -132,7 +132,13 @@ if (!customElements.get('resizable-table')) {
             }
 
             this.tableData = this.originalData.map(item => {
-                return this.visibleKeys.map(key => item[key]);
+                return this.visibleKeys.map(key => {
+                    const value = item[key];
+                    if (Array.isArray(value)) {
+                        return value.map(v => (typeof v === 'object' ? v.keyword ?? '' : v)).join(', ');
+                    }
+                    return value;
+                });
             });
 
             this.headers = this.visibleKeys.map(key => ({
@@ -228,7 +234,7 @@ if (!customElements.get('resizable-table')) {
                     text-align: left;
                     padding: 10px 12px;
                     border-bottom: 1px solid #e0e0e0;
-                    min-width: 80px;
+                    min-width: 60px;
                     max-width: 800px;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -390,7 +396,7 @@ if (!customElements.get('resizable-table')) {
                 /* 自定义滚动条样式 */
                 .table-body-container::-webkit-scrollbar {
                     width: 6px;
-                    height: 6px;
+                    height: 10px;
                 }
                 
                 .table-body-container::-webkit-scrollbar-track {
@@ -456,6 +462,10 @@ if (!customElements.get('resizable-table')) {
                 const col = document.createElement('col');
                 const width = this.columnWidths[header.key] || 150;
                 col.style.width = `${width}px`;
+                if (header.key === 'id') {
+                    col.style.minWidth = `${width}px`;
+                    col.style.maxWidth = `${width}px`;
+                }
                 headerColgroup.appendChild(col);
 
                 // 创建表头单元格
@@ -466,15 +476,21 @@ if (!customElements.get('resizable-table')) {
 
                 // 应用列宽
                 th.style.width = `${width}px`;
+                if (header.key === 'id') {
+                    th.style.minWidth = `${width}px`;
+                    th.style.maxWidth = `${width}px`;
+                }
                 totalWidth += width;
 
                 const sortIcon = document.createElement('span');
                 sortIcon.classList.add('sort-icon');
                 th.appendChild(sortIcon);
 
-                const resizer = document.createElement('div');
-                resizer.classList.add('resizer');
-                th.appendChild(resizer);
+                if (header.key !== 'id') {
+                    const resizer = document.createElement('div');
+                    resizer.classList.add('resizer');
+                    th.appendChild(resizer);
+                }
 
                 th.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
@@ -505,6 +521,10 @@ if (!customElements.get('resizable-table')) {
                 const col = document.createElement('col');
                 const width = this.columnWidths[key] || 150;
                 col.style.width = `${width}px`;
+                if (key === 'id') {
+                    col.style.minWidth = `${width}px`;
+                    col.style.maxWidth = `${width}px`;
+                }
                 bodyColgroup.appendChild(col);
                 totalWidth += width;
             });
@@ -528,9 +548,14 @@ if (!customElements.get('resizable-table')) {
                     }
                     row.appendChild(cell);
                 });
-                // 添加行点击事件
+                // 单击仅高亮行
                 row.addEventListener('click', (e) => {
-                    // 如果点击的是操作按钮，则不触发行点击
+                    if (e.target.closest('.action-btn')) return;
+                    this.highlightRow(rowIndex);
+                });
+
+                // 双击触发侧边栏
+                row.addEventListener('dblclick', (e) => {
                     if (e.target.closest('.action-btn')) return;
 
                     const originalData = this.originalData[rowIndex];
