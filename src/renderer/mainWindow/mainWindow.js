@@ -643,15 +643,15 @@ let currentDocId = null; // 当前操作的文档ID
 let currentFlowList = [];
 
 function hideAnnoSidebar(leftContainer, rightContainer) {
-  rightContainer.classList.add('force-hidden');
+  rightContainer.dataset.lastWidth = rightContainer.getBoundingClientRect().width;
   rightContainer.classList.remove('active');
+  rightContainer.style.width = '0px';
   setTimeout(() => {
     rightContainer.style.display = 'none';
-    rightContainer.classList.remove('force-hidden');
-  }, 400);
+    rightContainer.style.width = '';
+  }, 300);
   leftContainer.classList.remove('split-view');
   leftContainer.style.width = '';
-  rightContainer.style.width = '';
   rightContainer.dataset.mode = '';
 
   const table = leftContainer.querySelector('resizable-table');
@@ -673,10 +673,11 @@ function toggleAnnoSidebar(leftId, rightId, rowData) {
   currentDocId = uuid;
   currentType = docType;
   leftContainer.classList.add('split-view');
+  rightContainer.style.width = '0px';
   rightContainer.style.display = 'flex';
-  void rightContainer.offsetHeight;
+  void rightContainer.offsetWidth;
   rightContainer.classList.add('active');
-  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  const defaultWidth = parseInt(rightContainer.dataset.lastWidth) || 360;
   rightContainer.style.width = defaultWidth + 'px';
   leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   if (rightId === 'view-doc-imp-right') {
@@ -712,10 +713,11 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
   currentDocId = uuid;
   currentType = docType;
   leftContainer.classList.add('split-view');
+  rightContainer.style.width = '0px';
   rightContainer.style.display = 'flex';
-  void rightContainer.offsetHeight;
+  void rightContainer.offsetWidth;
   rightContainer.classList.add('active');
-  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  const defaultWidth = parseInt(rightContainer.dataset.lastWidth) || 360;
   rightContainer.style.width = defaultWidth + 'px';
   leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   rightContainer.dataset.mode = 'flow';
@@ -1097,8 +1099,10 @@ async function printDoc(formData) {
 
 }
 
-let tempListForSearch_Normal = null;//搜索/排序功能的临时数组
-let tempListForSearch_Important = null;//搜索/排序功能的临时数组
+let tempListForSearch_Normal = null;//当前显示的普通文档列表
+let tempListForSearch_Important = null;//当前显示的重要文档列表
+let fullListForSearch_Normal = null;//普通文档完整列表缓存
+let fullListForSearch_Important = null;//重要文档完整列表缓存
 let currentSortCloum = null;
 let currentSortDir = 'asc'
 async function refreshDocList(type = 1, searchResult = null, _searchKey = null) {
@@ -1134,8 +1138,14 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     }
 
     if (type == 1) {
+      if (searchResult == null) {
+        fullListForSearch_Normal = docs
+      }
       tempListForSearch_Normal = docs
     } else {
+      if (searchResult == null) {
+        fullListForSearch_Important = docs
+      }
       tempListForSearch_Important = docs
     }
 
@@ -1336,6 +1346,11 @@ function updateImportSortIcons(currentField, direction) {
 
 document.getElementById('search-normal').addEventListener('click', async () => {
 
+  const leftContainer = document.getElementById('view-doc-nor-left');
+  const rightContainer = document.getElementById('view-doc-nor-right');
+  hideAnnoSidebar(leftContainer, rightContainer);
+  currentDocId = null;
+
   // 获取选中的搜索字段
   const searchField = document.getElementById('search_field').value;
   // 获取搜索关键词并处理
@@ -1351,8 +1366,10 @@ document.getElementById('search-normal').addEventListener('click', async () => {
   }
 
 
+  const dataset = fullListForSearch_Normal || [];
+
   // 根据选定字段进行过滤
-  let filteredDocs = tempListForSearch_Normal.filter(doc => {
+  let filteredDocs = dataset.filter(doc => {
     // 全部字段搜索
     if (searchField === 'all') {
       const searchFields = [
@@ -1386,32 +1403,94 @@ document.getElementById('search-normal').addEventListener('click', async () => {
 })
 
 document.getElementById('search-important').addEventListener('click', async () => {
-  const searchKey = document.getElementById('search_inuput_important')
-    .value
-    .trim()
-    .toLowerCase();
+  const leftContainer = document.getElementById('view-doc-imp-left');
+  const rightContainer = document.getElementById('view-doc-imp-right');
+  hideAnnoSidebar(leftContainer, rightContainer);
+  currentDocId = null;
 
-  let filteredDocs = tempListForSearch_Important.filter(doc => {
-    const searchFields = [
-      doc.title,
-      doc.sender_unit,
-      doc.sender_number,
-      doc.drafting_unit,
-      doc.review_leader,
-      doc.secrecy_level,
-      doc.crgency_level,
-      doc.secrecy_period
-    ];
+  const rawKey = document.getElementById('search_input_important').value.trim();
+  const mode = document.getElementById('important_search_mode').value;
 
-    // 检查字段是否包含关键词（空关键词返回全部）
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
-  });
-  filteredDocs = searchKey == '' ? null : filteredDocs
-  refreshDocList(2, filteredDocs, searchKey)
+  // 关键字为空时显示全部
+  if (rawKey === '') {
+    refreshDocList(2, null);
+    return;
+  }
+
+  const dataset = fullListForSearch_Important || [];
+  const searchKey = rawKey.toLowerCase();
+  const results = [];
+
+  if (mode === 'title') {
+    dataset.forEach(doc => {
+      if (String(doc.title || '').toLowerCase().includes(searchKey)) {
+        results.push(doc);
+      }
+    });
+  } else if (mode === 'unit') {
+    for (const doc of dataset) {
+      const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
+      if (flows.some(f => String(f.unit || '').trim().toLowerCase() === searchKey)) {
+        results.push(doc);
+      }
+    }
+  } else if (mode === 'leader') {
+    for (const doc of dataset) {
+      const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
+      if (annos.some(a => String(a.author || '').trim().toLowerCase() === searchKey)) {
+        results.push(doc);
+      }
+    }
+  } else { // 多字段模式
+    for (const doc of dataset) {
+      let match = [
+        doc.title,
+        doc.sender_unit,
+        doc.sender_number,
+        doc.drafting_unit,
+        doc.review_leader,
+        doc.secrecy_level,
+        doc.crgency_level,
+        doc.secrecy_period,
+        doc.remarks
+      ].some(field => String(field ?? '').toLowerCase().includes(searchKey));
+
+      if (!match) {
+        const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
+        match = annos.some(a =>
+          String(a.content || '').toLowerCase().includes(searchKey) ||
+          String(a.annotate_note || '').toLowerCase().includes(searchKey) ||
+          String(a.author || '').toLowerCase().includes(searchKey)
+        );
+      }
+
+      if (!match) {
+        const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
+        match = flows.some(f =>
+          String(f.unit || '').toLowerCase().includes(searchKey)
+        );
+      }
+
+      if (match) {
+        results.push(doc);
+      }
+    }
+  }
+
+  refreshDocList(2, results, rawKey);
 })
+
+document.getElementById('search_inuput_normal').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('search-normal').click();
+  }
+});
+
+document.getElementById('search_input_important').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('search-important').click();
+    }
+});
 
 
 // window.addEventListener('click', (e) => {
@@ -1845,6 +1924,7 @@ let annoType = 0; //默认添加
 let currentAnnoId = null;
 // let annoProcessMode = 1;
 let tempListForSearch_Anno = [];
+let searchResult_Anno = [];
 let dispatch_units = [];//分发单位
 let isAnnoEditMode = true;
 function showAnnotateAdd(haveBg = false) {
@@ -1931,7 +2011,7 @@ async function loadAnnotateList(isSearch = false) {
     }
     tempListForSearch_Anno = annotations;
   } else {
-    annotations = tempListForSearch_Anno;
+    annotations = searchResult_Anno;
   }
 
   const listEl = currentType === 1 ? annotateListNor : annotateListImp;
@@ -1992,54 +2072,48 @@ function applyEllipsis(element, lines) {
   }
 }
 
-document.getElementById('search-anno').addEventListener('click', async () => {
-  const searchKey = document.getElementById('search-anno-input')
+function performAnnoSearch(inputId) {
+  const searchKey = document
+    .getElementById(inputId)
     .value
     .trim()
     .toLowerCase();
 
-  let filteredAnno = tempListForSearch_Anno.filter(anno => {
+  if (searchKey === '') {
+    searchResult_Anno = [];
+    loadAnnotateList(false);
+    return;
+  }
+
+  searchResult_Anno = tempListForSearch_Anno.filter(anno => {
     const searchFields = [
       anno.annotate_at,
       anno.content,
       anno.annotate_note,
       anno.author,
+      anno.distribution_scope,
     ];
 
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
+    return searchFields.some(field =>
+      String(field ?? '').toLowerCase().includes(searchKey)
+    );
   });
-  filteredAnno = searchKey == '' ? null : filteredAnno
-  tempListForSearch_Anno = filteredAnno
-  let isSearch = searchKey == '' ? false : true
-  loadAnnotateList(isSearch)
+
+  loadAnnotateList(true);
+}
+
+document.getElementById('search-anno').addEventListener('click', () => {
+  performAnnoSearch('search-anno-input');
+});
+document.getElementById('search-anno-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') performAnnoSearch('search-anno-input');
 });
 
-document.getElementById('search-anno-imp').addEventListener('click', async () => {
-  const searchKey = document.getElementById('search-anno-input-imp')
-    .value
-    .trim()
-    .toLowerCase();
-
-  let filteredAnno = tempListForSearch_Anno.filter(anno => {
-    const searchFields = [
-      anno.annotate_at,
-      anno.content,
-      anno.annotate_note,
-      anno.author,
-    ];
-
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
-  });
-  filteredAnno = searchKey == '' ? null : filteredAnno
-  tempListForSearch_Anno = filteredAnno
-  let isSearch = searchKey == '' ? false : true
-  loadAnnotateList(isSearch)
+document.getElementById('search-anno-imp').addEventListener('click', () => {
+  performAnnoSearch('search-anno-input-imp');
+});
+document.getElementById('search-anno-input-imp').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') performAnnoSearch('search-anno-input-imp');
 });
 
 function handleAnnotateListDblClick(e) {
