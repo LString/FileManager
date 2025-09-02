@@ -850,6 +850,7 @@ async function initResizableTable() {
     const norMenu = document.getElementById('normal-context-menu');
     const convertItem = document.getElementById('normal-to-important');
     const editItem = document.getElementById('normal-edit-doc');
+    const generateItem = document.getElementById('normal-generate-qrcode');
     let contextDocId = null;
     let contextDoc = null;
 
@@ -885,11 +886,19 @@ async function initResizableTable() {
       }
     });
 
+    generateItem.addEventListener('click', async () => {
+      norMenu.style.display = 'none';
+      if (contextDoc) {
+        await printDoc(contextDoc);
+      }
+    });
+
     // 为重要文档表添加行点击监听
     const impTable = document.getElementById('impTable');
     const impMenu = document.getElementById('important-context-menu');
     const impEditItem = document.getElementById('important-edit-doc');
     const impFlowItem = document.getElementById('important-show-flow');
+    const impGenerateItem = document.getElementById('important-generate-qrcode');
     let contextDocImp = null;
 
     impTable.addEventListener('row-click', (event) => {
@@ -919,6 +928,13 @@ async function initResizableTable() {
       impMenu.style.display = 'none';
       if (contextDocImp) {
         toggleFlowSidebar('view-doc-imp-left', 'view-doc-imp-right', contextDocImp);
+      }
+    });
+
+    impGenerateItem.addEventListener('click', async () => {
+      impMenu.style.display = 'none';
+      if (contextDocImp) {
+        await printDoc(contextDocImp);
       }
     });
 
