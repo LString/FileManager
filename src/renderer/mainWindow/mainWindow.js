@@ -3290,9 +3290,9 @@ async function loadSetting() {
   const settingsClose = document.getElementById('settings-close')
   const logoutBtn = document.getElementById('logout-button')
   const changePwdBtn = document.getElementById('change-password')
-  const saveAutoBtn = document.getElementById('save-auto-logout')
   const autoEnable = document.getElementById('auto-logout-enable')
   const autoMinutes = document.getElementById('auto-logout-minutes')
+  const autoTimeRow = document.getElementById('auto-logout-time-row')
   const newPwd = document.getElementById('new-password')
   const confirmPwd = document.getElementById('confirm-password')
 
@@ -3302,6 +3302,7 @@ async function loadSetting() {
   autoLogoutTime = saved.minutes || 15
   autoEnable.checked = autoLogoutEnabled
   autoMinutes.value = autoLogoutTime
+  autoTimeRow.style.display = autoLogoutEnabled ? 'flex' : 'none'
 
   const closeModal = () => {
     settingsModal.style.display = 'none'
@@ -3319,12 +3320,17 @@ async function loadSetting() {
     window.electronAPI.logout()
   })
 
-  saveAutoBtn.addEventListener('click', () => {
+  autoEnable.addEventListener('change', () => {
     autoLogoutEnabled = autoEnable.checked
+    autoTimeRow.style.display = autoLogoutEnabled ? 'flex' : 'none'
+    localStorage.setItem(key, JSON.stringify({ enabled: autoLogoutEnabled, minutes: autoLogoutTime }))
+    resetIdleTimer()
+  })
+
+  autoMinutes.addEventListener('change', () => {
     autoLogoutTime = parseInt(autoMinutes.value, 10) || 15
     localStorage.setItem(key, JSON.stringify({ enabled: autoLogoutEnabled, minutes: autoLogoutTime }))
     resetIdleTimer()
-    closeModal()
   })
 
   changePwdBtn.addEventListener('click', async () => {
