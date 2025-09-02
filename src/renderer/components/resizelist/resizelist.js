@@ -131,14 +131,10 @@ if (!customElements.get('resizable-table')) {
                 this.visibleKeys = ['id', 'title', 'sender_number', 'sender_date', 'input_user'];
             }
 
+            this.columnWidths['id'] = this.columnWidths['id'] || 60;
+
             this.tableData = this.originalData.map(item => {
-                return this.visibleKeys.map(key => {
-                    const value = item[key];
-                    if (Array.isArray(value)) {
-                        return value.map(v => (typeof v === 'object' ? v.keyword ?? '' : v)).join(', ');
-                    }
-                    return value;
-                });
+                return this.visibleKeys.map(key => this.getCellValue(item, key));
             });
 
             this.headers = this.visibleKeys.map(key => ({
@@ -150,6 +146,17 @@ if (!customElements.get('resizable-table')) {
             this.applyHeaderMapping();
             this.renderHeaders();
             this.renderBody();
+        }
+
+        getCellValue(item, key) {
+            const value = item[key];
+            if (Array.isArray(value)) {
+                return value.map(v => (typeof v === 'object' ? v.keyword ?? '' : v)).join(', ');
+            }
+            if (value && typeof value === 'object') {
+                return value.keyword ?? '';
+            }
+            return value ?? '';
         }
 
         applyHeaderMapping() {
@@ -404,12 +411,12 @@ if (!customElements.get('resizable-table')) {
                 }
                 
                 .table-body-container::-webkit-scrollbar-thumb {
-                    background-color: rgba(194, 194, 194, 0.4);
+                    background-color: transparent;
                     border-radius: 5px;
                 }
-                
-                .table-body-container::-webkit-scrollbar-thumb:hover {
-                    background-color: transparent;
+
+                .table-body-container:hover::-webkit-scrollbar-thumb {
+                    background-color: rgba(194, 194, 194, 0.4);
                 }
                 
                 @media (max-width: 768px) {
@@ -674,7 +681,7 @@ if (!customElements.get('resizable-table')) {
             }
 
             this.tableData = this.originalData.map(item => {
-                return this.visibleKeys.map(k => item[k]);
+                return this.visibleKeys.map(k => this.getCellValue(item, k));
             });
 
             this.headers = this.visibleKeys.map(k => ({
@@ -701,7 +708,8 @@ if (!customElements.get('resizable-table')) {
                 resizer.addEventListener('mousedown', (e) => {
                     this.isResizing = true;
                     this.currentHeader = header;
-                    this.startX = e.clientX + this.headerContainer.scrollLeft;
+                    const rect = this.headerContainer.getBoundingClientRect();
+                    this.startX = e.clientX - rect.left + this.headerContainer.scrollLeft;
                     this.startWidth = header.getBoundingClientRect().width;
                     resizer.classList.add('active');
 
@@ -723,7 +731,9 @@ if (!customElements.get('resizable-table')) {
 
             const MIN_WIDTH = 120;
             const MAX_WIDTH = 800;
-            let newWidth = this.startWidth + (e.clientX + this.headerContainer.scrollLeft - this.startX);
+            const rect = this.headerContainer.getBoundingClientRect();
+            let currentX = e.clientX - rect.left + this.headerContainer.scrollLeft;
+            let newWidth = this.startWidth + (currentX - this.startX);
             newWidth = Math.max(MIN_WIDTH, Math.min(newWidth, MAX_WIDTH));
 
             // 更新当前列的宽度

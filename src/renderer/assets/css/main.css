@@ -636,6 +636,21 @@ input:-webkit-autofill:focus {
     overflow: auto;
 }
 
+.sidebar-resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    background-color: transparent;
+    z-index: 10;
+}
+
+.sidebar-resizer:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
 /* 强制覆盖内联样式 */
 .view-doc-right.force-hidden {
     display: none !important;

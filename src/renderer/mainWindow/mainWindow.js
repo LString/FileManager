@@ -610,6 +610,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     * 刷新列表
     */
   initResizableTable();
+  initSidebarResizer('view-doc-nor-left', 'view-doc-nor-right');
+  initSidebarResizer('view-doc-imp-left', 'view-doc-imp-right');
 
 
 })
@@ -626,6 +628,8 @@ function hideAnnoSidebar(leftContainer, rightContainer) {
     rightContainer.classList.remove('force-hidden');
   }, 400);
   leftContainer.classList.remove('split-view');
+  leftContainer.style.width = '';
+  rightContainer.style.width = '';
   rightContainer.dataset.mode = '';
 
   const table = leftContainer.querySelector('resizable-table');
@@ -650,6 +654,9 @@ function toggleAnnoSidebar(leftId, rightId, rowData) {
   rightContainer.style.display = 'flex';
   void rightContainer.offsetHeight;
   rightContainer.classList.add('active');
+  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  rightContainer.style.width = defaultWidth + 'px';
+  leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   if (rightId === 'view-doc-imp-right') {
     rightContainer.dataset.mode = 'anno';
     const annoPanel = document.getElementById('imp-anno-panel');
@@ -686,6 +693,9 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
   rightContainer.style.display = 'flex';
   void rightContainer.offsetHeight;
   rightContainer.classList.add('active');
+  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  rightContainer.style.width = defaultWidth + 'px';
+  leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   rightContainer.dataset.mode = 'flow';
   const annoPanel = document.getElementById('imp-anno-panel');
   const flowPanel = document.getElementById('imp-flow-panel');
@@ -701,6 +711,40 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
     document.getElementById('flow-back').value = '';
   }
   loadFlowList();
+}
+
+function initSidebarResizer(leftId, rightId) {
+  const left = document.getElementById(leftId);
+  const right = document.getElementById(rightId);
+  const resizer = right?.querySelector('.sidebar-resizer');
+  if (!left || !right || !resizer) return;
+
+  let startX, startLeft, startRight;
+
+  resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = e.clientX;
+    startLeft = left.getBoundingClientRect().width;
+    startRight = right.getBoundingClientRect().width;
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+  });
+
+  const onDrag = (e) => {
+    const dx = startX - e.clientX;
+    const containerWidth = left.parentElement.getBoundingClientRect().width;
+    let newRight = startRight + dx;
+    const min = 200;
+    newRight = Math.min(Math.max(newRight, min), containerWidth - min);
+    const newLeft = containerWidth - newRight;
+    right.style.width = `${newRight}px`;
+    left.style.width = `${newLeft}px`;
+  };
+
+  const stopDrag = () => {
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+  };
 }
 
 async function loadFlowList() {
@@ -1083,7 +1127,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     table.setHeaderMap(headerMap)
 
     const columnWidths = {
-      id: 70,
+      id: 60,
       title: 280,
       sender_unit: 180,
       sender_number: 140,
