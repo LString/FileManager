@@ -389,19 +389,42 @@
             <!-- 单位管理 -->
             <div id="unit-manager-tab" class="tab-content">
                 <div class="unit-manager-body">
-                    <div class="add-unit">
-                        <div>
-                            <span>单位名称</span>
-                            <input type="text" id="add-unit-name" placeholder="请输入单位名称" class="add-name-real" />
+                    <div class="unit-left">
+                        <div class="add-unit">
+                            <div>
+                                <span>单位名称</span>
+                                <input type="text" id="add-unit-name" placeholder="请输入单位名称" class="add-name-real" />
+                            </div>
+                            <button id="add-unit-btn" class="add-btn">添加</button>
                         </div>
-                        <button id="add-unit-btn" class="add-btn">添加</button>
+                        <div class="unit-list-body">
+                            <div class="unit-list-title">
+                                <div class="name-list-title-colum">单位名称</div>
+                                <div class="name-list-title-colum">经手文件数</div>
+                            </div>
+                            <ol id="unit-list"></ol>
+                        </div>
                     </div>
-                    <div class="unit-list-body">
-                        <div class="unit-list-title">
-                            <div class="name-list-title-colum">单位名称</div>
-                            <div class="name-list-title-colum">经手文件数</div>
+                    <div class="unit-right">
+                        <button id="shink-unit" class="collapse collapse-unit" style="width: 8px;height: 20px;">
+                            <img src="../assets/image/collapse.png">
+                        </button>
+                        <div class="unit-detail">
+                            <span>文件名</span>
+                            <div class="unit-detail-table-container">
+                                <table class="unit-detail-table">
+                                    <thead class="unit-detail-thead">
+                                        <tr>
+                                            <th>序号</th>
+                                            <th>文件名称</th>
+                                            <th>分发时间</th>
+                                            <th>返回时间</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="unit-detail-tbody"></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <ol id="unit-list"></ol>
                     </div>
                 </div>
             </div>

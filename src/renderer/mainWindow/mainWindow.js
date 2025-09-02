@@ -145,6 +145,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       btn.classList.add('active');
       targetContent.classList.add('active');
+      if (tabId === 'unit-manager') {
+        loadUnitWithSonToUnitManager();
+      }
       // if(targetContent.id == `view-normal-tab`){
       //   refreshDocList(1)
       // }else if(targetContent.id == `view-important-tab`){
@@ -203,6 +206,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const selectedTab = document.getElementById(tabId);
       if (selectedTab) {
         selectedTab.classList.add('active');
+      }
+      if (this.dataset.tab === 'unit-manager') {
+        loadUnitWithSonToUnitManager();
       }
 
       // 隐藏菜单
@@ -758,6 +764,7 @@ async function loadFlowList() {
     `;
     tableBody.appendChild(tr);
   });
+  await loadUnitWithSonToUnitManager();
 }
 
 const flowAddBtn = document.getElementById('flow-add-btn');
@@ -2932,16 +2939,60 @@ async function loadUnitWithSonToUnitManager() {
   }
 }
 
-document.getElementById('unit-list').addEventListener('dblclick', e => {
+document.getElementById('unit-list').addEventListener('dblclick', (e) => {
   const item = e.target.closest('.unit-list-item');
   if (!item) return;
-  if (Number(item.dataset.count) > 0) return;
-  const unit = {
-    id: item.dataset.id,
-    name: item.querySelector('#unit-list-item-name').textContent
-  };
-  showUnitEidt(unit);
+  const count = Number(item.dataset.count);
+  const name = item.querySelector('#unit-list-item-name').textContent;
+  if (count > 0) {
+    showUnitDetail(name);
+  } else {
+    showUnitEidt({ id: item.dataset.id, name });
+  }
 });
+
+const unitRightContainer = document.querySelector('.unit-right');
+const unitLeftContainer = document.querySelector('.unit-left');
+
+function showUnitDetail(unitName) {
+  unitLeftContainer.classList.add('split-view');
+  unitRightContainer.style.display = 'flex';
+  void unitRightContainer.offsetHeight;
+  unitRightContainer.classList.add('active');
+  fillUnitDetail(unitName);
+}
+
+document.getElementById('shink-unit').addEventListener('click', () => {
+  unitRightContainer.classList.add('force-hidden');
+  unitRightContainer.classList.remove('active');
+  setTimeout(() => {
+    unitRightContainer.style.display = 'none';
+    unitRightContainer.classList.remove('force-hidden');
+  }, 400);
+  unitLeftContainer.classList.remove('split-view');
+});
+
+async function fillUnitDetail(unitName) {
+  const data = await window.electronAPI.db.getDocumentsByUnitName(unitName);
+  const tbody = document.getElementById('unit-detail-tbody');
+  tbody.innerHTML = '';
+  data.forEach((row, index) => {
+    const tr = document.createElement('tr');
+    const idx = document.createElement('td');
+    idx.textContent = index + 1;
+    const title = document.createElement('td');
+    title.textContent = row.title;
+    const dist = document.createElement('td');
+    dist.textContent = row.distributed_at || '';
+    const back = document.createElement('td');
+    back.textContent = row.back_at || '';
+    tr.appendChild(idx);
+    tr.appendChild(title);
+    tr.appendChild(dist);
+    tr.appendChild(back);
+    tbody.appendChild(tr);
+  });
+}
 
 let currentUnitId = null;
 let isUintEidting = false;

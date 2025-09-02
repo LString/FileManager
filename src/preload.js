@@ -81,6 +81,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getUnitWithSon: () => ipcRenderer.invoke('database', { action: 'getUnitWithSon' }),
     getUnitWithSonToManager: () => ipcRenderer.invoke('database', { action: 'getUnitWithSonToManager' }),
     getUnitsWithFlowCount: () => ipcRenderer.invoke('database', { action: 'getUnitsWithFlowCount' }),
+    getDocumentsByUnitName: (name) => ipcRenderer.invoke('database', { action: 'getDocumentsByUnitName', data: name }),
     deleteUnit: (id) => ipcRenderer.invoke('database', { action: 'deleteUnit', data: id }),
     deleteUnitSon: (id) => ipcRenderer.invoke('database', { action: 'deleteUnitSon', data: id }),
     searchUnit: (query) => ipcRenderer.invoke('database', { action: 'searchUnit', data: query }),

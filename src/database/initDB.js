@@ -486,12 +486,18 @@ class DB {
         ORDER BY a.created_at DESC, aa.unit_son_name ASC;
         `),
 
+      // 获取单位及其经手文件数
       getUnitsWithFlowCount: this.connection.prepare(`
-        SELECT u.id, u.name, COUNT(f.id) AS usage_count
-        FROM unit u
-        LEFT JOIN flow_records f ON f.unit = u.name
-        GROUP BY u.id
-        ORDER BY u.created_at DESC
+        SELECT id, name
+        FROM unit
+        ORDER BY created_at DESC
+      `),
+
+      // 统计某单位的流转记录数量
+      getFlowCountByUnit: this.connection.prepare(`
+        SELECT COUNT(*) AS count
+        FROM flow_records
+        WHERE unit = @unit
       `),
 
       searchUnits: this.connection.prepare(`
@@ -656,6 +662,15 @@ class DB {
         FROM flow_records
         WHERE document_uuid = @document_uuid
         ORDER BY id
+      `),
+
+      // 根据单位名称获取流转文件及时间
+      getDocumentsByUnitName: this.connection.prepare(`
+        SELECT f.document_uuid, f.distributed_at, f.back_at, d.title
+        FROM flow_records AS f
+        INNER JOIN documents AS d ON f.document_uuid = d.uuid
+        WHERE f.unit = @unit
+        ORDER BY f.id
       `),
 
       updateFlowRecord: this.connection.prepare(`

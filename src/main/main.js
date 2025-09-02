@@ -838,12 +838,16 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'getUnitsWithFlowCount': {
         const password = currentAccount.password;
         aes256.init(password);
-        const rows = dbInstance.statements.getUnitsWithFlowCount.all();
-        return rows.map(item => ({
-          id: item.id,
-          name: aes256.decrypt(item.name),
-          usage_count: item.usage_count
-        }));
+        const units = dbInstance.statements.getUnitsWithFlowCount.all();
+        return units.map(u => {
+          const name = aes256.decrypt(u.name);
+          const countRow = dbInstance.statements.getFlowCountByUnit.get({ unit: name });
+          return {
+            id: u.id,
+            name,
+            usage_count: countRow.count
+          };
+        });
       }
       case 'deleteUnit':
         return dbInstance.connection.transaction(() => {
@@ -995,6 +999,19 @@ ipcMain.handle('database', async (_, { action, data }) => {
           id: doc.id,
           uuid: doc.uuid,
           title: aes256.decrypt(doc.title) // 解密文档标题
+        }));
+      }
+
+      case 'getDocumentsByUnitName': {
+        const unit = data;
+        const rows = dbInstance.statements.getDocumentsByUnitName.all({ unit });
+        const password = currentAccount.password;
+        aes256.init(password);
+        return rows.map(r => ({
+          document_uuid: r.document_uuid,
+          title: aes256.decrypt(r.title),
+          distributed_at: r.distributed_at,
+          back_at: r.back_at
         }));
       }
 
