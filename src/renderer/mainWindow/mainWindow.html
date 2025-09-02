@@ -773,63 +773,52 @@
                                 <form id="annotate-edit-Form">
                                     <div class="form-row annotate-form-row">
                                         <div class="form-group">
-                                            <label for="annotate-edit-intype">录入方式</label>
-                                            <select id="annotate-edit-intype">
-                                                <option value="1">手动录入</option>
-                                                <option value="2">内容不录入</option>
-                                                <option value="3">仅圈阅</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row annotate-form-row">
-                                        <div class="form-group">
-                                            <label for="annotate-edit-note">姓名</label>
-                                            <input id="annotate-edit-author" list="annotate_edit_author_list"
-                                                required></input>
-                                            <datalist id="annotate_edit_author_list">
-                                            </datalist>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="annotate-edit-date">批注日期</label>
-                                            <input type="text" id="annotate-edit-date" placeholder="选择日期" required>
-                                        </div>
-                                    </div>
-
-                                    <div id="annotate-edit-content-container" class="form-row annotate-form-row">
-                                        <div class="form-group">
-                                            <label for="annotate-edit-content">内容：</label>
-                                            <textarea id="annotate-edit-content" name="请输入内容"></textarea>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="annotate-edit-note">备注</label>
-                                            <textarea id="annotate-edit-note"></textarea>
-                                        </div>
-                                    </div>
-
-
-                                    <div id="form_row_edit_dispatch" class="form-row annotate-form-row">
-                                        <div class="form-group">
-                                            <label for="primary-unit">分发范围：</label>
-                                            <div class="form-row-unit">
-                                                <select id="primary-edit-unit" class="annotate-unit-select">
-                                                    <option value="">请选择</option>
-                                                </select>
-                                                <select id="secondary-edit-unit" class="annotate-unit-select">
-                                                    <option value="">请选择</option>
+                                            <div class="form-group">
+                                                <label for="annotate-edit-intype">录入方式</label>
+                                                <select id="annotate-edit-intype">
+                                                    <option value="1">手动录入</option>
+                                                    <option value="2">内容不录入</option>
+                                                    <option value="3">仅圈阅</option>
                                                 </select>
                                             </div>
-
+                                            <div class="form-row-unit">
+                                                <div class="form-group">
+                                                    <label for="annotate-edit-author">姓名</label>
+                                                    <input id="annotate-edit-author" list="annotate_edit_author_list" required></input>
+                                                    <datalist id="annotate_edit_author_list">
+                                                    </datalist>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="annotate-edit-date">批注日期</label>
+                                                    <input type="text" id="annotate-edit-date" placeholder="选择日期" required>
+                                                </div>
+                                            </div>
+                                            <div id="form_row_edit_dispatch" class="form-group">
+                                                <div class="form-group">
+                                                    <label for="dispatch-edit-unit-input">分发范围</label>
+                                                    <div id="dispatch-edit-unit-inputwithadd-container" class="input_with_add">
+                                                        <div id="dispatch-edit-unit-container">
+                                                            <div class="input-wrapper">
+                                                                <input type="text" id="dispatch-edit-unit-add-input" placeholder="请输入分发单位" list="anno-unit-datalist"></input>
+                                                            </div>
+                                                        </div>
+                                                        <img id="dispatch-edit-unit-add" style="width: 15px;height: 15px;cursor: pointer;" src=" ../assets/image/add_icon.png">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="annotate-edit-note">备注</label>
+                                                <textarea id="annotate-edit-note"></textarea>
+                                            </div>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label for="fenfa-edit-date">分发日期：</label>
-                                            <input type="text" id="fenfa-edit-date" placeholder="选择日期">
+                                        <div class="annotate-content-special">
+                                            <label for="annotate-edit-content">内容</label>
+                                            <textarea id="annotate-edit-content" name="请输入内容" class="annotate-content-annocontent"></textarea>
                                         </div>
                                     </div>
                                     <div class="form-actions">
                                         <button type="submit" class="annotate-actions primary">编辑</button>
-                                        <button type="button" id="annotate-edit-delete"
-                                            class="annotate-actions cancel">删除</button>
+                                        <button type="button" id="annotate-edit-delete" class="annotate-actions cancel">删除</button>
                                     </div>
                                 </form>
                             </div>
