@@ -561,38 +561,45 @@ input:-webkit-autofill:focus {
 }
 
 .normal-serach {
-    align-items: center;
     display: flex;
-    height: 35px;
-    width: 445px;
-    margin-top: 0;
-    margin-left: auto;
-    margin-right: auto;
+    align-items: center;
+    height: 36px;
+    width: 100%;
+    max-width: 445px;
+    margin: 0 auto;
 }
 
 .search-input {
     flex: 1;
-    border: 0.85px solid rgba(161, 161, 161, 1);
-    border-radius: 8px 0 0 8px;
-    padding-top: 0;
-    padding-bottom: 0;
-    padding-left: 10px;
-    /* 左侧圆角 */
-    height: calc(100% - 1.7px);
+    border: 1px solid #d9d9d9;
+    border-radius: 6px 0 0 6px;
+    padding: 0 10px;
+    height: 100%;
     box-sizing: border-box;
+    outline: none;
+    transition: box-shadow 0.2s;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 2px rgba(66, 135, 242, 0.2);
 }
 
 .search-button {
+    border: none;
+    width: 40px;
+    height: 100%;
+    border-radius: 0 6px 6px 0;
     background: rgba(66, 135, 242, 1);
-    color: white;
-    border: 0.85px solid rgba(161, 161, 161, 1);
-    border-radius: 0 8px 8px 0;
-    /* 右侧圆角 */
-    padding-top: 0;
-    padding-bottom: 0;
-    height: calc(100% - 1.7px);
-    width: 43px;
-    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.search-button img {
+    width: 16px;
+    height: 16px;
+    filter: invert(1);
 }
 
 .view-doc-body {
@@ -1461,6 +1468,10 @@ input:-webkit-autofill:focus {
     margin-left: 32px;
 }
 
+.annotate-actions.danger {
+    background: #ff4d4f;
+}
+
 .docModal-actions {
     width: 70px;
     height: 25px;
@@ -1599,19 +1610,15 @@ input:-webkit-autofill:focus {
 }
 
 .look-annotate-bg {
-    border-radius: 5px;
-    background-color: white;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 10px 0;
     width: 100%;
     height: calc(100% - 97px);
     box-sizing: border-box;
     overflow: hidden;
-    border-radius: 5.04px;
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.25);
-    padding: 5px;
-    box-sizing: border-box;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 8px;
 }
 
 .look-annotate-list-title {
@@ -1620,9 +1627,10 @@ input:-webkit-autofill:focus {
     align-items: center;
     gap: 19px;
     background: rgba(230, 240, 252, 1);
-    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
     padding: 12px 0 12px 32px;
     box-sizing: border-box;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .look-annotate-list-title span {
@@ -1759,23 +1767,39 @@ input:-webkit-autofill:focus {
 
 /* 批注卡片样式 */
 .anno-card {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+    border: 1px solid #e5e6eb;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     padding: 12px 16px;
     margin-bottom: 8px;
     cursor: pointer;
+    background: #fff;
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
 .anno-card-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 8px;
+    font-weight: 500;
+    color: #1d2129;
 }
 
 .anno-card-body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    font-size: 14px;
+    color: #1d2129;
+}
+
+.anno-card:hover {
+    background: #f5f7fa;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.anno-card-body .annotate-remark-container {
+    color: #86909c;
 }
 
 

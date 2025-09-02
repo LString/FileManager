@@ -551,6 +551,8 @@ if (!customElements.get('resizable-table')) {
                             cell.style.color = 'red';
                         } else if (value === '流转中') {
                             cell.style.color = '#faad14';
+                        } else if (value === '已办结') {
+                            cell.style.color = '#52c41a';
                         }
                     }
                     row.appendChild(cell);

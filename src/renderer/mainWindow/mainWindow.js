@@ -1808,6 +1808,7 @@ function showAnnotateAdd(haveBg = false) {
   dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
   annotate_submit.textContent = '创建';
   annotate_secondary.textContent = '取消';
+  annotate_secondary.classList.remove('danger');
   annotate_date.setDate(new Date());
   setAnnotateFormEditable(true);
   toggleFields();
@@ -1822,6 +1823,7 @@ function showAnnotateEdit(anno) {
   currentAnnoId = anno.id;
   annotate_submit.textContent = '编辑';
   annotate_secondary.textContent = '删除';
+  annotate_secondary.classList.add('danger');
   setSelectValue('#annotate-intype', anno.processing_mode);
   document.getElementById('annotate-date').value = anno.annotate_at;
   annotate_date.setDate(anno.annotate_at);
@@ -1855,6 +1857,7 @@ function hideAnnotateModal() {
   currentAnnoId = null;
   isAnnoEditMode = true;
   setAnnotateFormEditable(true);
+  annotate_secondary.classList.remove('danger');
   loadAudit();
 }
 
@@ -1901,12 +1904,18 @@ async function loadAnnotateList(isSearch = false) {
     authorEl.textContent = annotate.author;
     dateEl.textContent = annotate.annotate_at;
     contentEl.textContent = annotate.content || '未录入';
-    remarkEl.textContent = annotate.annotate_note || '未录入';
+    if (annotate.annotate_note) {
+      remarkEl.textContent = annotate.annotate_note;
+    } else {
+      remarkEl.remove();
+    }
 
     listEl.appendChild(clone);
 
     applyEllipsis(contentEl, 2);
-    applyEllipsis(remarkEl, 1);
+    if (annotate.annotate_note) {
+      applyEllipsis(remarkEl, 1);
+    }
 
     contentEl.addEventListener('click', (e) => {
       if (contentEl.classList.contains('overflow')) {
@@ -1916,13 +1925,15 @@ async function loadAnnotateList(isSearch = false) {
       e.stopPropagation();
     });
 
-    remarkEl.addEventListener('click', (e) => {
-      if (remarkEl.classList.contains('overflow')) {
-        remarkEl.classList.add('expanded');
-        remarkEl.classList.remove('overflow');
-      }
-      e.stopPropagation();
-    });
+    if (annotate.annotate_note) {
+      remarkEl.addEventListener('click', (e) => {
+        if (remarkEl.classList.contains('overflow')) {
+          remarkEl.classList.add('expanded');
+          remarkEl.classList.remove('overflow');
+        }
+        e.stopPropagation();
+      });
+    }
   });
 }
 
@@ -2121,7 +2132,7 @@ function toggleFields() {
   if (showFields == "1") {
 
     contentField.required = true;
-    noteField.required = true;
+    noteField.required = false;
     dispatch_input.disabled = false;
     dispatch_add.disabled = false;
     dispatch_inputwithadd_container.style.backgroundColor = '';
@@ -2134,7 +2145,7 @@ function toggleFields() {
     noteField.style.display = '';
   } else if (showFields == "2") {
 
-
+    noteField.required = false;
     dispatch_input.disabled = false;
     dispatch_add.disabled = false;
     dispatch_inputwithadd_container.style.backgroundColor = '';
@@ -2148,7 +2159,7 @@ function toggleFields() {
     noteField.style.display = '';
 
   } else {
-
+    noteField.required = false;
 
     // 禁用字段、设置灰色背景并隐藏
     contentField.disabled = true;
@@ -2239,7 +2250,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
           annotate_type: currentType,
           processing_mode: getValidatedSelectValue('#annotate-intype'),
           content: type ? document.getElementById('annotate-content').value.trim() : null,
-          annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
+          annotate_note: type ? document.getElementById('annotate-note').value.trim() || null : null,
           annotate_at: document.getElementById('annotate-date').value,
           authorId,
           distribution_scope: distributionScope,
@@ -2276,7 +2287,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
           annotateTemp[currentAnnoId].annotate_type = currentType;
           annotateTemp[currentAnnoId].processing_mode = getValidatedSelectValue('#annotate-intype');
           annotateTemp[currentAnnoId].content = type ? document.getElementById('annotate-content').value.trim() : null;
-          annotateTemp[currentAnnoId].annotate_note = type ? document.getElementById('annotate-note').value.trim() : null;
+          annotateTemp[currentAnnoId].annotate_note = type ? document.getElementById('annotate-note').value.trim() || null : null;
           annotateTemp[currentAnnoId].annotate_at = document.getElementById('annotate-date').value;
           annotateTemp[currentAnnoId].authorId = authorId;
           annotateTemp[currentAnnoId].distribution_scope = distributionScope;
@@ -2292,7 +2303,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
           annotate_type: currentType,
           processing_mode: getValidatedSelectValue('#annotate-intype'),
           content: type ? document.getElementById('annotate-content').value.trim() : null,
-          annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
+          annotate_note: type ? document.getElementById('annotate-note').value.trim() || null : null,
           annotate_at: document.getElementById('annotate-date').value,
           authorId,
           distribution_scope: distributionScope,
@@ -2331,7 +2342,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
           annotate_type: currentType,
           processing_mode: getValidatedSelectValue('#annotate-intype'),
           content: type ? document.getElementById('annotate-content').value.trim() : null,
-          annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
+          annotate_note: type ? document.getElementById('annotate-note').value.trim() || null : null,
           annotate_at: document.getElementById('annotate-date').value,
           authorId,
           distribution_scope: distributionScope,
