@@ -1924,6 +1924,7 @@ let annoType = 0; //默认添加
 let currentAnnoId = null;
 // let annoProcessMode = 1;
 let tempListForSearch_Anno = [];
+let searchResult_Anno = [];
 let dispatch_units = [];//分发单位
 let isAnnoEditMode = true;
 function showAnnotateAdd(haveBg = false) {
@@ -2010,7 +2011,7 @@ async function loadAnnotateList(isSearch = false) {
     }
     tempListForSearch_Anno = annotations;
   } else {
-    annotations = tempListForSearch_Anno;
+    annotations = searchResult_Anno;
   }
 
   const listEl = currentType === 1 ? annotateListNor : annotateListImp;
@@ -2071,54 +2072,48 @@ function applyEllipsis(element, lines) {
   }
 }
 
-document.getElementById('search-anno').addEventListener('click', async () => {
-  const searchKey = document.getElementById('search-anno-input')
+function performAnnoSearch(inputId) {
+  const searchKey = document
+    .getElementById(inputId)
     .value
     .trim()
     .toLowerCase();
 
-  let filteredAnno = tempListForSearch_Anno.filter(anno => {
+  if (searchKey === '') {
+    searchResult_Anno = [];
+    loadAnnotateList(false);
+    return;
+  }
+
+  searchResult_Anno = tempListForSearch_Anno.filter(anno => {
     const searchFields = [
       anno.annotate_at,
       anno.content,
       anno.annotate_note,
       anno.author,
+      anno.distribution_scope,
     ];
 
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
+    return searchFields.some(field =>
+      String(field ?? '').toLowerCase().includes(searchKey)
+    );
   });
-  filteredAnno = searchKey == '' ? null : filteredAnno
-  tempListForSearch_Anno = filteredAnno
-  let isSearch = searchKey == '' ? false : true
-  loadAnnotateList(isSearch)
+
+  loadAnnotateList(true);
+}
+
+document.getElementById('search-anno').addEventListener('click', () => {
+  performAnnoSearch('search-anno-input');
+});
+document.getElementById('search-anno-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') performAnnoSearch('search-anno-input');
 });
 
-document.getElementById('search-anno-imp').addEventListener('click', async () => {
-  const searchKey = document.getElementById('search-anno-input-imp')
-    .value
-    .trim()
-    .toLowerCase();
-
-  let filteredAnno = tempListForSearch_Anno.filter(anno => {
-    const searchFields = [
-      anno.annotate_at,
-      anno.content,
-      anno.annotate_note,
-      anno.author,
-    ];
-
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
-  });
-  filteredAnno = searchKey == '' ? null : filteredAnno
-  tempListForSearch_Anno = filteredAnno
-  let isSearch = searchKey == '' ? false : true
-  loadAnnotateList(isSearch)
+document.getElementById('search-anno-imp').addEventListener('click', () => {
+  performAnnoSearch('search-anno-input-imp');
+});
+document.getElementById('search-anno-input-imp').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') performAnnoSearch('search-anno-input-imp');
 });
 
 function handleAnnotateListDblClick(e) {
