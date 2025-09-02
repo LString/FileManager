@@ -171,6 +171,7 @@ class DB {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         document_uuid TEXT NOT NULL,
         unit TEXT NOT NULL,
+        supervisors TEXT,
         distributed_at TEXT,
         back_at TEXT,
         created_at DATETIME DEFAULT (datetime('now', 'localtime')),
@@ -179,6 +180,13 @@ class DB {
 
       CREATE INDEX IF NOT EXISTS idx_flow_records_uuid ON flow_records(document_uuid);
     `);
+
+    // Ensure new column exists for legacy databases
+    const flowColumns = this.connection.prepare("PRAGMA table_info(flow_records)").all();
+    const hasSupervisors = flowColumns.some(col => col.name === 'supervisors');
+    if (!hasSupervisors) {
+      this.connection.prepare("ALTER TABLE flow_records ADD COLUMN supervisors TEXT").run();
+    }
   }
 
   prepareStatements() {
@@ -629,14 +637,14 @@ class DB {
       /******************** 文件流转记录 ********************/
       addFlowRecord: this.connection.prepare(`
         INSERT INTO flow_records (
-          document_uuid, unit, distributed_at, back_at
+          document_uuid, unit, supervisors, distributed_at, back_at
         ) VALUES (
-          @document_uuid, @unit, @distributed_at, @back_at
+          @document_uuid, @unit, @supervisors, @distributed_at, @back_at
         )
       `),
 
       getFlowRecords: this.connection.prepare(`
-        SELECT id, unit, distributed_at, back_at
+        SELECT id, unit, supervisors, distributed_at, back_at
         FROM flow_records
         WHERE document_uuid = @document_uuid
         ORDER BY id
@@ -644,6 +652,7 @@ class DB {
 
       updateFlowRecord: this.connection.prepare(`
         UPDATE flow_records SET
+          supervisors = COALESCE(@supervisors, supervisors),
           distributed_at = COALESCE(@distributed_at, distributed_at),
           back_at = COALESCE(@back_at, back_at)
         WHERE id = @id

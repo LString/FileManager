@@ -758,6 +758,7 @@ async function loadFlowList() {
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td>${rec.unit || ''}</td>
+      <td>${rec.supervisors || ''}</td>
       <td class="editable" data-field="distributed_at">${rec.distributed_at || ''}</td>
       <td class="editable" data-field="back_at">${rec.back_at || ''}</td>
     `;
@@ -799,6 +800,7 @@ flowSaveBtn?.addEventListener('click', async () => {
   await window.electronAPI.db.addFlowRecord({
     document_uuid: currentDocId,
     unit,
+    supervisors: '',
     distributed_at,
     back_at
   });
@@ -2359,9 +2361,28 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       const result = await window.electronAPI.db.addAnnotation(data);
 
       if (result.changes > 0) {
-        //分发单位表添加
+        // 通过批注分发单位更新文件流转记录
         if (dispatch_units.length > 0) {
-          const result1 = await window.electronAPI.db.addDistribution(data);
+          const existing = await window.electronAPI.db.getFlowRecords({ document_uuid: currentDocId });
+          for (const unit of dispatch_units) {
+            const found = existing.find(r => r.unit === unit.name);
+            if (found) {
+              const leaders = (found.supervisors || '').split(',').filter(Boolean);
+              if (!leaders.includes(name)) {
+                leaders.push(name);
+                await window.electronAPI.db.updateFlowRecord({ id: found.id, supervisors: leaders.join(',') });
+              }
+            } else {
+              await window.electronAPI.db.addFlowRecord({
+                document_uuid: currentDocId,
+                unit: unit.name,
+                supervisors: name,
+                distributed_at: null,
+                back_at: null
+              });
+            }
+          }
+          await loadFlowList();
         }
 
         loadAnnotateList();

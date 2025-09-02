@@ -999,6 +999,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'updateFlowRecord': {
         const params = {
           id: data.id,
+          supervisors: data.supervisors ?? null,
           distributed_at: data.distributed_at ?? null,
           back_at: data.back_at ?? null,
         };
