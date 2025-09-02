@@ -682,6 +682,13 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
     annoPanel.style.display = 'none';
     flowPanel.style.display = 'flex';
   }
+  const flowFormEl = document.getElementById('flow-form');
+  if (flowFormEl) {
+    flowFormEl.style.display = 'none';
+    document.getElementById('flow-unit').value = '';
+    document.getElementById('flow-distributed').value = '';
+    document.getElementById('flow-back').value = '';
+  }
   loadFlowList();
 }
 
@@ -706,17 +713,48 @@ function loadFlowList() {
   });
 }
 
-document.getElementById('flow-add-btn')?.addEventListener('click', () => {
+const flowAddBtn = document.getElementById('flow-add-btn');
+const flowForm = document.getElementById('flow-form');
+const flowSaveBtn = document.getElementById('flow-save-btn');
+const flowCancelBtn = document.getElementById('flow-cancel-btn');
+
+flowAddBtn?.addEventListener('click', () => {
   if (!currentDocId) return;
-  const unit = prompt('请输入单位名称');
-  if (!unit) return;
-  const distributed_at = prompt('请输入分发时间', '') || '';
-  const back_at = prompt('请输入返回时间', '') || '';
+  flowForm.style.display = 'flex';
+  document.getElementById('flow-unit').focus();
+});
+
+flowSaveBtn?.addEventListener('click', () => {
+  if (!currentDocId) return;
+  const unitInput = document.getElementById('flow-unit');
+  const distributedInput = document.getElementById('flow-distributed');
+  const backInput = document.getElementById('flow-back');
+  const unit = unitInput.value.trim();
+  const distributed_at = distributedInput.value.trim();
+  const back_at = backInput.value.trim();
+  if (!unit) {
+    flowForm.style.display = 'none';
+    unitInput.value = '';
+    distributedInput.value = '';
+    backInput.value = '';
+    return;
+  }
   const list = flowRecordsMap[currentDocId] || [];
   list.push({ unit, distributed_at, back_at });
   flowRecordsMap[currentDocId] = list;
   saveFlowRecords();
   loadFlowList();
+  unitInput.value = '';
+  distributedInput.value = '';
+  backInput.value = '';
+  flowForm.style.display = 'none';
+});
+
+flowCancelBtn?.addEventListener('click', () => {
+  document.getElementById('flow-unit').value = '';
+  document.getElementById('flow-distributed').value = '';
+  document.getElementById('flow-back').value = '';
+  flowForm.style.display = 'none';
 });
 
 document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
