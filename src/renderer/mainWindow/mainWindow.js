@@ -5,13 +5,6 @@ const annotate_date = flatpickr("#annotate-date", {
   locale: "zh", // 需要额外引入中文语言包
   defaultDate: new Date()
 });
-
-
-const annotate_edit_date = flatpickr("#annotate-edit-date", {
-  dateFormat: "Y-m-d",
-  locale: "zh", // 需要额外引入中文语言包
-  defaultDate: new Date()
-});
 // sender_date
 
 const sender_date = flatpickr("#sender_date", {
@@ -33,6 +26,8 @@ let idleTimer;
 let autoLogoutTime = 15;
 let autoLogoutEnabled = true;
 let currentUser;
+let annotate_submit;
+let annotate_secondary;
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('[初始化] DOM加载完成')
@@ -100,6 +95,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   const popupMenu = document.getElementById('data-manager-popup');
   const popupItems = document.querySelectorAll('.popup-item');
   const tabContents = document.querySelectorAll('.tab-content');
+  annotate_submit = getElement('annotate-submit');
+  annotate_secondary = getElement('annotate-secondary');
+  annotate_secondary?.addEventListener('click', async () => {
+    if (isEditingAnno) {
+      if (!(await hasPermission())) {
+        const cancel = await showPermissionDialog();
+        if (!cancel) return;
+      }
+      const confirm = await showConfirmDialog('确定删除该条批注？');
+      if (!confirm) return;
+      if (currentDocId) {
+        await window.electronAPI.db.deleteAnnotate(currentAnnoId);
+      } else {
+        annotateTemp = annotateTemp.filter(obj => obj.id !== currentAnnoId);
+      }
+      await loadAnnotateList();
+      hideAnnotateModal();
+    } else {
+      hideAnnotateModal();
+    }
+  });
   // 修改后的标签切换逻辑
   tabs.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -522,9 +538,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadAudit()
 //备注处理方式
 // toggleFields();
-//备注处理方式
-// toggleEditFields();
-// intypeEditSelect.addEventListener('change', toggleEditFields);
 
   const initialTab = document.querySelector('.tab-btn.active');
   if (initialTab) {
@@ -577,21 +590,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   });
 
-  //备注取消监听
-  document.querySelector('#annotate_add .cancel').addEventListener('click', () => {
-    hideAnnotateAdd();
-  });
-
+  //备注关闭监听
   document.getElementById('annotate-close-look').addEventListener('click', () => {
     hideAnnotateLook();
   });
 
   document.getElementById('annotate-close-add').addEventListener('click', () => {
-    hideAnnotateAdd();
-  });
-
-  document.getElementById('annotate-edit-close-add').addEventListener('click', () => {
-    hideAnnotateEdit();
+    hideAnnotateModal();
   });
   //权限控制
   checkPermission()
@@ -1756,18 +1761,12 @@ document.getElementById('anno-add-btn-imp').addEventListener('click', () => {
 // //查看备注
 const annotate_look = document.getElementById('annotate_look');
 const annotate_add = document.getElementById('annotate_add');
-const annotate_edit = document.getElementById('annotate_edit');
 
 const intypeSelect = document.getElementById('annotate-intype');
 const annotate_content = document.getElementById('annotate-content');
 const mentionList = document.getElementById('mentionList');
 
 intypeSelect?.addEventListener('change', toggleFields);
-
-const intypeEditSelect = document.getElementById('annotate-edit-intype');
-
-const annotateEdit_content = document.getElementById('annotate-edit-content');
-const form_row_fenfa = document.getElementById('form_row_dispatch')
 const annotateListNor = document.getElementById('annotate-list');
 const annotateListImp = document.getElementById('annotate-list-imp');
 let currentMentionPos = null;
@@ -1779,11 +1778,6 @@ const dispatch_add = document.getElementById('dispatch-unit-add');
 const dispatch_input = document.getElementById('dispatch-unit-add-input');
 const dispatch_inputwithadd_container = document.getElementById('dispatch-unit-inputwithadd-container');
 const dispatch_input_container = document.getElementById('dispatch-unit-container');
-
-const dispatch_edit_add = document.getElementById('dispatch-edit-unit-add');
-const dispatch_edit_input = document.getElementById('dispatch-edit-unit-add-input');
-const dispatch_edit_input_container = document.getElementById('dispatch-edit-unit-container');
-let dispatch_edit_units = [];//编辑时分发单位
 
 // // 模拟数据
 
@@ -1805,96 +1799,56 @@ let currentAnnoId = null;
 // let annoProcessMode = 1;
 let tempListForSearch_Anno = [];
 let dispatch_units = [];//分发单位
-function changeAnnoEditing() {
-  //非编辑模式下点击修改UI状态
-  const form = document.getElementById('annotate-edit-Form');
-
-  // 切换编辑模式
-  form.classList.toggle('editing');
-
-  // 动态切换禁用状.
-  isEditingAnno = form.classList.contains('editing');
-  const inputs = form.querySelectorAll('input, select,textarea');
-  form.querySelector('.annotate-actions.primary').textContent = isEditingAnno ? '保存' : '编辑'
-  // form.querySelector('.annotate-actions.cancel').textContent = '删除'
-  inputs.forEach(input => {
-    input.disabled = !isEditingAnno;
-    // if (input.id === 'annotate-intype') { // 替换成你的实际 ID
-    //   input.disabled = true;
-    // }
-  });
-  const labels_closes = form.querySelectorAll('.alias-tag-delete-btn');
-  labels_closes.forEach(close => {
-    close.style.pointerEvents = isEditingAnno ? 'auto' : 'none';
-  })
-  dispatch_edit_add.style.pointerEvents = isEditingAnno ? 'auto' : 'none';
-
-}
 function showAnnotateAdd(haveBg = false) {
+  isEditingAnno = false;
+  currentAnnoId = null;
+  document.getElementById('annotate-Form').reset();
+  dispatch_units = [];
+  dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
+  annotate_submit.textContent = '创建';
+  annotate_secondary.textContent = '取消';
+  annotate_date.setDate(new Date());
   toggleFields();
   annotate_add.style.display = 'block';
   if (haveBg) {
-    annotate_add.querySelector('.annotate-bg').style.backgroundColor = 'rgba(0, 0, 0, 0)'
+    annotate_add.querySelector('.annotate-bg').style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }
 }
-function showAnnotateEdit(anno = null) { //类型 0添加 1展示数据  
-  annotate_edit.style.display = 'block';
-  //annoProcessMode = anno.processing_mode
-  currentAnnoId = anno.id
-
-  if (anno) {
-    setSelectValue('#annotate-edit-intype', anno.processing_mode);
-    //annoLeaders = anno.name;//解析多个标签,仅圈阅的时候解析多个标签 只能删除，不能添加
-    document.getElementById('annotate-edit-date').value = anno.annotate_at;
-    document.getElementById('annotate-edit-content').value = anno.content;
-    document.getElementById('annotate-edit-note').value = anno.annotate_note;
-    document.getElementById('annotate-edit-author').value = anno.author;
-    dispatch_edit_units = [];
-    dispatch_edit_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
-    if (anno.distribution_scope) {
-      const units = anno.distribution_scope.split(',').filter(u => u);
-      units.forEach(u => {
-        const item = aliastemp.content.cloneNode(true);
-        item.querySelector('#tag-content').textContent = u;
-        dispatch_edit_input_container.insertBefore(item, dispatch_edit_input.parentNode);
-        dispatch_edit_units.push({ id: null, name: u });
-      });
-    }
-    //禁用状态
-    const form = document.getElementById('annotate-edit-Form');
-
-    const inputs = form.querySelectorAll('input, select, textarea');
-    form.querySelector('.annotate-actions.primary').textContent = '编辑'
-
-    inputs.forEach(input => {
-      input.disabled = true;
-      // if (input.id === 'annotate-intype') { // 替换成你的实际 ID
-      //   input.disabled = true;
-      // }
+function showAnnotateEdit(anno) {
+  isEditingAnno = true;
+  currentAnnoId = anno.id;
+  annotate_submit.textContent = '保存';
+  annotate_secondary.textContent = '删除';
+  setSelectValue('#annotate-intype', anno.processing_mode);
+  document.getElementById('annotate-date').value = anno.annotate_at;
+  annotate_date.setDate(anno.annotate_at);
+  document.getElementById('annotate-content').value = anno.content;
+  document.getElementById('annotate-note').value = anno.annotate_note;
+  document.getElementById('annotate-author').value = anno.author;
+  dispatch_units = [];
+  dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
+  if (anno.distribution_scope) {
+    const units = anno.distribution_scope.split(',').filter(u => u);
+    units.forEach(u => {
+      const item = aliastemp.content.cloneNode(true);
+      item.querySelector('#tag-content').textContent = u;
+      dispatch_input_container.insertBefore(item, dispatch_input.parentNode);
+      dispatch_units.push({ id: null, name: u });
     });
-    dispatch_edit_add.style.pointerEvents = 'none';
-
-    // changeAnnoEditing()
   }
-  toggleEditFields();
+  toggleFields();
+  annotate_add.style.display = 'block';
 }
-function hideAnnotateAdd() {
+function hideAnnotateModal() {
   annotate_add.style.display = 'none';
   document.getElementById('annotate-Form').reset();
   annotate_date.setDate(new Date());
+  dispatch_units = [];
+  dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
   document.getElementById('hasAnnotate').textContent = `已有${annotateTemp.length}条备注`;
+  isEditingAnno = false;
+  currentAnnoId = null;
   loadAudit();
-}
-function hideAnnotateEdit() {
-  if (isEditingAnno) {
-    changeAnnoEditing()
-  }
-  annotate_edit.style.display = 'none';
-  document.getElementById('annotate-edit-Form').reset();
-  annotate_edit_date.setDate(new Date());
-  dispatch_edit_units = [];
-  dispatch_edit_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
-  document.getElementById('hasAnnotate').textContent = `已有${annotateTemp.length}条备注`;
 }
 
 function checkTextOverflow() {
@@ -2248,20 +2202,6 @@ function toggleFields() {
 
 }
 
-function toggleEditFields() {
-  const showFields = intypeEditSelect.value === '1';
-  // contentEditGroup.classList.toggle('hidden', !showFields);
-  // noteGroup.classList.toggle('hidden', !showFields);
-  // if (showFields) {
-  //   form_row_fenfa.style.display = 'none'
-  // } else {
-  // form_row_fenfa.style.display = 'grid'
-  // }
-  // 设置字段必填状态
-  document.getElementById('annotate-edit-content').required = showFields;
-  document.getElementById('annotate-edit-note').required = showFields;
-}
-
 //批注分发单位标签添加
 dispatch_add.addEventListener('click', async () => {
 
@@ -2301,53 +2241,17 @@ dispatch_input_container.addEventListener('click', async (e) => {
   }
 })
 
-dispatch_edit_add.addEventListener('click', async () => {
-  const value = dispatch_edit_input.value.trim();
-  if (value) {
-    let unit = globalUnits.find(u => u.name === value);
-    if (!unit) {
-      const newId = await window.electronAPI.db.createUnit({ name: value });
-      unit = { id: newId, name: value };
-      globalUnits.push(unit);
-      populateUnitDatalist('#anno-unit-datalist', globalUnits);
-      populateUnitDatalist('#flow-unit-datalist', globalUnits);
-    }
-    const item = aliastemp.content.cloneNode(true);
-    item.querySelector('#tag-content').textContent = value;
-    dispatch_edit_input_container.insertBefore(item, dispatch_edit_input.parentNode);
-    dispatch_edit_units.push(unit);
-    dispatch_edit_input.value = '';
-    dispatch_edit_input.focus();
-    dispatch_edit_input_container.scrollLeft = dispatch_edit_input_container.scrollWidth;
-  }
-});
-
-dispatch_edit_input_container.addEventListener('click', async (e) => {
-  if (e.target.matches('.alias-tag-delete-btn')) {
-    const item = e.target.closest('.alias-tag');
-    const content = item.querySelector('#tag-content').textContent;
-    dispatch_edit_units = dispatch_edit_units.filter(a => a.name !== content);
-    item.remove();
-  }
-});
-
 //添加批注表单
 document.getElementById('annotate-Form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    // 如果当前文档类型未知，则根据文档ID补全
     if (currentDocId && (currentType === undefined || currentType === null)) {
       const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
       currentType = docInfo?.doc_type || docInfo?.docType || docInfo?.type || 1;
     }
-    let name;
+    let name = getValidatedSelectValue('#annotate-author');
     let authorId;
-
-    name = getValidatedSelectValue('#annotate-author');
-    // 检查是否存在同名作者
     const existingAuthors = await window.electronAPI.db.findAuthorsByName(name);
-
-    // 存在则复用，不存在则新建
     if (existingAuthors.length > 0) {
       authorId = existingAuthors[0].id;
     } else {
@@ -2356,27 +2260,24 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       authorId = newAuthor;
     }
     const type = intypeSelect?.value === '1';
-    let data;
     const distributionScope = dispatch_units.length > 0
       ? dispatch_units.map(u => u.name).join(',')
       : null;
-    if (currentDocId) {
-      data = {
-        annotate_type: currentType,
-        processing_mode: getValidatedSelectValue('#annotate-intype'),
-        content: type ? document.getElementById('annotate-content').value.trim() : null,
-        annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
-        annotate_at: document.getElementById('annotate-date').value,
-        authorId: authorId,
-        distribution_scope: distributionScope,
-        distribution_at: null,
-        uuid: currentDocId
-      };
-
-      const result = await window.electronAPI.db.addAnnotation(data);
-
-      if (result.changes > 0) {
-        // 通过批注分发单位更新文件流转记录
+    if (isEditingAnno) {
+      if (currentDocId) {
+        const data = {
+          annotate_type: currentType,
+          processing_mode: getValidatedSelectValue('#annotate-intype'),
+          content: type ? document.getElementById('annotate-content').value.trim() : null,
+          annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
+          annotate_at: document.getElementById('annotate-date').value,
+          authorId,
+          distribution_scope: distributionScope,
+          distribution_at: null,
+          uuid: currentDocId,
+          id: currentAnnoId
+        };
+        await window.electronAPI.db.updateAnnotate(data);
         if (dispatch_units.length > 0) {
           const existing = await window.electronAPI.db.getFlowRecords({ document_uuid: currentDocId });
           for (const unit of dispatch_units) {
@@ -2399,167 +2300,86 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
           }
           await loadFlowList();
         }
-
-        loadAnnotateList();
-        document.getElementById('annotate-Form').reset();
-        dispatch_units = [];
-        dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
-        hideAnnotateAdd();
+        await loadAnnotateList();
+      } else {
+        if (annotateTemp[currentAnnoId] !== undefined) {
+          annotateTemp[currentAnnoId].annotate_type = currentType;
+          annotateTemp[currentAnnoId].processing_mode = getValidatedSelectValue('#annotate-intype');
+          annotateTemp[currentAnnoId].content = type ? document.getElementById('annotate-content').value.trim() : null;
+          annotateTemp[currentAnnoId].annotate_note = type ? document.getElementById('annotate-note').value.trim() : null;
+          annotateTemp[currentAnnoId].annotate_at = document.getElementById('annotate-date').value;
+          annotateTemp[currentAnnoId].authorId = authorId;
+          annotateTemp[currentAnnoId].distribution_scope = distributionScope;
+          annotateTemp[currentAnnoId].distribution_at = null;
+          annotateTemp[currentAnnoId].author = name;
+          await loadAnnotateList();
+        }
       }
+      hideAnnotateModal();
     } else {
-      data = { //新建文档时缓存的批注
-        annotate_type: currentType,
-        processing_mode: getValidatedSelectValue('#annotate-intype'),
-        content: type ? document.getElementById('annotate-content').value.trim() : null,
-        annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
-        annotate_at: document.getElementById('annotate-date').value,
-        authorId: authorId,
-        distribution_scope: distributionScope,
-        distribution_at: null,
-        uuid: null,
-        author: name, //仅在查阅的时候显示
-        id: annotateTemp.length
-      };
-      annotateTemp.push(data);
-      loadAnnotateList()
-      document.getElementById('annotate-Form').reset();
-      dispatch_units = [];
-      dispatch_input_container.querySelectorAll('.alias-tag').forEach(tag => tag.remove());
-      hideAnnotateAdd();
+      if (currentDocId) {
+        const data = {
+          annotate_type: currentType,
+          processing_mode: getValidatedSelectValue('#annotate-intype'),
+          content: type ? document.getElementById('annotate-content').value.trim() : null,
+          annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
+          annotate_at: document.getElementById('annotate-date').value,
+          authorId,
+          distribution_scope: distributionScope,
+          distribution_at: null,
+          uuid: currentDocId
+        };
+        const result = await window.electronAPI.db.addAnnotation(data);
+        if (result.changes > 0) {
+          if (dispatch_units.length > 0) {
+            const existing = await window.electronAPI.db.getFlowRecords({ document_uuid: currentDocId });
+            for (const unit of dispatch_units) {
+              const found = existing.find(r => r.unit === unit.name);
+              if (found) {
+                const leaders = (found.supervisors || '').split(',').filter(Boolean);
+                if (!leaders.includes(name)) {
+                  leaders.push(name);
+                  await window.electronAPI.db.updateFlowRecord({ id: found.id, supervisors: leaders.join(',') });
+                }
+              } else {
+                await window.electronAPI.db.addFlowRecord({
+                  document_uuid: currentDocId,
+                  unit: unit.name,
+                  supervisors: name,
+                  distributed_at: null,
+                  back_at: null
+                });
+              }
+            }
+            await loadFlowList();
+          }
+          await loadAnnotateList();
+          hideAnnotateModal();
+        }
+      } else {
+        const data = {
+          annotate_type: currentType,
+          processing_mode: getValidatedSelectValue('#annotate-intype'),
+          content: type ? document.getElementById('annotate-content').value.trim() : null,
+          annotate_note: type ? document.getElementById('annotate-note').value.trim() : null,
+          annotate_at: document.getElementById('annotate-date').value,
+          authorId,
+          distribution_scope: distributionScope,
+          distribution_at: null,
+          uuid: null,
+          author: name,
+          id: annotateTemp.length
+        };
+        annotateTemp.push(data);
+        await loadAnnotateList();
+        hideAnnotateModal();
+      }
     }
   } catch (error) {
     console.error('添加批注失败:', error);
-    // await showinfoDialog('添加批注失败');
-  }
-
-});
-
-//编辑批注表单
-document.getElementById('annotate-edit-Form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  if (isEditingAnno) {
-    if (currentDocId) {
-      // 如果当前文档类型未知，则根据文档ID补全
-      if (currentType === undefined || currentType === null) {
-        const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
-        currentType = docInfo?.doc_type || docInfo?.docType || docInfo?.type || 1;
-      }
-      let authorId;
-      let name = getValidatedSelectValue('#annotate-edit-author');
-      // 检查是否存在同名作者
-      const existingAuthors = await window.electronAPI.db.findAuthorsByName(name);
-
-      // 存在则复用，不存在则新建
-      if (existingAuthors.length > 0) {
-        authorId = existingAuthors[0].id;
-      } else {
-        const unitInfo = null;
-        const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
-        authorId = newAuthor;
-      }
-      const type = intypeEditSelect?.value === '1';
-      let data;
-      if (currentAnnoId) {
-        const distributionScope = dispatch_edit_units.length > 0
-          ? dispatch_edit_units.map(u => u.name).join(',')
-          : null;
-        data = {
-          annotate_type: currentType,
-          processing_mode: getValidatedSelectValue('#annotate-edit-intype'),
-          content: type ? document.getElementById('annotate-edit-content').value.trim() : null,
-          annotate_note: type ? document.getElementById('annotate-edit-note').value.trim() : null,
-          annotate_at: document.getElementById('annotate-edit-date').value,
-          authorId: authorId,
-          distribution_scope: distributionScope,
-          distribution_at: null,
-          uuid: currentDocId,
-          id: currentAnnoId
-        };
-        // 调用Electron API
-        await window.electronAPI.db.updateAnnotate(data);
-
-        if (dispatch_edit_units.length > 0) {
-          const existing = await window.electronAPI.db.getFlowRecords({ document_uuid: currentDocId });
-          for (const unit of dispatch_edit_units) {
-            const found = existing.find(r => r.unit === unit.name);
-            if (found) {
-              const leaders = (found.supervisors || '').split(',').filter(Boolean);
-              if (!leaders.includes(name)) {
-                leaders.push(name);
-                await window.electronAPI.db.updateFlowRecord({ id: found.id, supervisors: leaders.join(',') });
-              }
-            } else {
-              await window.electronAPI.db.addFlowRecord({
-                document_uuid: currentDocId,
-                unit: unit.name,
-                supervisors: name,
-                distributed_at: null,
-                back_at: null
-              });
-            }
-          }
-          await loadFlowList();
-        }
-      }
-      await loadAnnotateList()
-      hideAnnotateEdit()
-    } else {
-      // 检查索引是否存在（避免越界错误）
-      if (annotateTemp[currentAnnoId] !== undefined) {
-        let authorId;
-        let name = getValidatedSelectValue('#annotate-edit-author');
-        // 检查是否存在同名作者
-        const existingAuthors = await window.electronAPI.db.findAuthorsByName(name);
-
-        // 存在则复用，不存在则新建
-        if (existingAuthors.length > 0) {
-          authorId = existingAuthors[0].id;
-        } else {
-          const unitInfo = null;
-          const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
-          authorId = newAuthor;
-        }
-        const type = intypeEditSelect?.value === '1';
-        // 直接修改对象的属性
-        annotateTemp[currentAnnoId].annotate_type = currentType;
-        annotateTemp[currentAnnoId].processing_mode = getValidatedSelectValue('#annotate-edit-intype');
-        annotateTemp[currentAnnoId].content = type ? document.getElementById('annotate-edit-content').value.trim() : null;
-        annotateTemp[currentAnnoId].annotate_note = type ? document.getElementById('annotate-edit-note').value.trim() : null;
-        annotateTemp[currentAnnoId].annotate_at = document.getElementById('annotate-edit-date').value;
-        annotateTemp[currentAnnoId].authorId = authorId;
-        annotateTemp[currentAnnoId].distribution_scope = dispatch_edit_units.length > 0
-          ? dispatch_edit_units.map(u => u.name).join(',')
-          : null;
-        annotateTemp[currentAnnoId].distribution_at = null;
-        await loadAnnotateList()
-        hideAnnotateEdit()
-      }
-    }
-  } else {
-    changeAnnoEditing()
   }
 });
-//删除批注
-document.getElementById('annotate-edit-delete').addEventListener('click', async (_e) => {
-  if (!(await hasPermission())) {
-    const cancel = await showPermissionDialog();
-    if (!cancel) return;
-  }
 
-  const confirm = await showConfirmDialog('确定删除该条批注？');
-  if (!confirm) return;
-  if (currentDocId) {
-    await window.electronAPI.db.deleteAnnotate(currentAnnoId)
-    hideAnnotateEdit()
-    loadAnnotateList()
-  } else {
-    annotateTemp = annotateTemp.filter(obj => obj.id !== currentAnnoId);
-    hideAnnotateEdit()
-    loadAnnotateList()
-  }
-
-})
 /**
  * 填充选项 名字
  */
