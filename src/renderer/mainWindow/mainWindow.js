@@ -2212,11 +2212,8 @@ dispatch_add.addEventListener('click', async () => {
   if (value) {
     let unit = globalUnits.find(unit => unit.name === value);
     if (!unit) {
-      const newId = await window.electronAPI.db.createUnit({ name: value });
-      unit = { id: newId, name: value };
-      globalUnits.push(unit);
-      populateUnitDatalist('#anno-unit-datalist', globalUnits);
-      populateUnitDatalist('#flow-unit-datalist', globalUnits);
+      // 先缓存在内存，实际写入数据库在提交时统一处理
+      unit = { name: value };
     }
     const item = aliastemp.content.cloneNode(true);
     item.querySelector('#tag-content').textContent = value;
@@ -2268,8 +2265,26 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       const unitInfo = null;
       const newAuthor = await window.electronAPI.db.createAuthor({ name, unit: unitInfo });
       authorId = newAuthor;
+      // 刷新作者选择列表，确保新姓名可在其他位置使用
+      await loadSelectOptions();
     }
     const type = intypeSelect?.value === '1';
+    // 确保分发单位写入数据库
+    for (const unit of dispatch_units) {
+      if (!unit.id) {
+        const exist = await window.electronAPI.db.findUnitByName(unit.name);
+        if (exist.length > 0) {
+          unit.id = exist[0].id;
+        } else {
+          const newId = await window.electronAPI.db.createUnit({ name: unit.name });
+          unit.id = newId;
+          globalUnits.push({ id: newId, name: unit.name });
+        }
+      }
+    }
+    populateUnitDatalist('#anno-unit-datalist', globalUnits);
+    populateUnitDatalist('#flow-unit-datalist', globalUnits);
+
     const distributionScope = dispatch_units.length > 0
       ? dispatch_units.map(u => u.name).join(',')
       : null;
