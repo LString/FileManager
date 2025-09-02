@@ -2267,6 +2267,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
       authorId = newAuthor;
       // 刷新作者选择列表，确保新姓名可在其他位置使用
       await loadSelectOptions();
+      await loadAuthorsWithAliasesToNameManager();
     }
     const type = intypeSelect?.value === '1';
     // 确保分发单位写入数据库
@@ -2284,6 +2285,7 @@ document.getElementById('annotate-Form').addEventListener('submit', async (e) =>
     }
     populateUnitDatalist('#anno-unit-datalist', globalUnits);
     populateUnitDatalist('#flow-unit-datalist', globalUnits);
+    await loadUnitWithSonToUnitManager();
 
     const distributionScope = dispatch_units.length > 0
       ? dispatch_units.map(u => u.name).join(',')
@@ -2610,6 +2612,7 @@ document.getElementById('add-name-btn').addEventListener('click', async (_e) => 
 
 async function loadAuthorsWithAliasesToNameManager() {
   const container = document.getElementById('name-list');
+  if (!container) return;
   try {
     const authors = await window.electronAPI.db.getAuthorsWithAliases() || [];
     container.replaceChildren();
@@ -2668,6 +2671,8 @@ function showError(container) {
 
 // 在容器上统一监听点击事件
 document.getElementById('name-list').addEventListener('click', async e => {
+  const item = e.target.closest('.name-list-item');
+  if (!item) return;
   // 删除姓名
   if (e.target.matches('#deleteName , #deleteName > img')) {
     if (!(await hasPermission())) {
@@ -2677,7 +2682,7 @@ document.getElementById('name-list').addEventListener('click', async e => {
     const confirm = await showConfirmDialog('确定删除该姓名？');
     if (!confirm) return;
     try {
-      const nameId = e.target.closest('.name-list-item').dataset.id
+      const nameId = item.dataset.id;
       await window.electronAPI.db.deleteAuthor(nameId);
       loadAuthorsWithAliasesToNameManager();
       loadAudit()
@@ -2685,25 +2690,12 @@ document.getElementById('name-list').addEventListener('click', async e => {
       console.error('删除失败:', error);
       // await showinfoDialog('删除失败，请检查控制台');
     }
-  } else if (e.target.matches('#editName , #editName > img')) {
-    const container = e.target.closest('.name-list-item')
-    const name = container.querySelector('#name-list-item-name').textContent
-    // const alias = container.querySelector('#name-list-item-alias').textContent
-    const unit = container.querySelector('#name-list-item-unit').textContent
-    const aliases = JSON.parse(container.dataset.aliases || '[]');
-    const authorId = container.dataset.id;
+  } else {
+    const name = item.querySelector('#name-list-item-name').textContent;
+    const unit = item.querySelector('#name-list-item-unit').textContent;
+    const aliases = JSON.parse(item.dataset.aliases || '[]');
+    const authorId = item.dataset.id;
     showNameEdit(authorId, name, aliases, unit);
-  }
-  else {
-
-    const container = e.target.closest('.name-list-item')
-    const name = container.querySelector('#name-list-item-name').textContent
-    // const alias = container.querySelector('#name-list-item-alias').textContent
-    const unit = container.querySelector('#name-list-item-unit').textContent
-    const aliases = JSON.parse(container.dataset.aliases || '[]');
-    const authorId = container.dataset.id;
-    showNameEdit(authorId, name, aliases, unit);
-
   }
 });
 
@@ -2944,6 +2936,7 @@ document.getElementById('add-unit-btn').addEventListener('click', async (_e) => 
 // 加载姓名树形结构
 async function loadUnitWithSonToUnitManager() {
   const container = document.getElementById('unit-list');
+  if (!container) return;
   try {
     const units = await window.electronAPI.db.getUnitWithSonToManager() || [];
     container.replaceChildren();
@@ -2982,6 +2975,8 @@ async function loadUnitWithSonToUnitManager() {
 
 // 在容器上统一监听点击事件
 document.getElementById('unit-list').addEventListener('click', async e => {
+  const item = e.target.closest('.unit-list-item');
+  if (!item) return;
   // 删除单位
   if (e.target.matches('#deleteUnit, #deleteUnit > img')) {
     if (!(await hasPermission())) {
@@ -2991,7 +2986,7 @@ document.getElementById('unit-list').addEventListener('click', async e => {
     const confirm = await showConfirmDialog('确定删除该单位？');
     if (!confirm) return;
     try {
-      const unitSonId = e.target.closest('.unit-list-item').dataset.id
+      const unitSonId = item.dataset.id;
       await window.electronAPI.db.deleteUnitSon(unitSonId);
       loadUnitWithSonToUnitManager();
       loadAudit()
@@ -2999,11 +2994,8 @@ document.getElementById('unit-list').addEventListener('click', async e => {
       console.error('删除失败:', error);
       // await showinfoDialog('删除失败，请检查控制台');
     }
-  } else if (e.target.matches('#editUnit, #editUnit > img')) {
-    const unit = e.target.closest('.unit-list-item').dataset.unit
-    showUnitEidt(unit)
   } else {
-    const unit = e.target.closest('.unit-list-item').dataset.unit
+    const unit = item.dataset.unit;
     showUnitEidt(unit)
   }
 });
