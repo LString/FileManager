@@ -1799,6 +1799,7 @@ let currentAnnoId = null;
 // let annoProcessMode = 1;
 let tempListForSearch_Anno = [];
 let dispatch_units = [];//分发单位
+let isAnnoEditMode = true;
 function showAnnotateAdd(haveBg = false) {
   isEditingAnno = false;
   currentAnnoId = null;
@@ -1808,7 +1809,9 @@ function showAnnotateAdd(haveBg = false) {
   annotate_submit.textContent = '创建';
   annotate_secondary.textContent = '取消';
   annotate_date.setDate(new Date());
+  setAnnotateFormEditable(true);
   toggleFields();
+  isAnnoEditMode = true;
   annotate_add.style.display = 'block';
   if (haveBg) {
     annotate_add.querySelector('.annotate-bg').style.backgroundColor = 'rgba(0, 0, 0, 0)';
@@ -1817,7 +1820,7 @@ function showAnnotateAdd(haveBg = false) {
 function showAnnotateEdit(anno) {
   isEditingAnno = true;
   currentAnnoId = anno.id;
-  annotate_submit.textContent = '保存';
+  annotate_submit.textContent = '编辑';
   annotate_secondary.textContent = '删除';
   setSelectValue('#annotate-intype', anno.processing_mode);
   document.getElementById('annotate-date').value = anno.annotate_at;
@@ -1837,6 +1840,8 @@ function showAnnotateEdit(anno) {
     });
   }
   toggleFields();
+  setAnnotateFormEditable(false);
+  isAnnoEditMode = false;
   annotate_add.style.display = 'block';
 }
 function hideAnnotateModal() {
@@ -1848,6 +1853,8 @@ function hideAnnotateModal() {
   document.getElementById('hasAnnotate').textContent = `已有${annotateTemp.length}条备注`;
   isEditingAnno = false;
   currentAnnoId = null;
+  isAnnoEditMode = true;
+  setAnnotateFormEditable(true);
   loadAudit();
 }
 
@@ -1993,10 +2000,6 @@ annotate_content.normalize();
 annotate_content.addEventListener('input', handleInput);
 annotate_content.addEventListener('keydown', handleKeyDown);
 
-annotateEdit_content.normalize();
-annotateEdit_content.addEventListener('input', handleInputEdit);
-annotateEdit_content.addEventListener('keydown', handleKeyDownEdit);
-
 function handleInput(e) {
   const pos = e.target.selectionStart;
   const value = e.target.value;
@@ -2041,51 +2044,6 @@ function handleKeyDown(e) {
       break;
   }
 }
-
-function handleInputEdit(e) {
-  const pos = e.target.selectionStart;
-  const value = e.target.value;
-
-  // 检测@符号输入
-  if (value[pos - 1] === '@') {
-    showMentionList(pos, 2);
-  }
-}
-
-function handleKeyDownEdit(e) {
-  if (!mentionList.style.display === 'block') return;
-
-  const items = mentionList.querySelectorAll('.mention-item');
-  let active = mentionList.querySelector('.active');
-
-  switch (e.key) {
-    case 'ArrowDown':
-      e.preventDefault();
-      if (!active) items[0].classList.add('active');
-      else {
-        active.classList.remove('active');
-        active.nextElementSibling?.classList.add('active');
-      }
-      break;
-
-    case 'ArrowUp':
-      e.preventDefault();
-      if (active) {
-        active.classList.remove('active');
-        active.previousElementSibling?.classList.add('active');
-      }
-      break;
-
-    case 'Enter':
-      e.preventDefault();
-      if (active) selectMention(active.dataset.user, 2);
-      break;
-
-    case 'Escape':
-      hideMentionList();
-      break;
-  }
-}
 // 点击外部关闭弹窗
 document.addEventListener('click', (e) => {
   if (!mentionList.contains(e.target)) {
@@ -2095,25 +2053,20 @@ document.addEventListener('click', (e) => {
 
 // 定位配置
 const LIST_OFFSET = 5; // 距离右下角的偏移量
-function showMentionList(cursorPos, type = 1) {
-  let textarea
-  if (type == 1) {
-    textarea = annotate_content;
-  } else {
-    textarea = annotateEdit_content;
-  }
+function showMentionList(cursorPos) {
+  const textarea = annotate_content;
 
   const rect = textarea.getBoundingClientRect();
   // 渲染列表
   mentionList.innerHTML = users.map(user =>
-    `<div class="mention-item" 
+    `<div class="mention-item"
             data-user="${user.name}"
             onclick="selectMention('${user.name}')">
           ${user.name}
       </div>`
   ).join('');
   // 定位到右下角
-  mentionList.style.display = 'block';
+  mentionList.style.display = "block";
   mentionList.style.top = `${rect.bottom + window.scrollY - LIST_OFFSET}px`;
   mentionList.style.left = `${rect.right + window.scrollX - mentionList.offsetWidth - LIST_OFFSET}px`;
   currentMentionPos = {
@@ -2122,14 +2075,9 @@ function showMentionList(cursorPos, type = 1) {
   };
 }
 // 选择用户
-function selectMention(username, type = 1) {
+function selectMention(username) {
   if (!currentMentionPos) return;
-  let annotate
-  if (type === 1) {
-    annotate = annotate_content
-  } else {
-    annotate = annotateEdit_content
-  }
+  const annotate = annotate_content;
   const start = currentMentionPos.start - 1; // 包含@符号
   const end = currentMentionPos.end;
 
@@ -2146,9 +2094,24 @@ function selectMention(username, type = 1) {
 
   hideMentionList();
 }
+
 function hideMentionList() {
   mentionList.style.display = 'none';
   currentMentionPos = null;
+}
+
+function setAnnotateFormEditable(editable) {
+  intypeSelect.disabled = !editable;
+  document.getElementById('annotate-date').disabled = !editable;
+  document.getElementById('annotate-author').disabled = !editable;
+  dispatch_input.disabled = !editable;
+  dispatch_add.disabled = !editable;
+  dispatch_input_container.style.pointerEvents = editable ? '' : 'none';
+  dispatch_inputwithadd_container.style.backgroundColor = editable ? '' : '#f0f0f0';
+  contentField.disabled = !editable;
+  noteField.disabled = !editable;
+  contentField.style.backgroundColor = editable ? '' : '#f0f0f0';
+  noteField.style.backgroundColor = editable ? '' : '#f0f0f0';
 }
 
 // 处理方式
@@ -2244,6 +2207,13 @@ dispatch_input_container.addEventListener('click', async (e) => {
 //添加批注表单
 document.getElementById('annotate-Form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (isEditingAnno && !isAnnoEditMode) {
+    isAnnoEditMode = true;
+    annotate_submit.textContent = '保存';
+    setAnnotateFormEditable(true);
+    toggleFields();
+    return;
+  }
   try {
     if (currentDocId && (currentType === undefined || currentType === null)) {
       const docInfo = await window.electronAPI.db.getDocumentById(currentDocId);
