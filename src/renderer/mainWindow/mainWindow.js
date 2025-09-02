@@ -1386,31 +1386,75 @@ document.getElementById('search-normal').addEventListener('click', async () => {
 })
 
 document.getElementById('search-important').addEventListener('click', async () => {
-  const searchKey = document.getElementById('search_inuput_important')
-    .value
-    .trim()
-    .toLowerCase();
+  const rawKey = document.getElementById('search_inuput_important').value.trim();
+  const mode = document.getElementById('important_search_mode').value;
 
-  let filteredDocs = tempListForSearch_Important.filter(doc => {
-    const searchFields = [
-      doc.title,
-      doc.sender_unit,
-      doc.sender_number,
-      doc.drafting_unit,
-      doc.review_leader,
-      doc.secrecy_level,
-      doc.crgency_level,
-      doc.secrecy_period
-    ];
+  // 关键字为空时显示全部
+  if (rawKey === '') {
+    refreshDocList(2, null);
+    return;
+  }
 
-    // 检查字段是否包含关键词（空关键词返回全部）
-    return searchKey === '' ||
-      searchFields.some(field =>
-        String(field).toLowerCase().includes(searchKey)
-      );
-  });
-  filteredDocs = searchKey == '' ? null : filteredDocs
-  refreshDocList(2, filteredDocs, searchKey)
+  const searchKey = rawKey.toLowerCase();
+  const results = [];
+
+  if (mode === 'title') {
+    tempListForSearch_Important.forEach(doc => {
+      if (String(doc.title || '').toLowerCase().includes(searchKey)) {
+        results.push(doc);
+      }
+    });
+  } else if (mode === 'unit') {
+    for (const doc of tempListForSearch_Important) {
+      const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
+      if (flows.some(f => String(f.unit || '').trim().toLowerCase() === searchKey)) {
+        results.push(doc);
+      }
+    }
+  } else if (mode === 'leader') {
+    for (const doc of tempListForSearch_Important) {
+      const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
+      if (annos.some(a => String(a.author || '').trim().toLowerCase() === searchKey)) {
+        results.push(doc);
+      }
+    }
+  } else { // 多字段模式
+    for (const doc of tempListForSearch_Important) {
+      let match = [
+        doc.title,
+        doc.sender_unit,
+        doc.sender_number,
+        doc.drafting_unit,
+        doc.review_leader,
+        doc.secrecy_level,
+        doc.crgency_level,
+        doc.secrecy_period,
+        doc.remarks
+      ].some(field => String(field ?? '').toLowerCase().includes(searchKey));
+
+      if (!match) {
+        const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
+        match = annos.some(a =>
+          String(a.content || '').toLowerCase().includes(searchKey) ||
+          String(a.annotate_note || '').toLowerCase().includes(searchKey) ||
+          String(a.author || '').toLowerCase().includes(searchKey)
+        );
+      }
+
+      if (!match) {
+        const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
+        match = flows.some(f =>
+          String(f.unit || '').toLowerCase().includes(searchKey)
+        );
+      }
+
+      if (match) {
+        results.push(doc);
+      }
+    }
+  }
+
+  refreshDocList(2, results, rawKey);
 })
 
 
