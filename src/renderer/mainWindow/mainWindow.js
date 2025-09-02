@@ -1795,6 +1795,7 @@ const dispatch_add = document.getElementById('dispatch-unit-add');
 const dispatch_input = document.getElementById('dispatch-unit-add-input');
 const dispatch_inputwithadd_container = document.getElementById('dispatch-unit-inputwithadd-container');
 const dispatch_input_container = document.getElementById('dispatch-unit-container');
+const annotateForm = document.getElementById('annotate-Form');
 
 // // 模拟数据
 
@@ -2192,6 +2193,17 @@ function toggleFields() {
   // 设置字段必填状态
 
 }
+
+annotateForm.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (e.target === dispatch_input) {
+      e.preventDefault();
+      dispatch_add.click();
+    } else if (e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+    }
+  }
+});
 
 //批注分发单位标签添加
 dispatch_add.addEventListener('click', async () => {
