@@ -165,6 +165,19 @@ class DB {
       CREATE INDEX IF NOT EXISTS idx_distribution_doc ON document_distribution(document_uuid);
       CREATE INDEX IF NOT EXISTS idx_distribution_annotation ON document_distribution(annotation_id);
       CREATE INDEX IF NOT EXISTS idx_distribution_unit ON document_distribution(unit_id);
+
+      -- 文件流转记录表
+      CREATE TABLE IF NOT EXISTS flow_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        document_uuid TEXT NOT NULL,
+        unit TEXT NOT NULL,
+        distributed_at TEXT,
+        back_at TEXT,
+        created_at DATETIME DEFAULT (datetime('now', 'localtime')),
+        FOREIGN KEY(document_uuid) REFERENCES documents(uuid) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_flow_records_uuid ON flow_records(document_uuid);
     `);
   }
 
@@ -607,6 +620,33 @@ class DB {
 
       getDistributionById: this.connection.prepare(`
         SELECT * FROM document_distribution WHERE id = @id
+      `),
+
+      /******************** 文件流转记录 ********************/
+      addFlowRecord: this.connection.prepare(`
+        INSERT INTO flow_records (
+          document_uuid, unit, distributed_at, back_at
+        ) VALUES (
+          @document_uuid, @unit, @distributed_at, @back_at
+        )
+      `),
+
+      getFlowRecords: this.connection.prepare(`
+        SELECT id, unit, distributed_at, back_at
+        FROM flow_records
+        WHERE document_uuid = @document_uuid
+        ORDER BY id
+      `),
+
+      updateFlowRecord: this.connection.prepare(`
+        UPDATE flow_records SET
+          distributed_at = COALESCE(@distributed_at, distributed_at),
+          back_at = COALESCE(@back_at, back_at)
+        WHERE id = @id
+      `),
+
+      deleteFlowRecord: this.connection.prepare(`
+        DELETE FROM flow_records WHERE id = @id
       `),
 
     };

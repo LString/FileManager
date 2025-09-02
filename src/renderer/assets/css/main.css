@@ -2896,22 +2896,23 @@ input:-webkit-autofill:focus {
     cursor: pointer;
     border: none;
     color: #fff;
+    white-space: nowrap;
 }
 
 .flow-save-btn {
-    background: #52c41a;
+    background: #67c23a;
 }
 
 .flow-save-btn:hover {
-    background: #73d13d;
+    background: #85d16b;
 }
 
 .flow-cancel-btn {
-    background: #ff4d4f;
+    background: #f56c6c;
 }
 
 .flow-cancel-btn:hover {
-    background: #ff7875;
+    background: #f78989;
 }
 
 .flow-table {
