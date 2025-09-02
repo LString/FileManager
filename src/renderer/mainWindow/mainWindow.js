@@ -648,7 +648,7 @@ function hideAnnoSidebar(leftContainer, rightContainer) {
   setTimeout(() => {
     rightContainer.style.display = 'none';
     rightContainer.classList.remove('force-hidden');
-  }, 400);
+  }, 300);
   leftContainer.classList.remove('split-view');
   leftContainer.style.width = '';
   rightContainer.style.width = '';
@@ -1097,8 +1097,10 @@ async function printDoc(formData) {
 
 }
 
-let tempListForSearch_Normal = null;//搜索/排序功能的临时数组
-let tempListForSearch_Important = null;//搜索/排序功能的临时数组
+let tempListForSearch_Normal = null;//当前显示的普通文档列表
+let tempListForSearch_Important = null;//当前显示的重要文档列表
+let fullListForSearch_Normal = null;//普通文档完整列表缓存
+let fullListForSearch_Important = null;//重要文档完整列表缓存
 let currentSortCloum = null;
 let currentSortDir = 'asc'
 async function refreshDocList(type = 1, searchResult = null, _searchKey = null) {
@@ -1134,8 +1136,14 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     }
 
     if (type == 1) {
+      if (searchResult == null) {
+        fullListForSearch_Normal = docs
+      }
       tempListForSearch_Normal = docs
     } else {
+      if (searchResult == null) {
+        fullListForSearch_Important = docs
+      }
       tempListForSearch_Important = docs
     }
 
@@ -1336,6 +1344,11 @@ function updateImportSortIcons(currentField, direction) {
 
 document.getElementById('search-normal').addEventListener('click', async () => {
 
+  const leftContainer = document.getElementById('view-doc-nor-left');
+  const rightContainer = document.getElementById('view-doc-nor-right');
+  hideAnnoSidebar(leftContainer, rightContainer);
+  currentDocId = null;
+
   // 获取选中的搜索字段
   const searchField = document.getElementById('search_field').value;
   // 获取搜索关键词并处理
@@ -1351,8 +1364,10 @@ document.getElementById('search-normal').addEventListener('click', async () => {
   }
 
 
+  const dataset = fullListForSearch_Normal || [];
+
   // 根据选定字段进行过滤
-  let filteredDocs = tempListForSearch_Normal.filter(doc => {
+  let filteredDocs = dataset.filter(doc => {
     // 全部字段搜索
     if (searchField === 'all') {
       const searchFields = [
@@ -1386,6 +1401,11 @@ document.getElementById('search-normal').addEventListener('click', async () => {
 })
 
 document.getElementById('search-important').addEventListener('click', async () => {
+  const leftContainer = document.getElementById('view-doc-imp-left');
+  const rightContainer = document.getElementById('view-doc-imp-right');
+  hideAnnoSidebar(leftContainer, rightContainer);
+  currentDocId = null;
+
   const rawKey = document.getElementById('search_inuput_important').value.trim();
   const mode = document.getElementById('important_search_mode').value;
 
@@ -1395,31 +1415,32 @@ document.getElementById('search-important').addEventListener('click', async () =
     return;
   }
 
+  const dataset = fullListForSearch_Important || [];
   const searchKey = rawKey.toLowerCase();
   const results = [];
 
   if (mode === 'title') {
-    tempListForSearch_Important.forEach(doc => {
+    dataset.forEach(doc => {
       if (String(doc.title || '').toLowerCase().includes(searchKey)) {
         results.push(doc);
       }
     });
   } else if (mode === 'unit') {
-    for (const doc of tempListForSearch_Important) {
+    for (const doc of dataset) {
       const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
       if (flows.some(f => String(f.unit || '').trim().toLowerCase() === searchKey)) {
         results.push(doc);
       }
     }
   } else if (mode === 'leader') {
-    for (const doc of tempListForSearch_Important) {
+    for (const doc of dataset) {
       const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
       if (annos.some(a => String(a.author || '').trim().toLowerCase() === searchKey)) {
         results.push(doc);
       }
     }
   } else { // 多字段模式
-    for (const doc of tempListForSearch_Important) {
+    for (const doc of dataset) {
       let match = [
         doc.title,
         doc.sender_unit,
@@ -1456,6 +1477,18 @@ document.getElementById('search-important').addEventListener('click', async () =
 
   refreshDocList(2, results, rawKey);
 })
+
+document.getElementById('search_inuput_normal').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('search-normal').click();
+  }
+});
+
+document.getElementById('search_inuput_important').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('search-important').click();
+  }
+});
 
 
 // window.addEventListener('click', (e) => {
