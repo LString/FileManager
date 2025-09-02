@@ -835,6 +835,16 @@ ipcMain.handle('database', async (_, { action, data }) => {
         });
 
       }
+      case 'getUnitsWithFlowCount': {
+        const password = currentAccount.password;
+        aes256.init(password);
+        const rows = dbInstance.statements.getUnitsWithFlowCount.all();
+        return rows.map(item => ({
+          id: item.id,
+          name: aes256.decrypt(item.name),
+          usage_count: item.usage_count
+        }));
+      }
       case 'deleteUnit':
         return dbInstance.connection.transaction(() => {
           dbInstance.statements.deleteUnit.run({ unitId: data });

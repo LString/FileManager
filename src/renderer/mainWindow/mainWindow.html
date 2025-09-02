@@ -391,20 +391,15 @@
                 <div class="unit-manager-body">
                     <div class="add-unit">
                         <div>
-                            <span>一级单位</span>
-                            <input type="text" id="add-unit-unit" placeholder="请输入一级单位" class="add-name-real" />
-                        </div>
-                        <div>
-                            <span>二级单位</span>
-                            <input type="text" id="add-unit-unitSon" placeholder="请输入二级单位" class="add-name-real" />
+                            <span>单位名称</span>
+                            <input type="text" id="add-unit-name" placeholder="请输入单位名称" class="add-name-real" />
                         </div>
                         <button id="add-unit-btn" class="add-btn">添加</button>
                     </div>
                     <div class="unit-list-body">
                         <div class="unit-list-title">
-                            <div class="name-list-title-colum">一级单位</div>
-                            <div class="name-list-title-colum">二级单位</div>
-                            <div class="name-list-title-colum">操作</div>
+                            <div class="name-list-title-colum">单位名称</div>
+                            <div class="name-list-title-colum">经手文件数</div>
                         </div>
                         <ol id="unit-list"></ol>
                     </div>
@@ -859,12 +854,8 @@
                     <div class="name-edit-body">
                         <div class="unit-edit-container">
                             <div class="unit-edit-unit-container">
-                                <label for="unit-edit-primary-unit">一级单位</label>
-                                <input id="unit-edit-primary-unit" disabled>
-                            </div>
-                            <div class="unit-edit-unit-container">
-                                <label for="unit-edit-secondary-unit">二级单位</label>
-                                <input id="unit-edit-secondary-unit" disabled>
+                                <label for="unit-edit-name">单位名称</label>
+                                <input id="unit-edit-name" disabled>
                             </div>
                         </div>
                         <div class="name-edit-btn-actions">
@@ -939,16 +930,8 @@
         <template id="unitListTemplate">
             <div id="unitList-item" class="nameList-item-body">
                 <div class="unit-list-item">
-                    <div id="unit-list-item-name" class="name-list-item-colum">张三</div>
-                    <div id="unit-list-item-son" class="name-list-item-colum">张三，张三，张三，张三，张三</div>
-                    <div class="unit-list-item-colum">
-                        <button id="editUnit" class="action-btn edit-btn" title="编辑">
-                            <img src="../assets/image/edit_icon.png" />
-                        </button>
-                        <button id="deleteUnit" class="action-btn delete-btn" title="删除单位及其子单位">
-                            <img src="../assets/image/delete_icon.png" />
-                        </button>
-                    </div>
+                    <div id="unit-list-item-name" class="name-list-item-colum">单位</div>
+                    <div id="unit-list-item-count" class="name-list-item-colum">0</div>
                 </div>
                 <hr>
             </div>

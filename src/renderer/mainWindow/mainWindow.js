@@ -2892,44 +2892,20 @@ function showInfo(title, name, alias, unit) {
  * 单位管理模块
  */
 document.getElementById('add-unit-btn').addEventListener('click', async (_e) => {
-  const name = document.getElementById('add-unit-unit').value.trim();
-  const unitSon = document.getElementById('add-unit-unitSon').value.trim();
-
-  if (!name || !unitSon) {
-    return;
-  }
-
+  const name = document.getElementById('add-unit-name').value.trim();
+  if (!name) return;
   try {
-    // 检查是否存在同名单位
     const existingUnit = await window.electronAPI.db.findUnitByName(name);
-    let unitId;
-
-    // 存在则复用，不存在则新建
-    if (existingUnit.length > 0) {
-      unitId = existingUnit[0].id;
-    } else {
-      const newUnit = await window.electronAPI.db.createUnit({ name });
-      unitId = newUnit;
+    if (existingUnit.length === 0) {
+      await window.electronAPI.db.createUnit({ name });
+      await loadUnit();
     }
-
-    // 添加二级单位（自动处理唯一性）
-    await window.electronAPI.db.addUnitSon({
-      unit_id: unitId,
-      unit_son_name: unitSon
-    });
-
-    // 清空输入并刷新列表
-    document.getElementById('add-unit-unit').value = '';
-    document.getElementById('add-unit-unitSon').value = '';
-    //更新选择器
-    loadUnit();
-    //更新列表
+    document.getElementById('add-unit-name').value = '';
     loadUnitWithSonToUnitManager();
   } catch (error) {
     console.error('操作失败:', error);
     alert(`操作失败: ${error.message}`);
   }
-
 });
 
 
@@ -2938,33 +2914,16 @@ async function loadUnitWithSonToUnitManager() {
   const container = document.getElementById('unit-list');
   if (!container) return;
   try {
-    const units = await window.electronAPI.db.getUnitWithSonToManager() || [];
+    const units = await window.electronAPI.db.getUnitsWithFlowCount();
     container.replaceChildren();
 
     units.forEach(unit => {
-      // 处理子单元数据结构
-      let unitsSon;
-      const sonSource = unit.unitSon; // 确保字段名正确
-      if (typeof sonSource === 'string') {
-        try { unitsSon = JSON.parse(sonSource) }
-        catch (_e) { unitsSon = [] }
-      } else {
-        // 兼容单对象和数组
-        unitsSon = Array.isArray(sonSource) ? sonSource : [sonSource].filter(Boolean)
-      }
-
-      // 克隆模板
       const clone = document.getElementById('unitListTemplate').content.cloneNode(true);
       const item = clone.querySelector('.unit-list-item');
-      item.dataset.id = unit.unitSon.id;//子单位ID
-      item.dataset.unit = JSON.stringify(unit);;//子单位ID
-      // 渲染主单元
-      item.querySelector('#unit-list-item-name').textContent = unit.name || '无';
-
-      // 渲染子单元（即使单对象也通过数组处理）
-      const sonNames = unitsSon.map(item => item.unit_son_name).join(', ');
-      item.querySelector('#unit-list-item-son').textContent = sonNames || '无子单元';
-
+      item.dataset.id = unit.id;
+      item.dataset.count = unit.usage_count;
+      item.querySelector('#unit-list-item-name').textContent = unit.name;
+      item.querySelector('#unit-list-item-count').textContent = unit.usage_count;
       container.appendChild(clone);
     });
   } catch (error) {
@@ -2973,116 +2932,76 @@ async function loadUnitWithSonToUnitManager() {
   }
 }
 
-// 在容器上统一监听点击事件
-document.getElementById('unit-list').addEventListener('click', async e => {
+document.getElementById('unit-list').addEventListener('dblclick', e => {
   const item = e.target.closest('.unit-list-item');
   if (!item) return;
-  // 删除单位
-  if (e.target.matches('#deleteUnit, #deleteUnit > img')) {
-    if (!(await hasPermission())) {
-      const cancel = await showPermissionDialog();
-      if (!cancel) return;
-    }
-    const confirm = await showConfirmDialog('确定删除该单位？');
-    if (!confirm) return;
-    try {
-      const unitSonId = item.dataset.id;
-      await window.electronAPI.db.deleteUnitSon(unitSonId);
-      loadUnitWithSonToUnitManager();
-      loadAudit()
-    } catch (error) {
-      console.error('删除失败:', error);
-      // await showinfoDialog('删除失败，请检查控制台');
-    }
-  } else {
-    const unit = item.dataset.unit;
-    showUnitEidt(unit)
-  }
+  if (Number(item.dataset.count) > 0) return;
+  const unit = {
+    id: item.dataset.id,
+    name: item.querySelector('#unit-list-item-name').textContent
+  };
+  showUnitEidt(unit);
 });
 
-//单位编辑
-let currentUnitId = null
-let currentUnitSonId = null
-let isUintEidting = false
-function showUnitEidt(unit) {
-  const tempunit = JSON.parse(unit);
-  currentUnitId = tempunit.unitId
-  currentUnitSonId = tempunit.unitSon.id
-  document.getElementById('unitEdit').style.display = 'block'
+let currentUnitId = null;
+let isUintEidting = false;
 
-  document.getElementById('unit-edit-primary-unit').value = tempunit.name
-  document.getElementById('unit-edit-secondary-unit').value = tempunit.unitSon.unit_son_name
+function showUnitEidt(unit) {
+  currentUnitId = unit.id;
+  document.getElementById('unit-edit-name').value = unit.name;
+  document.getElementById('unitEdit').style.display = 'block';
 }
 
-document.getElementById('save-unit-eidt').addEventListener('click', async (_e) => {
-
+document.getElementById('save-unit-eidt').addEventListener('click', async () => {
   if (!isUintEidting) {
     changeUnitEditing();
   } else {
-    const newUnitName = document.getElementById('unit-edit-primary-unit').value
-    const newUnitSonName = document.getElementById('unit-edit-secondary-unit').value
-    const unitSon = { currentUnitSonId, newUnitSonName }
-    const array = [unitSon];
+    const newUnitName = document.getElementById('unit-edit-name').value.trim();
     await window.electronAPI.db.updateUnitWithSons({
       unitId: currentUnitId,
       newName: newUnitName,
-      newUnitSons: array
-    })
-    loadUnitWithSonToUnitManager()
-    hideUnitEidt()
+      newUnitSons: []
+    });
+    await loadUnit();
+    await loadUnitWithSonToUnitManager();
+    hideUnitEidt();
   }
-
 });
 
 function changeUnitEditing() {
   const unitEdit = document.getElementById('unitEdit');
-  //非编辑模式下点击修改UI状态
   unitEdit.classList.toggle('editing');
-
-  // 动态切换禁用状.
   isUintEidting = unitEdit.classList.contains('editing');
-  const inputs = unitEdit.querySelectorAll('input');
-  inputs.forEach(input => {
-    input.disabled = !isUintEidting;
-  });
-
-  document.getElementById('save-unit-eidt').textContent = isUintEidting ? '保存' : '编辑'
-
+  const input = document.getElementById('unit-edit-name');
+  input.disabled = !isUintEidting;
+  document.getElementById('save-unit-eidt').textContent = isUintEidting ? '保存' : '编辑';
 }
 
-document.getElementById('delete-unit-eidt').addEventListener('click', async (_e) => {
-
+document.getElementById('delete-unit-eidt').addEventListener('click', async () => {
   if (!(await hasPermission())) {
     const cancel = await showPermissionDialog();
     if (!cancel) return;
   }
   const confirm = await showConfirmDialog('确定删除该单位？');
   if (!confirm) return;
-  try {
-    const unittUnitId = currentUnitId
-    await window.electronAPI.db.deleteUnit(unittUnitId);
-    loadUnitWithSonToUnitManager();
-    loadAudit()
-    hideUnitEidt()
-  } catch (error) {
-    console.error('删除失败:', error);
-    // await showinfoDialog('删除失败，请检查控制台');
-  }
+  await window.electronAPI.db.deleteUnit(currentUnitId);
+  await loadUnit();
+  await loadUnitWithSonToUnitManager();
+  loadAudit();
+  hideUnitEidt();
+});
 
-
-})
 function hideUnitEidt() {
   if (isUintEidting) {
-    changeUnitEditing()
+    changeUnitEditing();
   }
-
-  currentUnitId = null
-  currentUnitSonId = null
-  document.getElementById('unitEdit').style.display = 'none'
+  currentUnitId = null;
+  document.getElementById('unitEdit').style.display = 'none';
 }
-document.getElementById('unitEdit-close').addEventListener('click', async (_e) => {
+
+document.getElementById('unitEdit-close').addEventListener('click', () => {
   hideUnitEidt();
-})
+});
 
 //数据审计
 async function loadAudit() {

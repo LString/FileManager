@@ -476,7 +476,7 @@ class DB {
         `),
 
       getUnitWithSonToManager: this.connection.prepare(`
-        SELECT 
+        SELECT
           a.id AS unitId,
           a.name AS name,
           aa.id AS sonId,
@@ -486,10 +486,18 @@ class DB {
         ORDER BY a.created_at DESC, aa.unit_son_name ASC;
         `),
 
+      getUnitsWithFlowCount: this.connection.prepare(`
+        SELECT u.id, u.name, COUNT(f.id) AS usage_count
+        FROM unit u
+        LEFT JOIN flow_records f ON f.unit = u.name
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+      `),
+
       searchUnits: this.connection.prepare(`
-        SELECT a.id, a.name, aa.unit_son_name FROM unit 
-          a LEFT JOIN unit_son aa 
-          ON a.id = aa.unit_id WHERE a.name LIKE 
+        SELECT a.id, a.name, aa.unit_son_name FROM unit
+          a LEFT JOIN unit_son aa
+          ON a.id = aa.unit_id WHERE a.name LIKE
           @query OR aa.unit_son_name LIKE @query 
           GROUP BY a.id
         `),
