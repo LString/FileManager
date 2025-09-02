@@ -1406,7 +1406,7 @@ document.getElementById('search-important').addEventListener('click', async () =
   hideAnnoSidebar(leftContainer, rightContainer);
   currentDocId = null;
 
-  const rawKey = document.getElementById('search_inuput_important').value.trim();
+  const rawKey = document.getElementById('search_input_important').value.trim();
   const mode = document.getElementById('important_search_mode').value;
 
   // 关键字为空时显示全部
@@ -1484,10 +1484,10 @@ document.getElementById('search_inuput_normal').addEventListener('keydown', (e) 
   }
 });
 
-document.getElementById('search_inuput_important').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    document.getElementById('search-important').click();
-  }
+document.getElementById('search_input_important').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('search-important').click();
+    }
 });
 
 

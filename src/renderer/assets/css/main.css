@@ -528,13 +528,13 @@ input:-webkit-autofill:focus {
     top: 20px;
     position: absolute;
     transform: translateX(-50%);
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
 }
 
 .search_key {
-    width: 100%;
+    width: 120px;
     height: 36px;
     margin: 0;
     border: 1px solid #d9d9d9;
@@ -553,6 +553,10 @@ input:-webkit-autofill:focus {
     cursor: pointer;
 }
 
+.search_key:focus {
+    box-shadow: 0 0 0 2px rgba(66, 135, 242, 0.2);
+}
+
 .new-doc-add-annotate-contaniner {
     display: flex;
     align-items: center;
@@ -568,11 +572,11 @@ input:-webkit-autofill:focus {
     cursor: pointer;
 }
 
-.normal-serach {
+.normal-search {
     display: flex;
     align-items: center;
     height: 36px;
-    width: 100%;
+    flex: 1;
     margin: 0;
 }
 
