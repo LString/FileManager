@@ -762,7 +762,7 @@ document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
   if (td.tagName !== 'TD' || !td.classList.contains('editable')) return;
   const oldValue = td.textContent;
   const input = document.createElement('input');
-  input.type = 'text';
+  input.type = 'date';
   input.value = oldValue;
   td.textContent = '';
   td.appendChild(input);
