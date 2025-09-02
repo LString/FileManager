@@ -610,6 +610,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     * 刷新列表
     */
   initResizableTable();
+  initSidebarResizer('view-doc-nor-left', 'view-doc-nor-right');
+  initSidebarResizer('view-doc-imp-left', 'view-doc-imp-right');
 
 
 })
@@ -626,7 +628,12 @@ function hideAnnoSidebar(leftContainer, rightContainer) {
     rightContainer.classList.remove('force-hidden');
   }, 400);
   leftContainer.classList.remove('split-view');
+  leftContainer.style.width = '';
+  rightContainer.style.width = '';
   rightContainer.dataset.mode = '';
+
+  const table = leftContainer.querySelector('resizable-table');
+  table?.clearSelection();
 }
 
 function toggleAnnoSidebar(leftId, rightId, rowData) {
@@ -647,6 +654,9 @@ function toggleAnnoSidebar(leftId, rightId, rowData) {
   rightContainer.style.display = 'flex';
   void rightContainer.offsetHeight;
   rightContainer.classList.add('active');
+  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  rightContainer.style.width = defaultWidth + 'px';
+  leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   if (rightId === 'view-doc-imp-right') {
     rightContainer.dataset.mode = 'anno';
     const annoPanel = document.getElementById('imp-anno-panel');
@@ -683,6 +693,9 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
   rightContainer.style.display = 'flex';
   void rightContainer.offsetHeight;
   rightContainer.classList.add('active');
+  const defaultWidth = parseInt(rightContainer.style.width) || 360;
+  rightContainer.style.width = defaultWidth + 'px';
+  leftContainer.style.width = `calc(100% - ${defaultWidth}px)`;
   rightContainer.dataset.mode = 'flow';
   const annoPanel = document.getElementById('imp-anno-panel');
   const flowPanel = document.getElementById('imp-flow-panel');
@@ -698,6 +711,40 @@ function toggleFlowSidebar(leftId, rightId, rowData) {
     document.getElementById('flow-back').value = '';
   }
   loadFlowList();
+}
+
+function initSidebarResizer(leftId, rightId) {
+  const left = document.getElementById(leftId);
+  const right = document.getElementById(rightId);
+  const resizer = right?.querySelector('.sidebar-resizer');
+  if (!left || !right || !resizer) return;
+
+  let startX, startLeft, startRight;
+
+  resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = e.clientX;
+    startLeft = left.getBoundingClientRect().width;
+    startRight = right.getBoundingClientRect().width;
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+  });
+
+  const onDrag = (e) => {
+    const dx = startX - e.clientX;
+    const containerWidth = left.parentElement.getBoundingClientRect().width;
+    let newRight = startRight + dx;
+    const min = 200;
+    newRight = Math.min(Math.max(newRight, min), containerWidth - min);
+    const newLeft = containerWidth - newRight;
+    right.style.width = `${newRight}px`;
+    left.style.width = `${newLeft}px`;
+  };
+
+  const stopDrag = () => {
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+  };
 }
 
 async function loadFlowList() {
@@ -866,6 +913,7 @@ async function initResizableTable() {
       e.preventDefault();
       contextDoc = norTable.originalData[row.dataset.index];
       contextDocId = contextDoc.uuid;
+      norTable.highlightRow(Number(row.dataset.index));
       norMenu.style.display = 'block';
       norMenu.style.left = `${e.clientX}px`;
       norMenu.style.top = `${e.clientY}px`;
@@ -911,6 +959,7 @@ async function initResizableTable() {
       if (!row) return;
       e.preventDefault();
       contextDocImp = impTable.originalData[row.dataset.index];
+      impTable.highlightRow(Number(row.dataset.index));
       impMenu.style.display = 'block';
       impMenu.style.left = `${e.clientX}px`;
       impMenu.style.top = `${e.clientY}px`;
@@ -1067,7 +1116,8 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       crgency_level: '紧急程度',
       secrecy_period: '保密期限',
       review_leader: '呈阅领导',
-      remarks: '标记'
+      key_words: '关键词',
+      remarks: '备注'
     }
 
     if (type === 2) {
@@ -1076,6 +1126,24 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
 
     table.setHeaderMap(headerMap)
 
+    const columnWidths = {
+      id: 60,
+      title: 280,
+      sender_unit: 180,
+      sender_number: 140,
+      drafting_unit: 180,
+      input_user: 100,
+      sender_date: 160,
+      secrecy_level: 120,
+      crgency_level: 120,
+      secrecy_period: 120,
+      review_leader: 150,
+      key_words: 200,
+      remarks: 180,
+      status: 120
+    }
+
+    table.columnWidths = columnWidths
     table.setData(docs)
 
     if (type === 2) {
