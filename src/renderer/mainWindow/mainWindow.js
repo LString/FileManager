@@ -627,6 +627,9 @@ function hideAnnoSidebar(leftContainer, rightContainer) {
   }, 400);
   leftContainer.classList.remove('split-view');
   rightContainer.dataset.mode = '';
+
+  const table = leftContainer.querySelector('resizable-table');
+  table?.clearSelection();
 }
 
 function toggleAnnoSidebar(leftId, rightId, rowData) {
@@ -866,6 +869,7 @@ async function initResizableTable() {
       e.preventDefault();
       contextDoc = norTable.originalData[row.dataset.index];
       contextDocId = contextDoc.uuid;
+      norTable.highlightRow(Number(row.dataset.index));
       norMenu.style.display = 'block';
       norMenu.style.left = `${e.clientX}px`;
       norMenu.style.top = `${e.clientY}px`;
@@ -911,6 +915,7 @@ async function initResizableTable() {
       if (!row) return;
       e.preventDefault();
       contextDocImp = impTable.originalData[row.dataset.index];
+      impTable.highlightRow(Number(row.dataset.index));
       impMenu.style.display = 'block';
       impMenu.style.left = `${e.clientX}px`;
       impMenu.style.top = `${e.clientY}px`;
@@ -1067,7 +1072,8 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       crgency_level: '紧急程度',
       secrecy_period: '保密期限',
       review_leader: '呈阅领导',
-      remarks: '标记'
+      key_words: '关键词',
+      remarks: '备注'
     }
 
     if (type === 2) {
@@ -1076,6 +1082,24 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
 
     table.setHeaderMap(headerMap)
 
+    const columnWidths = {
+      id: 60,
+      title: 280,
+      sender_unit: 180,
+      sender_number: 140,
+      drafting_unit: 180,
+      input_user: 100,
+      sender_date: 160,
+      secrecy_level: 120,
+      crgency_level: 120,
+      secrecy_period: 120,
+      review_leader: 150,
+      key_words: 200,
+      remarks: 180,
+      status: 120
+    }
+
+    table.columnWidths = columnWidths
     table.setData(docs)
 
     if (type === 2) {

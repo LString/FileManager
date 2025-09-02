@@ -208,8 +208,7 @@ if (!customElements.get('resizable-table')) {
                     scrollbar-gutter: stable;
                     scroll-behavior: smooth; /* 平滑滚动 */
                 }
-                
-                                    
+
                 table {
                     border-spacing: 0;
                     table-layout: fixed;
@@ -217,58 +216,61 @@ if (!customElements.get('resizable-table')) {
                 }
 
                 th {
-                    background: rgba(246, 246, 251, 1);;
+                    background: #fafafa;
                     position: relative;
                     cursor: pointer;
-                    font-weight: 400;
+                    font-weight: 500;
                     color: rgba(29, 33, 41, 1);
                     font-size: 14px;
                     user-select: none;
                     transition: background 0.3s;
                     box-sizing: border-box;
                     text-align: left;
-                    padding: 12px 16px;
-                    border: 0.5px solid rgba(0, 0, 0, 0.2);
+                    padding: 10px 12px;
+                    border-bottom: 1px solid #e0e0e0;
                     min-width: 80px;
                     max-width: 800px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
                 }
-                
+
                 th:hover {
-                    background-color: #f5fbff;
+                    background-color: #f5f5f5;
                 }
 
-                
                 #table-headers-table,
                 #table-body-table {
                     border-collapse: collapse;
                     table-layout: fixed; /* 保持固定布局 */
                 }
-            
+
                 #table-body-table tr {
                     transition: background-color 0.2s;
-                    border: 0.5px solid rgba(0, 0, 0, 0.2);
+                    border-bottom: 1px solid #f0f0f0;
                 }
-                
+
                 #table-body-table tr:hover {
-                    background-color: #f5fbff;
+                    background-color: #f5faff;
+                }
+
+                #table-body-table tr.selected {
+                    background-color: #e6f7ff;
                 }
 
                 #table-body-table td {
                     box-sizing: border-box;
-                    padding: 1px 1px 1px 16px;
+                    padding: 6px 8px;
                     height: 47px;
                     min-width: 60px;
                     max-width: 800px;
                     overflow: hidden;
                     word-wrap: break-word;
                     white-space: normal;
-                    border: none !important;
+                    border: none;
                 }
-                
-                #table-headers-table{
+
+                #table-headers-table {
                     border-collapse: collapse;
                 }
 
@@ -277,13 +279,42 @@ if (!customElements.get('resizable-table')) {
                     top: 0;
                     z-index: 100;
                 }
-                
-                
+
                 .sort-icon {
                     display: inline-block;
-                    margin-left: 8px;
-                    font-size: 14px;
-                    transition: transform 0.2s;
+                    width: 8px;
+                    height: 12px;
+                    margin-left: 6px;
+                    position: relative;
+                }
+
+                .sort-icon::before,
+                .sort-icon::after {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    width: 0;
+                    height: 0;
+                    border-left: 4px solid transparent;
+                    border-right: 4px solid transparent;
+                }
+
+                .sort-icon::before {
+                    top: 0;
+                    border-bottom: 6px solid #ccc;
+                }
+
+                .sort-icon::after {
+                    bottom: 0;
+                    border-top: 6px solid #ccc;
+                }
+
+                th.asc .sort-icon::before {
+                    border-bottom-color: #1890ff;
+                }
+
+                th.desc .sort-icon::after {
+                    border-top-color: #1890ff;
                 }
                 
                 .resizer {
@@ -439,7 +470,6 @@ if (!customElements.get('resizable-table')) {
 
                 const sortIcon = document.createElement('span');
                 sortIcon.classList.add('sort-icon');
-                sortIcon.textContent = '↕';
                 th.appendChild(sortIcon);
 
                 const resizer = document.createElement('div');
@@ -504,6 +534,7 @@ if (!customElements.get('resizable-table')) {
                     if (e.target.closest('.action-btn')) return;
 
                     const originalData = this.originalData[rowIndex];
+                    this.highlightRow(rowIndex);
                     this.dispatchEvent(new CustomEvent('row-click', {
                         detail: {
                             data: originalData,
@@ -520,6 +551,20 @@ if (!customElements.get('resizable-table')) {
             this.bodyTable.style.minWidth = '100%';
         }
 
+        highlightRow(index) {
+            const rows = this.shadowRoot.querySelectorAll('#table-body tr');
+            rows.forEach((r, i) => {
+                r.classList.toggle('selected', i === index);
+            });
+            this.selectedIndex = index;
+        }
+
+        clearSelection() {
+            const rows = this.shadowRoot.querySelectorAll('#table-body tr.selected');
+            rows.forEach(r => r.classList.remove('selected'));
+            this.selectedIndex = null;
+        }
+
         // 显示右键菜单
         showContextMenu(e) {
             if (!this.contextMenu) return;
@@ -528,7 +573,7 @@ if (!customElements.get('resizable-table')) {
             menuList.innerHTML = '';
 
             this.allKeys.forEach(key => {
-                if (key === 'uuid' || key === 'created_at' || key === 'key_words' || key === 'review_leader') {
+                if (key === 'uuid' || key === 'created_at' || key === 'docType' || key === 'doc_type' || key === 'review_leader') {
                     return
                 }
                 const isVisible = this.visibleKeys.includes(key);
@@ -628,7 +673,7 @@ if (!customElements.get('resizable-table')) {
                 resizer.addEventListener('mousedown', (e) => {
                     this.isResizing = true;
                     this.currentHeader = header;
-                    this.startX = e.clientX;
+                    this.startX = e.clientX + this.headerContainer.scrollLeft;
                     this.startWidth = header.getBoundingClientRect().width;
                     resizer.classList.add('active');
 
@@ -650,7 +695,7 @@ if (!customElements.get('resizable-table')) {
 
             const MIN_WIDTH = 120;
             const MAX_WIDTH = 800;
-            let newWidth = this.startWidth + (e.clientX - this.startX);
+            let newWidth = this.startWidth + (e.clientX + this.headerContainer.scrollLeft - this.startX);
             newWidth = Math.max(MIN_WIDTH, Math.min(newWidth, MAX_WIDTH));
 
             // 更新当前列的宽度
@@ -738,11 +783,9 @@ if (!customElements.get('resizable-table')) {
                     this.sortColumn = index;
 
                     headers.forEach((h, i) => {
-                        const ic = h.querySelector('.sort-icon');
+                        h.classList.remove('asc', 'desc');
                         if (i === index) {
-                            ic.textContent = this.sortDirection === 'asc' ? '↑' : '↓';
-                        } else if (!isMultiSort) {
-                            ic.textContent = '↕';
+                            h.classList.add(this.sortDirection);
                         }
                     });
 
