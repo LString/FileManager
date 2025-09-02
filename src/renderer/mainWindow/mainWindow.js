@@ -106,6 +106,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       const confirm = await showConfirmDialog('确定删除该条批注？');
       if (!confirm) return;
       if (currentDocId) {
+        const author = document.getElementById('annotate-author').value.trim();
+        const units = dispatch_units.map(u => u.name);
+        if (units.length > 0) {
+          const existing = await window.electronAPI.db.getFlowRecords({ document_uuid: currentDocId });
+          for (const unit of units) {
+            const found = existing.find(r => r.unit === unit);
+            if (found) {
+              const leaders = (found.supervisors || '').split(',').filter(Boolean);
+              const idx = leaders.indexOf(author);
+              if (idx !== -1) {
+                leaders.splice(idx, 1);
+                if (leaders.length === 0) {
+                  await window.electronAPI.db.deleteFlowRecord({ id: found.id });
+                } else {
+                  await window.electronAPI.db.updateFlowRecord({ id: found.id, supervisors: leaders.join(',') });
+                }
+              }
+            }
+          }
+          await loadFlowList();
+          await refreshDocList(2);
+        }
         await window.electronAPI.db.deleteAnnotate(currentAnnoId);
       } else {
         annotateTemp = annotateTemp.filter(obj => obj.id !== currentAnnoId);
