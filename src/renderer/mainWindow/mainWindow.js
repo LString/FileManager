@@ -40,6 +40,10 @@ let users; //用户列表缓存
 let globalWordsCatchs;//关键词列表缓存
 let annotateTemp = [];//新建文档的批注缓存
 let globalUnits; //单位缓存列表
+let idleTimer;
+let autoLogoutTime = 15;
+let autoLogoutEnabled = true;
+let currentUser;
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('[初始化] DOM加载完成')
@@ -97,6 +101,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   loadSetting()
+
+  ;['click', 'mousemove', 'keydown'].forEach(evt => {
+    document.addEventListener(evt, resetIdleTimer)
+  })
 
   const tabs = document.querySelectorAll('.tab-btn');
   const dataManagerBtn = document.getElementById('data-manager');
@@ -3265,13 +3273,73 @@ async function hasPermission() {
   return level == 1
 }
 
+function resetIdleTimer() {
+  clearTimeout(idleTimer)
+  if (!autoLogoutEnabled) return
+  idleTimer = setTimeout(() => {
+    window.electronAPI.logout()
+  }, autoLogoutTime * 60 * 1000)
+}
+
 async function loadSetting() {
-  document.getElementById('userName').textContent = await window.electronAPI.getCurrentAcconutName()
-  document.getElementById('login-out').addEventListener('click', async () => {
-    const confirm = await showConfirmDialog('确定要退出吗？', true);
-    if (!confirm) return;
-    window.electronAPI.close()
+  currentUser = await window.electronAPI.getCurrentAcconutName()
+  document.getElementById('userName').textContent = currentUser
+
+  const settingIcon = document.getElementById('setting-icon')
+  const settingsModal = document.getElementById('settings-modal')
+  const settingsClose = document.getElementById('settings-close')
+  const logoutBtn = document.getElementById('logout-button')
+  const changePwdBtn = document.getElementById('change-password')
+  const saveAutoBtn = document.getElementById('save-auto-logout')
+  const autoEnable = document.getElementById('auto-logout-enable')
+  const autoMinutes = document.getElementById('auto-logout-minutes')
+  const newPwd = document.getElementById('new-password')
+  const confirmPwd = document.getElementById('confirm-password')
+
+  const key = `autoLogout_${currentUser}`
+  const saved = JSON.parse(localStorage.getItem(key) || '{}')
+  autoLogoutEnabled = saved.enabled !== false
+  autoLogoutTime = saved.minutes || 15
+  autoEnable.checked = autoLogoutEnabled
+  autoMinutes.value = autoLogoutTime
+
+  const closeModal = () => {
+    settingsModal.style.display = 'none'
+    newPwd.value = ''
+    confirmPwd.value = ''
+  }
+
+  settingIcon.addEventListener('click', () => {
+    settingsModal.style.display = 'block'
   })
+  settingsClose.addEventListener('click', closeModal)
+
+  logoutBtn.addEventListener('click', () => {
+    closeModal()
+    window.electronAPI.logout()
+  })
+
+  saveAutoBtn.addEventListener('click', () => {
+    autoLogoutEnabled = autoEnable.checked
+    autoLogoutTime = parseInt(autoMinutes.value, 10) || 15
+    localStorage.setItem(key, JSON.stringify({ enabled: autoLogoutEnabled, minutes: autoLogoutTime }))
+    resetIdleTimer()
+    closeModal()
+  })
+
+  changePwdBtn.addEventListener('click', async () => {
+    const np = newPwd.value.trim()
+    const cp = confirmPwd.value.trim()
+    if (!np || np !== cp) {
+      showToast('密码不一致')
+      return
+    }
+    await window.electronAPI.db.updatePassword({ username: currentUser, password: np })
+    closeModal()
+    window.electronAPI.logout()
+  })
+
+  resetIdleTimer()
 }
 
 function showToast(text, duration = 2000) {

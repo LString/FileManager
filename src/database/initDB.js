@@ -195,6 +195,10 @@ class DB {
         `SELECT * FROM account WHERE username=@username`
       ),
 
+      updateAccountPassword: this.connection.prepare(
+        `UPDATE account SET password=@password WHERE username=@username`
+      ),
+
       /******************** 文档操作 ********************/
       createDocument: this.connection.prepare(`
         INSERT INTO documents (

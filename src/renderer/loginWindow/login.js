@@ -91,6 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
         input.type = isPassword ? 'text' : 'password';
     });
 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const loginBtn = document.getElementById('btn-login');
+            if (loginBtn) loginBtn.click();
+        }
+    });
+
     async function showConfirmDialog(msg, show = false) {
         const result = await window.electronAPI.showDialog({ message: msg, showNotice: show });//返回confirm/cancel/close
         console.log('result == ' + result)

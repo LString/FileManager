@@ -74,8 +74,6 @@
                     <img id="setting-icon" class="setting-icon" src="../assets/image/setting.png" alt="设置">
                     <span id="userName" class="setting-btn"
                         style="font-weight: bold;font-size: 18px;color: #353535">用户名</span>
-                    <span id="login-out" class="setting-btn"
-                        style="font-size: 12px; color: #888888;cursor: pointer;margin-bottom: 1px;">退出</span>
                 </div>
             </div>
         </div>
@@ -1068,6 +1066,32 @@
                     <div class="dialog-tbn-container">
                         <button id="cancelBtn" type="button" class="dialog-btn dialogcancel">取消</button>
                         <button id="confirmBtn" type="button" class="dialog-btn confirm">确认</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="settings-modal" class="modal">
+            <div class="pop-bg">
+                <div class="pop-content" style="width:400px;height:auto;padding:20px;">
+                    <div class="modal-header">
+                        <span>设置</span>
+                        <img id="settings-close" src="../assets/image/close.png" style="width:16px;height:16px;cursor:pointer;">
+                    </div>
+                    <hr>
+                    <div class="modal-body">
+                        <div class="auto-logout-section" style="margin-bottom:10px;">
+                            <label><input type="checkbox" id="auto-logout-enable"> 启用自动登出</label>
+                            <input type="number" id="auto-logout-minutes" min="1" style="width:60px;"> 分钟
+                            <button id="save-auto-logout" class="dialog-btn" style="margin-left:10px;">保存</button>
+                        </div>
+                        <hr>
+                        <div class="change-password-section" style="margin-bottom:10px;">
+                            <input type="password" id="new-password" placeholder="新密码" style="margin-right:10px;">
+                            <input type="password" id="confirm-password" placeholder="确认密码" style="margin-right:10px;">
+                            <button id="change-password" class="dialog-btn">修改密码</button>
+                        </div>
+                        <hr>
+                        <button id="logout-button" class="dialog-btn">登出</button>
                     </div>
                 </div>
             </div>

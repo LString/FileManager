@@ -142,6 +142,15 @@ ipcMain.on('close-window', () => {
     })
 })
 
+ipcMain.on('logout', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.close()
+    mainWindow = null
+  }
+  currentAccount = null
+  createWindow()
+})
+
 ipcMain.handle('database', async (_, { action, data }) => {
 
   try {
@@ -999,6 +1008,14 @@ ipcMain.handle('database', async (_, { action, data }) => {
 
       case 'deleteFlowRecord': {
         dbInstance.statements.deleteFlowRecord.run({ id: data.id });
+        return;
+      }
+
+      case 'updatePassword': {
+        dbInstance.statements.updateAccountPassword.run({ username: data.username, password: data.password })
+        if (currentAccount && currentAccount.username === data.username) {
+          currentAccount.password = data.password
+        }
         return;
       }
 
