@@ -171,6 +171,7 @@ class DB {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         document_uuid TEXT NOT NULL,
         unit TEXT NOT NULL,
+        supervisors TEXT,
         distributed_at TEXT,
         back_at TEXT,
         created_at DATETIME DEFAULT (datetime('now', 'localtime')),
@@ -179,6 +180,13 @@ class DB {
 
       CREATE INDEX IF NOT EXISTS idx_flow_records_uuid ON flow_records(document_uuid);
     `);
+
+    // Ensure new column exists for legacy databases
+    const flowColumns = this.connection.prepare("PRAGMA table_info(flow_records)").all();
+    const hasSupervisors = flowColumns.some(col => col.name === 'supervisors');
+    if (!hasSupervisors) {
+      this.connection.prepare("ALTER TABLE flow_records ADD COLUMN supervisors TEXT").run();
+    }
   }
 
   prepareStatements() {
@@ -468,7 +476,7 @@ class DB {
         `),
 
       getUnitWithSonToManager: this.connection.prepare(`
-        SELECT 
+        SELECT
           a.id AS unitId,
           a.name AS name,
           aa.id AS sonId,
@@ -478,10 +486,24 @@ class DB {
         ORDER BY a.created_at DESC, aa.unit_son_name ASC;
         `),
 
+      // 获取单位及其经手文件数
+      getUnitsWithFlowCount: this.connection.prepare(`
+        SELECT id, name
+        FROM unit
+        ORDER BY created_at DESC
+      `),
+
+      // 统计某单位的流转记录数量
+      getFlowCountByUnit: this.connection.prepare(`
+        SELECT COUNT(*) AS count
+        FROM flow_records
+        WHERE unit = @unit
+      `),
+
       searchUnits: this.connection.prepare(`
-        SELECT a.id, a.name, aa.unit_son_name FROM unit 
-          a LEFT JOIN unit_son aa 
-          ON a.id = aa.unit_id WHERE a.name LIKE 
+        SELECT a.id, a.name, aa.unit_son_name FROM unit
+          a LEFT JOIN unit_son aa
+          ON a.id = aa.unit_id WHERE a.name LIKE
           @query OR aa.unit_son_name LIKE @query 
           GROUP BY a.id
         `),
@@ -629,21 +651,31 @@ class DB {
       /******************** 文件流转记录 ********************/
       addFlowRecord: this.connection.prepare(`
         INSERT INTO flow_records (
-          document_uuid, unit, distributed_at, back_at
+          document_uuid, unit, supervisors, distributed_at, back_at
         ) VALUES (
-          @document_uuid, @unit, @distributed_at, @back_at
+          @document_uuid, @unit, @supervisors, @distributed_at, @back_at
         )
       `),
 
       getFlowRecords: this.connection.prepare(`
-        SELECT id, unit, distributed_at, back_at
+        SELECT id, unit, supervisors, distributed_at, back_at
         FROM flow_records
         WHERE document_uuid = @document_uuid
         ORDER BY id
       `),
 
+      // 根据单位名称获取流转文件及时间
+      getDocumentsByUnitName: this.connection.prepare(`
+        SELECT f.document_uuid, f.distributed_at, f.back_at, d.title
+        FROM flow_records AS f
+        INNER JOIN documents AS d ON f.document_uuid = d.uuid
+        WHERE f.unit = @unit
+        ORDER BY f.id
+      `),
+
       updateFlowRecord: this.connection.prepare(`
         UPDATE flow_records SET
+          supervisors = COALESCE(@supervisors, supervisors),
           distributed_at = COALESCE(@distributed_at, distributed_at),
           back_at = COALESCE(@back_at, back_at)
         WHERE id = @id

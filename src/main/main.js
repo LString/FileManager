@@ -835,6 +835,20 @@ ipcMain.handle('database', async (_, { action, data }) => {
         });
 
       }
+      case 'getUnitsWithFlowCount': {
+        const password = currentAccount.password;
+        aes256.init(password);
+        const units = dbInstance.statements.getUnitsWithFlowCount.all();
+        return units.map(u => {
+          const name = aes256.decrypt(u.name);
+          const countRow = dbInstance.statements.getFlowCountByUnit.get({ unit: name });
+          return {
+            id: u.id,
+            name,
+            usage_count: countRow.count
+          };
+        });
+      }
       case 'deleteUnit':
         return dbInstance.connection.transaction(() => {
           dbInstance.statements.deleteUnit.run({ unitId: data });
@@ -988,6 +1002,19 @@ ipcMain.handle('database', async (_, { action, data }) => {
         }));
       }
 
+      case 'getDocumentsByUnitName': {
+        const unit = data;
+        const rows = dbInstance.statements.getDocumentsByUnitName.all({ unit });
+        const password = currentAccount.password;
+        aes256.init(password);
+        return rows.map(r => ({
+          document_uuid: r.document_uuid,
+          title: aes256.decrypt(r.title),
+          distributed_at: r.distributed_at,
+          back_at: r.back_at
+        }));
+      }
+
       case 'getFlowRecords': {
         return dbInstance.statements.getFlowRecords.all({ document_uuid: data.document_uuid });
       }
@@ -999,6 +1026,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'updateFlowRecord': {
         const params = {
           id: data.id,
+          supervisors: data.supervisors ?? null,
           distributed_at: data.distributed_at ?? null,
           back_at: data.back_at ?? null,
         };
