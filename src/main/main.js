@@ -988,7 +988,12 @@ ipcMain.handle('database', async (_, { action, data }) => {
       }
 
       case 'updateFlowRecord': {
-        dbInstance.statements.updateFlowRecord.run(data);
+        const params = {
+          id: data.id,
+          distributed_at: data.distributed_at ?? null,
+          back_at: data.back_at ?? null,
+        };
+        dbInstance.statements.updateFlowRecord.run(params);
         return;
       }
 
