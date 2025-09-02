@@ -607,6 +607,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 let currentType;
 let currentDocId = null; // 当前操作的文档ID
+// 文件流转记录，使用 localStorage 持久化
+let flowRecordsMap = JSON.parse(localStorage.getItem('flowRecords') || '{}');
 
 function hideAnnoSidebar(leftContainer, rightContainer) {
   rightContainer.classList.add('force-hidden');
@@ -616,6 +618,7 @@ function hideAnnoSidebar(leftContainer, rightContainer) {
     rightContainer.classList.remove('force-hidden');
   }, 400);
   leftContainer.classList.remove('split-view');
+  rightContainer.dataset.mode = '';
 }
 
 function toggleAnnoSidebar(leftId, rightId, rowData) {
@@ -636,8 +639,109 @@ function toggleAnnoSidebar(leftId, rightId, rowData) {
   rightContainer.style.display = 'flex';
   void rightContainer.offsetHeight;
   rightContainer.classList.add('active');
+  if (rightId === 'view-doc-imp-right') {
+    rightContainer.dataset.mode = 'anno';
+    const annoPanel = document.getElementById('imp-anno-panel');
+    const flowPanel = document.getElementById('imp-flow-panel');
+    if (annoPanel && flowPanel) {
+      annoPanel.style.display = 'flex';
+      flowPanel.style.display = 'none';
+    }
+  }
   loadAnnotateList();
 }
+
+// 展示文件流转侧栏
+function toggleFlowSidebar(leftId, rightId, rowData) {
+  const leftContainer = document.getElementById(leftId);
+  const rightContainer = document.getElementById(rightId);
+  const uuid = rowData.uuid;
+  const docType = rowData.docType || rowData.doc_type || rowData.type;
+
+  if (
+    currentDocId === uuid &&
+    rightContainer.style.display === 'flex' &&
+    rightContainer.dataset.mode === 'flow'
+  ) {
+    hideAnnoSidebar(leftContainer, rightContainer);
+    currentDocId = null;
+    rightContainer.dataset.mode = '';
+    return;
+  }
+
+  currentDocId = uuid;
+  currentType = docType;
+  leftContainer.classList.add('split-view');
+  rightContainer.style.display = 'flex';
+  void rightContainer.offsetHeight;
+  rightContainer.classList.add('active');
+  rightContainer.dataset.mode = 'flow';
+  const annoPanel = document.getElementById('imp-anno-panel');
+  const flowPanel = document.getElementById('imp-flow-panel');
+  if (annoPanel && flowPanel) {
+    annoPanel.style.display = 'none';
+    flowPanel.style.display = 'flex';
+  }
+  loadFlowList();
+}
+
+function saveFlowRecords() {
+  localStorage.setItem('flowRecords', JSON.stringify(flowRecordsMap));
+}
+
+function loadFlowList() {
+  const tableBody = document.querySelector('#flow-table tbody');
+  if (!tableBody || !currentDocId) return;
+  tableBody.innerHTML = '';
+  const list = flowRecordsMap[currentDocId] || [];
+  list.forEach((rec, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${rec.unit || ''}</td>
+      <td class="editable" data-field="distributed_at">${rec.distributed_at || ''}</td>
+      <td class="editable" data-field="back_at">${rec.back_at || ''}</td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+document.getElementById('flow-add-btn')?.addEventListener('click', () => {
+  if (!currentDocId) return;
+  const unit = prompt('请输入单位名称');
+  if (!unit) return;
+  const distributed_at = prompt('请输入分发时间', '') || '';
+  const back_at = prompt('请输入返回时间', '') || '';
+  const list = flowRecordsMap[currentDocId] || [];
+  list.push({ unit, distributed_at, back_at });
+  flowRecordsMap[currentDocId] = list;
+  saveFlowRecords();
+  loadFlowList();
+});
+
+document.getElementById('flow-table')?.addEventListener('dblclick', (e) => {
+  const td = e.target;
+  if (td.tagName !== 'TD' || !td.classList.contains('editable')) return;
+  const oldValue = td.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = oldValue;
+  td.textContent = '';
+  td.appendChild(input);
+  input.focus();
+  input.addEventListener('blur', () => {
+    const value = input.value;
+    const field = td.dataset.field;
+    td.removeChild(input);
+    td.textContent = value;
+    const rowIndex = td.parentElement.rowIndex - 1;
+    const list = flowRecordsMap[currentDocId] || [];
+    if (list[rowIndex]) {
+      list[rowIndex][field] = value;
+      saveFlowRecords();
+    }
+  });
+});
 
 async function initResizableTable() {
   try {
@@ -688,6 +792,7 @@ async function initResizableTable() {
     const impTable = document.getElementById('impTable');
     const impMenu = document.getElementById('important-context-menu');
     const impEditItem = document.getElementById('important-edit-doc');
+    const impFlowItem = document.getElementById('important-show-flow');
     let contextDocImp = null;
 
     impTable.addEventListener('row-click', (event) => {
@@ -710,6 +815,13 @@ async function initResizableTable() {
       if (contextDocImp) {
         const doc = { ...contextDocImp, type: contextDocImp.docType || contextDocImp.doc_type || contextDocImp.type };
         showEditModal(doc);
+      }
+    });
+
+    impFlowItem.addEventListener('click', () => {
+      impMenu.style.display = 'none';
+      if (contextDocImp) {
+        toggleFlowSidebar('view-doc-imp-left', 'view-doc-imp-right', contextDocImp);
       }
     });
 
