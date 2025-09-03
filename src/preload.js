@@ -38,6 +38,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCurrentAcconutName: () => ipcRenderer.invoke('getCurrentAcconutName'),
   readConfig: () => ipcRenderer.invoke('read-config'),
   getCascaderData: () => ipcRenderer.invoke('get-cascader-data'),
+  getAuditRetention: () => ipcRenderer.invoke('getAuditRetention'),
+  setAuditRetention: (value) => ipcRenderer.invoke('setAuditRetention', value),
 
   showSaveDialog: (options) => ipcRenderer.invoke('show-save-dialog', options),
   generateAndExport: (data) => ipcRenderer.invoke('save-document', data),
