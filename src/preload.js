@@ -33,11 +33,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('window-unmaximized', callback)
   },
 
+  onAuditLogUpdated: (callback) => {
+    ipcRenderer.on('audit-log-updated', callback)
+    return () => ipcRenderer.removeListener('audit-log-updated', callback)
+  },
+
   sendLogin: (userData) => ipcRenderer.send('login-success', userData),
   getLevel: () => ipcRenderer.invoke('getLevel'),
   getCurrentAcconutName: () => ipcRenderer.invoke('getCurrentAcconutName'),
   readConfig: () => ipcRenderer.invoke('read-config'),
   getCascaderData: () => ipcRenderer.invoke('get-cascader-data'),
+  getAuditRetention: () => ipcRenderer.invoke('getAuditRetention'),
+  setAuditRetention: (value) => ipcRenderer.invoke('setAuditRetention', value),
 
   showSaveDialog: (options) => ipcRenderer.invoke('show-save-dialog', options),
   generateAndExport: (data) => ipcRenderer.invoke('save-document', data),

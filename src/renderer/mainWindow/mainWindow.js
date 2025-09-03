@@ -3192,6 +3192,10 @@ async function loadAudit() {
   }
 }
 
+window.electronAPI.onAuditLogUpdated(() => {
+  loadAudit()
+})
+
 //关键词管理
 async function initKeywordTable() {
   const table = document.getElementById('keyword-list');
@@ -3341,6 +3345,7 @@ async function loadSetting() {
   const autoEnable = document.getElementById('auto-logout-enable')
   const autoMinutes = document.getElementById('auto-logout-minutes')
   const autoTimeRow = document.getElementById('auto-logout-time-row')
+  const auditRetention = document.getElementById('audit-retention-years')
   const newPwd = document.getElementById('new-password')
   const confirmPwd = document.getElementById('confirm-password')
 
@@ -3351,6 +3356,8 @@ async function loadSetting() {
   autoEnable.checked = autoLogoutEnabled
   autoMinutes.value = autoLogoutTime
   autoTimeRow.style.display = autoLogoutEnabled ? 'flex' : 'none'
+  const retentionYears = await window.electronAPI.getAuditRetention()
+  auditRetention.value = retentionYears
 
   const closeModal = () => {
     settingsModal.style.display = 'none'
@@ -3379,6 +3386,11 @@ async function loadSetting() {
     autoLogoutTime = parseInt(autoMinutes.value, 10) || 15
     localStorage.setItem(key, JSON.stringify({ enabled: autoLogoutEnabled, minutes: autoLogoutTime }))
     resetIdleTimer()
+  })
+
+  auditRetention.addEventListener('change', () => {
+    const years = parseInt(auditRetention.value, 10) || 3
+    window.electronAPI.setAuditRetention(years)
   })
 
   changePwdBtn.addEventListener('click', async () => {

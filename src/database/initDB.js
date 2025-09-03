@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3');
 // const { create } = require('core-js/core/object');
-const { app } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -17,6 +17,7 @@ class DB {
     this.connection.pragma('foreign_keys = ON');
     this.initializeSchema();
     this.prepareStatements();
+    this.deleteExpiredAuditLogs();
   }
 
   initializeSchema() {
@@ -129,6 +130,15 @@ class DB {
         details TEXT NOT NULL,
         operation_time DATETIME DEFAULT (datetime('now', 'localtime'))
       );
+
+      -- 系统设置表
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+
+      INSERT OR IGNORE INTO settings(key, value)
+      VALUES('audit_retention_years', '3');
 
       --关键词管理列表
       CREATE TABLE IF NOT EXISTS key_words (
@@ -538,6 +548,17 @@ class DB {
         )
       `),
 
+      // 审计日志保留设置
+      getAuditRetention: this.connection.prepare(
+        "SELECT value FROM settings WHERE key = 'audit_retention_years'"
+      ),
+      setAuditRetention: this.connection.prepare(
+        "INSERT INTO settings (key, value) VALUES ('audit_retention_years', @value) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+      ),
+      deleteOldAuditLogs: this.connection.prepare(
+        "DELETE FROM audit_log WHERE operation_time < datetime('now', @limit)"
+      ),
+
       getOperations: this.connection.prepare(`
        SELECT * FROM audit_log ORDER BY operation_time DESC
       `),
@@ -686,6 +707,28 @@ class DB {
       `),
 
     };
+  }
+
+  getAuditRetention() {
+    const row = this.statements.getAuditRetention.get();
+    return row ? parseInt(row.value, 10) : 3;
+  }
+
+  setAuditRetention(years) {
+    this.statements.setAuditRetention.run({ value: String(years) });
+  }
+
+  deleteExpiredAuditLogs() {
+    const years = this.getAuditRetention();
+    this.statements.deleteOldAuditLogs.run({ limit: `-${years} years` });
+  }
+
+  logOperation(params) {
+    this.statements.logOperation.run(params);
+    this.deleteExpiredAuditLogs();
+    BrowserWindow.getAllWindows().forEach(win => {
+      win.webContents.send('audit-log-updated');
+    });
   }
 
   convertToImportant(normalUuid) {

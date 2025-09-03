@@ -219,7 +219,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
 
         }
         if (lastRowId) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               operation_type: aes256.encrypt('创建'),
               table_name: aes256.encrypt('documents'),
@@ -340,7 +340,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           });
 
           if (result.changes > 0) {
-            dbInstance.statements.logOperation.run(
+            dbInstance.logOperation(
               {
                 operation_type: aes256.encrypt('更新'),
                 table_name: aes256.encrypt('documents'),
@@ -361,7 +361,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           console.log('删除影响行数:', result.changes);
 
           if (result.changes > 0) {
-            dbInstance.statements.logOperation.run(
+            dbInstance.logOperation(
               {
                 operation_type: aes256.encrypt('删除'),
                 table_name: aes256.encrypt('documents'),
@@ -378,7 +378,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'convertToImportant': {
         const uuid = dbInstance.convertToImportant(data);
         if (uuid) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               operation_type: aes256.encrypt('转重要'),
               table_name: aes256.encrypt('documents'),
@@ -409,7 +409,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           });
 
         if (uuid) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               operation_type: aes256.encrypt('新建'),
               table_name: aes256.encrypt('annotations'),
@@ -467,7 +467,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           }
         );
         if (id) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               operation_type: aes256.encrypt('更新'),
               table_name: aes256.encrypt('annotations'),
@@ -482,7 +482,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'deleteAnnotate': {
         const annoId = dbInstance.statements.deleteAnnotate.run({ id: data });
         if (annoId) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('annotations'),
               operation_type: aes256.encrypt('删除'),
@@ -513,7 +513,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const encryptedUnit = aes256.encrypt(data.unit);
         const result = dbInstance.statements.createAuthor.get({ name: encryptedName, unit: encryptedUnit });
         if (result) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('authors'),
               operator: aes256.encrypt(currentAccount.username),
@@ -531,7 +531,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const encryName = data.map(name => aes256.encrypt(name))
         const result = dbInstance.createAuthors(encryName);
         if (result) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('authors'),
               operator: aes256.encrypt(currentAccount.username),
@@ -552,7 +552,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           alias: aes256.encrypt(data.alias)
         }).lastInsertRowid;
         if (aliaId) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('author_alias'),
               operator: aes256.encrypt(currentAccount.username),
@@ -627,7 +627,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
 
         return dbInstance.connection.transaction(() => {
           dbInstance.statements.deleteAuthor.run({ authorId: data });
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('authors'),
               operator: aes256.encrypt(currentAccount.username),
@@ -641,7 +641,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'deleteAlias': {
         const change = dbInstance.statements.deleteAlias.run({ aliasId: data }).changes
         if (change) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('author_alias'),
               operator: aes256.encrypt(currentAccount.username),
@@ -684,7 +684,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         });
 
         if (id) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('author_alias'),
               operator: aes256.encrypt(currentAccount.username),
@@ -710,7 +710,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const encryptedName = aes256.encrypt(data.name);
         const result = dbInstance.statements.createUnit.get({ name: encryptedName });
         if (result) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('author_alias'),
               operator: aes256.encrypt(currentAccount.username),
@@ -730,7 +730,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           unit_son_name: aes256.encrypt(data.unit_son_name)
         }).lastInsertRowid;
         if (result) {
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('author_alias'),
               operator: aes256.encrypt(currentAccount.username),
@@ -852,7 +852,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'deleteUnit':
         return dbInstance.connection.transaction(() => {
           dbInstance.statements.deleteUnit.run({ unitId: data });
-          dbInstance.statements.logOperation.run(
+          dbInstance.logOperation(
             {
               table_name: aes256.encrypt('author_alias'),
               operator: aes256.encrypt(currentAccount.username),
@@ -866,7 +866,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
 
       case 'deleteUnitSon': {
         const changes = dbInstance.statements.deleteUnitSon.run({ unitSonId: data }).changes;
-        dbInstance.statements.logOperation.run(
+        dbInstance.logOperation(
           {
             table_name: aes256.encrypt('unit'),
             operator: aes256.encrypt(currentAccount.username),
@@ -910,7 +910,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           encryUnit,
           encryUnitSons,
         );
-        dbInstance.statements.logOperation.run(
+        dbInstance.logOperation(
           {
             table_name: aes256.encrypt('unit-unitson'),
             operator: aes256.encrypt(currentAccount.username),
@@ -1098,6 +1098,15 @@ ipcMain.handle('getLevel', async () => {
 })
 ipcMain.handle('getCurrentAcconutName', async () => {
   return currentAccount.username
+})
+
+ipcMain.handle('getAuditRetention', async () => {
+  return dbInstance.getAuditRetention();
+})
+
+ipcMain.handle('setAuditRetention', async (_event, value) => {
+  dbInstance.setAuditRetention(value);
+  return true;
 })
 
 ipcMain.handle('get-cascader-data', async () => {
