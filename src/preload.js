@@ -1,4 +1,19 @@
 const { contextBridge, ipcRenderer } = require('electron')
+
+async function checkDeletePermission() {
+  const level = await ipcRenderer.invoke('getLevel');
+  if (level !== 1) {
+    ipcRenderer.invoke('toast:show', '当前账户不具备操作权限');
+    throw new Error('当前账户不具备操作权限');
+  }
+}
+
+const invokeDB = (action, data) => ipcRenderer.invoke('database', { action, data });
+const deleteWrapper = (action) => async (data) => {
+  await checkDeletePermission();
+  return invokeDB(action, data);
+};
+
 // 暴露安全API到渲染进程
 contextBridge.exposeInMainWorld('electronAPI', {
   showDialog: (action) => ipcRenderer.invoke('dialog:show', action),
@@ -55,7 +70,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getDocumentsByTypeWithKeywords: (doc_type) => ipcRenderer.invoke('database', { action: 'getDocumentsByTypeWithKeywords', data: doc_type }),
     getDocumentById: (uuid) => ipcRenderer.invoke('database', { action: 'getDocumentById', data: uuid }),
     updateDocument: (data) => ipcRenderer.invoke('database', { action: 'updateDocument', data }),
-    deleteDocument: (data) => ipcRenderer.invoke('database', { action: 'deleteDocument', data }),
+    deleteDocument: deleteWrapper('deleteDocument'),
 
     //转为重要文件
     convertToImportant: (uuid) => ipcRenderer.invoke('database', { action: 'convertToImportant', data: uuid }),
@@ -63,8 +78,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     //普通文档批注
     addAnnotation: (data) => ipcRenderer.invoke('database', { action: 'addAnnotation', data }),
     getAnnotations: (data) => ipcRenderer.invoke('database', { action: 'getAnnotations', data }),
-    deleteAnnotate: (data) => ipcRenderer.invoke('database', { action: 'deleteAnnotate', data }),
-    deleteAnnotates: (data) => ipcRenderer.invoke('database', { action: 'deleteAnnotates', data }),
+    deleteAnnotate: deleteWrapper('deleteAnnotate'),
+    deleteAnnotates: deleteWrapper('deleteAnnotates'),
     updateAnnotate: (data) => ipcRenderer.invoke('database', { action: 'updateAnnotate', data }),
 
 
@@ -75,8 +90,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     addAuthorAlias: (data) => ipcRenderer.invoke('database', { action: 'addAuthorAlias', data }),
     getAuthors: () => ipcRenderer.invoke('database', { action: 'getAuthors' }),
     getAuthorsWithAliases: () => ipcRenderer.invoke('database', { action: 'getAuthorsWithAliases' }),
-    deleteAuthor: (id) => ipcRenderer.invoke('database', { action: 'deleteAuthor', data: id }),
-    deleteAlias: (id) => ipcRenderer.invoke('database', { action: 'deleteAlias', data: id }),
+    deleteAuthor: deleteWrapper('deleteAuthor'),
+    deleteAlias: deleteWrapper('deleteAlias'),
     searchAuthors: (query) => ipcRenderer.invoke('database', { action: 'searchAuthors', data: query }),
     updateAuthor: (data) => ipcRenderer.invoke('database', { action: 'updateAuthor', data }),
 
@@ -89,8 +104,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getUnitWithSonToManager: () => ipcRenderer.invoke('database', { action: 'getUnitWithSonToManager' }),
     getUnitsWithFlowCount: () => ipcRenderer.invoke('database', { action: 'getUnitsWithFlowCount' }),
     getDocumentsByUnitName: (name) => ipcRenderer.invoke('database', { action: 'getDocumentsByUnitName', data: name }),
-    deleteUnit: (id) => ipcRenderer.invoke('database', { action: 'deleteUnit', data: id }),
-    deleteUnitSon: (id) => ipcRenderer.invoke('database', { action: 'deleteUnitSon', data: id }),
+    deleteUnit: deleteWrapper('deleteUnit'),
+    deleteUnitSon: deleteWrapper('deleteUnitSon'),
     searchUnit: (query) => ipcRenderer.invoke('database', { action: 'searchUnit', data: query }),
     updateUnitWithSons: (data) => ipcRenderer.invoke('database', { action: 'updateUnitWithSons', data }),
 
@@ -110,7 +125,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     addFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'addFlowRecord', data }),
     getFlowRecords: (data) => ipcRenderer.invoke('database', { action: 'getFlowRecords', data }),
     updateFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'updateFlowRecord', data }),
-    deleteFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'deleteFlowRecord', data }),
+    deleteFlowRecord: deleteWrapper('deleteFlowRecord'),
     updatePassword: (data) => ipcRenderer.invoke('database', { action: 'updatePassword', data }),
 
   },
