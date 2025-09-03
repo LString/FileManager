@@ -33,6 +33,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('window-unmaximized', callback)
   },
 
+  onAuditLogUpdated: (callback) => {
+    ipcRenderer.on('audit-log-updated', callback)
+    return () => ipcRenderer.removeListener('audit-log-updated', callback)
+  },
+
   sendLogin: (userData) => ipcRenderer.send('login-success', userData),
   getLevel: () => ipcRenderer.invoke('getLevel'),
   getCurrentAcconutName: () => ipcRenderer.invoke('getCurrentAcconutName'),

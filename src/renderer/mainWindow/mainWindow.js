@@ -3192,6 +3192,10 @@ async function loadAudit() {
   }
 }
 
+window.electronAPI.onAuditLogUpdated(() => {
+  loadAudit()
+})
+
 //关键词管理
 async function initKeywordTable() {
   const table = document.getElementById('keyword-list');

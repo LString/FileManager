@@ -1,6 +1,6 @@
 const Database = require('better-sqlite3');
 // const { create } = require('core-js/core/object');
-const { app } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -726,6 +726,9 @@ class DB {
   logOperation(params) {
     this.statements.logOperation.run(params);
     this.deleteExpiredAuditLogs();
+    BrowserWindow.getAllWindows().forEach(win => {
+      win.webContents.send('audit-log-updated');
+    });
   }
 
   convertToImportant(normalUuid) {
