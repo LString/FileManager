@@ -154,6 +154,14 @@ ipcMain.on('logout', () => {
 ipcMain.handle('database', async (_, { action, data }) => {
 
   try {
+    if (currentAccount.level !== 1 && action.startsWith('delete')) {
+      new Notification({
+        title: '系统提示',
+        body: '当前账户不具备操作权限',
+        silent: true
+      }).show();
+      return { success: false };
+    }
     switch (action) {
       case 'login': {
         const account = dbInstance.statements.getAccount.get({ username: data.username })
