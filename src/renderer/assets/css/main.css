@@ -4,6 +4,12 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: row;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #d0d0d0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
 hr {
@@ -194,7 +200,7 @@ hr {
 /* 窗口控制按钮 */
 #window-controls {
     display: flex;
-    height: 18px;
+    height: 30px;
     -webkit-app-region: no-drag;
     flex-direction: row;
     justify-content: end;
@@ -202,17 +208,40 @@ hr {
 }
 
 .control-btn {
-    width: 18px;
-    height: 18px;
+    width: 30px;
+    height: 30px;
     border: none;
-    color: rgb(44, 44, 44);
+    color: #555;
     background-color: transparent;
     margin-left: 5px;
-    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: relative;
+    overflow: visible;
 }
 
-.control-btn:hover {
-    background: #4a4a4a;
+.control-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    transition: background 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.control-btn:hover::before {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(0.8);
+}
+
+.control-icon {
+    width: 14px;
+    height: 14px;
+    position: relative;
+    z-index: 1;
 }
 
 .setting-box {

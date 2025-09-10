@@ -12,6 +12,14 @@ body {
   margin: 0;
 }
 
+body {
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #d0d0d0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
 /* 标题栏样式 */
 #titlebar {
   height: 30px;
@@ -41,6 +49,7 @@ body {
 }
 
 /* 窗口控制按钮 */
+
 #window-controls {
   display: flex;
   height: 100%;
@@ -49,22 +58,39 @@ body {
 }
 
 .control-btn {
-  width: 40px;
-  height: 100%;
+  width: 30px;
+  height: 30px;
   border: none;
-  color: white;
+  color: #555;
   background-color: transparent;
-  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  position: relative;
+  overflow: visible;
 }
 
-.control-btn:hover {
-  background: #4a4a4a;
-  border-radius: 8px;
+.control-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transition: background 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 0;
 }
 
-#close:hover {
-  background: #e94a57 !important;
-  border-radius: 8px;
+.control-btn:hover::before {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(0.8);
+}
+
+.control-icon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  z-index: 1;
 }
 
 .main-container {
