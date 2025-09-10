@@ -232,6 +232,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (this.dataset.tab === 'unit-manager') {
         loadUnitWithSonToUnitManager();
       }
+      if (this.dataset.tab === 'user-manager') {
+        loadUsers();
+      }
 
       // 隐藏菜单
       popupMenu.style.display = 'none';
@@ -3149,6 +3152,59 @@ function hideUnitEidt() {
 document.getElementById('unitEdit-close').addEventListener('click', () => {
   hideUnitEidt();
 });
+
+/**
+ * 用户管理
+ */
+document.getElementById('add-user-btn')?.addEventListener('click', async () => {
+  if (!(await hasPermission())) {
+    const cancel = await showPermissionDialog();
+    if (!cancel) return;
+  }
+  const username = document.getElementById('add-user-name').value.trim();
+  const level = parseInt(document.getElementById('add-user-level').value, 10);
+  if (!username) return;
+  await window.electronAPI.db.createAccount({ username, level });
+  document.getElementById('add-user-name').value = '';
+  document.getElementById('add-user-level').value = '2';
+  await loadUsers();
+  loadAudit();
+});
+
+document.getElementById('user-list')?.addEventListener('click', async (e) => {
+  const btn = e.target.closest('#deleteUser');
+  if (!btn) return;
+  if (!(await hasPermission())) {
+    const cancel = await showPermissionDialog();
+    if (!cancel) return;
+  }
+  const item = btn.closest('.user-list-item');
+  const username = item.querySelector('#user-list-item-username').textContent;
+  const confirm = await showConfirmDialog('确定删除该用户？');
+  if (!confirm) return;
+  await window.electronAPI.db.deleteAccount(username);
+  await loadUsers();
+  loadAudit();
+});
+
+async function loadUsers() {
+  const container = document.getElementById('user-list');
+  if (!container) return;
+  try {
+    const users = await window.electronAPI.db.getAccounts();
+    container.replaceChildren();
+    users.forEach(user => {
+      const clone = document.getElementById('userListTemplate').content.cloneNode(true);
+      clone.querySelector('#user-list-item-username').textContent = user.username;
+      clone.querySelector('#user-list-item-lastlogin').textContent = user.last_login || '';
+      clone.querySelector('#user-list-item-level').textContent = user.level === 1 ? '管理员' : '普通用户';
+      container.appendChild(clone);
+    });
+  } catch (error) {
+    console.error('加载失败:', error);
+    container.innerHTML = '';
+  }
+}
 
 //数据审计
 async function loadAudit() {

@@ -173,6 +173,14 @@ ipcMain.handle('database', async (_, { action, data }) => {
           return
         }
         currentAccount = account;
+        dbInstance.statements.updateAccountLastLogin.run({ username: account.username })
+        aes256.init(account.password)
+        dbInstance.logOperation({
+          operation_type: aes256.encrypt('登录'),
+          table_name: aes256.encrypt('account'),
+          operator: aes256.encrypt(account.username),
+          details: aes256.encrypt('用户登录系统')
+        })
         createMainWindow(); // 创建主窗口
         loginWindow.close(); // 关闭登录窗口
         return;
@@ -1037,6 +1045,39 @@ ipcMain.handle('database', async (_, { action, data }) => {
       case 'deleteFlowRecord': {
         dbInstance.statements.deleteFlowRecord.run({ id: data.id });
         return;
+      }
+
+      case 'getAccounts': {
+        const accounts = dbInstance.statements.getAccounts.all();
+        return accounts;
+      }
+
+      case 'createAccount': {
+        const res = dbInstance.statements.createAccount.run({ username: data.username, password: '123456', level: data.level });
+        if (res.changes > 0) {
+          aes256.init(currentAccount.password);
+          dbInstance.logOperation({
+            operation_type: aes256.encrypt('新增'),
+            table_name: aes256.encrypt('account'),
+            operator: aes256.encrypt(currentAccount.username),
+            details: aes256.encrypt('新增用户' + data.username)
+          });
+        }
+        return res.changes;
+      }
+
+      case 'deleteAccount': {
+        const res = dbInstance.statements.deleteAccount.run({ username: data });
+        if (res.changes > 0) {
+          aes256.init(currentAccount.password);
+          dbInstance.logOperation({
+            operation_type: aes256.encrypt('删除'),
+            table_name: aes256.encrypt('account'),
+            operator: aes256.encrypt(currentAccount.username),
+            details: aes256.encrypt('删除用户' + data)
+          });
+        }
+        return res.changes;
       }
 
       case 'updatePassword': {

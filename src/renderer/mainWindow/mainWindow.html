@@ -55,6 +55,9 @@
             <button class="popup-item" data-tab="data-audit">
                 <span>数据审计</span>
             </button>
+            <button class="popup-item" data-tab="user-manager">
+                <span>用户管理</span>
+            </button>
             <button class="popup-item" data-tab="keyword-manager">
                 <span>标签管理</span>
             </button>
@@ -471,6 +474,34 @@
                             </div>
                         </div>
                         <ol id="audit-List" class="doc-list"></ol>
+                    </div>
+                </div>
+            </div>
+            <!-- 用户管理 -->
+            <div id="user-manager-tab" class="tab-content">
+                <div class="name-manager-body">
+                    <div class="add-name">
+                        <div>
+                            <span>用户名</span>
+                            <input type="text" id="add-user-name" placeholder="请输入用户名" class="add-name-real" />
+                        </div>
+                        <div>
+                            <span>权限</span>
+                            <select id="add-user-level" class="add-name-real">
+                                <option value="1">管理员</option>
+                                <option value="2" selected>普通用户</option>
+                            </select>
+                        </div>
+                        <button id="add-user-btn" class="add-btn">添加</button>
+                    </div>
+                    <div class="name-list-body">
+                        <div class="name-list-title">
+                            <div class="name-list-title-colum">用户名</div>
+                            <div class="name-list-title-colum">最近登录时间</div>
+                            <div class="name-list-title-colum">账户权限</div>
+                            <div class="name-list-title-colum">操作</div>
+                        </div>
+                        <ol id="user-list"></ol>
                     </div>
                 </div>
             </div>
@@ -961,6 +992,21 @@
                 <div class="unit-list-item">
                     <div id="unit-list-item-name" class="name-list-item-colum">单位</div>
                     <div id="unit-list-item-count" class="name-list-item-colum">0</div>
+                </div>
+                <hr>
+            </div>
+        </template>
+        <template id="userListTemplate">
+            <div class="nameList-item-body">
+                <div class="user-list-item">
+                    <div id="user-list-item-username" class="name-list-item-colum"></div>
+                    <div id="user-list-item-lastlogin" class="name-list-item-colum"></div>
+                    <div id="user-list-item-level" class="name-list-item-colum"></div>
+                    <div class="name-list-item-colum">
+                        <button id="deleteUser" class="action-btn delete-btn" title="删除">
+                            <img src="../assets/image/delete_icon.png" />
+                        </button>
+                    </div>
                 </div>
                 <hr>
             </div>
