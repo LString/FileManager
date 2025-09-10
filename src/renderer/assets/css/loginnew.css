@@ -4,9 +4,9 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    border: 1px solid #d0d0d0;
+    background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 1px #d0d0d0, 0 4px 16px rgba(0, 0, 0, 0.2);
     overflow: hidden;
 }
 
@@ -64,11 +64,23 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: background 0.2s;
+    position: relative;
+    overflow: visible;
 }
 
-.control-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
+.control-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    transition: background 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.control-btn:hover::before {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(0.8);
 }
 
 .control-icon {
