@@ -113,6 +113,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     deleteFlowRecord: (data) => ipcRenderer.invoke('database', { action: 'deleteFlowRecord', data }),
     updatePassword: (data) => ipcRenderer.invoke('database', { action: 'updatePassword', data }),
 
+    getAccounts: () => ipcRenderer.invoke('database', { action: 'getAccounts' }),
+    createAccount: (data) => ipcRenderer.invoke('database', { action: 'createAccount', data }),
+    deleteAccount: (data) => ipcRenderer.invoke('database', { action: 'deleteAccount', data }),
+
   },
   // store: {
   //   saveCredentials: (data) => ipcRenderer.invoke('store', { action: 'saveCredentials', data }),

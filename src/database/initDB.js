@@ -90,7 +90,8 @@ class DB {
       CREATE TABLE IF NOT EXISTS account (
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        level INTEGER NOT NULL
+        level INTEGER NOT NULL,
+        last_login DATETIME
       );
 
       -- 批注表（合并普通和重要批注）
@@ -197,6 +198,12 @@ class DB {
     if (!hasSupervisors) {
       this.connection.prepare("ALTER TABLE flow_records ADD COLUMN supervisors TEXT").run();
     }
+
+    const accountColumns = this.connection.prepare("PRAGMA table_info(account)").all();
+    const hasLastLogin = accountColumns.some(col => col.name === 'last_login');
+    if (!hasLastLogin) {
+      this.connection.prepare("ALTER TABLE account ADD COLUMN last_login DATETIME").run();
+    }
   }
 
   prepareStatements() {
@@ -213,8 +220,20 @@ class DB {
         `SELECT * FROM account WHERE username=@username`
       ),
 
+      getAccounts: this.connection.prepare(
+        `SELECT username, level, last_login FROM account ORDER BY username`
+      ),
+
+      deleteAccount: this.connection.prepare(
+        `DELETE FROM account WHERE username=@username`
+      ),
+
       updateAccountPassword: this.connection.prepare(
         `UPDATE account SET password=@password WHERE username=@username`
+      ),
+
+      updateAccountLastLogin: this.connection.prepare(
+        `UPDATE account SET last_login = datetime('now', 'localtime') WHERE username=@username`
       ),
 
       /******************** 文档操作 ********************/

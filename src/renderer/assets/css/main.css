@@ -1013,6 +1013,14 @@ input:-webkit-autofill:focus {
     margin: 0;
     overflow-y: auto;
 }
+#user-list {
+    width: 100%;
+    height: calc(100% - 44px);
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
 
 .name-list-title-colum {
     font-size: 14px;
