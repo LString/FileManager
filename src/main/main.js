@@ -184,10 +184,12 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const password = currentAccount.password
         aes256.init(password)
         const leadersEncrypt = data.review_leader.split(',').map(name => aes256.encrypt(name)).join(',')
+        const serial = dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
         const lastRowId = dbInstance.statements.createDocument.run(
           {
             uuid: uuid,
             doc_type: data.doc_type,
+            type_serial: serial,
             title: aes256.encrypt(data.title),
             sender_number: aes256.encrypt(data.sender_number),
             sender_date: aes256.encrypt(data.sender_date),
@@ -200,7 +202,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
             drafting_unit: aes256.encrypt(data.drafting_unit),
             crgency_level: aes256.encrypt(data.crgency_level),
             review_leader: leadersEncrypt,
-            remarks: aes256.encrypt(data.remarks)
+            remarks: aes256.encrypt(data.remarks),
+            is_important: 0
           }).lastInsertRowid
         if (lastRowId && data.annotate.length > 0) {//如果有批注，创建完文件插入批注
           data.annotate.forEach(anno => {
@@ -259,6 +262,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
           return {
             id: doc.id,
             uuid: doc.uuid,
+            doc_type: doc.doc_type,
+            is_important: doc.is_important,
             created_at: doc.created_at,
             title: aes256.decrypt(doc.title),
             sender_unit: aes256.decrypt(doc.sender_unit),

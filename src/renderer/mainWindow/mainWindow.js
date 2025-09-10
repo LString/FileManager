@@ -1102,7 +1102,8 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     docs = docs.map(doc => ({
       ...doc,
       doc_type: doc.doc_type ?? doc.docType ?? doc.type ?? type,
-      docType: doc.docType ?? doc.doc_type ?? doc.type ?? type
+      docType: doc.docType ?? doc.doc_type ?? doc.type ?? type,
+      is_important: doc.is_important ?? doc.isImportant ?? 0
     }))
 
     // 获取文件状态，仅针对重要文件列表

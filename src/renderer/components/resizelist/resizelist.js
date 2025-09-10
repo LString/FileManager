@@ -270,6 +270,9 @@ if (!customElements.get('resizable-table')) {
                 #table-body-table tr.selected {
                     background-color: #e6f7ff;
                 }
+                #table-body-table tr.important {
+                    background-color: #ffeaea;
+                }
 
                 #table-body-table td {
                     box-sizing: border-box;
@@ -557,6 +560,9 @@ if (!customElements.get('resizable-table')) {
                     }
                     row.appendChild(cell);
                 });
+                if (this.originalData[rowIndex].is_important) {
+                    row.classList.add('important');
+                }
                 // 单击仅高亮行
                 row.addEventListener('click', (e) => {
                     if (e.target.closest('.action-btn')) return;
@@ -607,7 +613,7 @@ if (!customElements.get('resizable-table')) {
             menuList.innerHTML = '';
 
             this.allKeys.forEach(key => {
-                if (key === 'uuid' || key === 'created_at' || key === 'docType' || key === 'doc_type' || key === 'review_leader') {
+                if (key === 'uuid' || key === 'created_at' || key === 'docType' || key === 'doc_type' || key === 'review_leader' || key === 'is_important') {
                     return
                 }
                 const isVisible = this.visibleKeys.includes(key);
