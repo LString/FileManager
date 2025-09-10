@@ -262,6 +262,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
           return {
             id: doc.id,
             uuid: doc.uuid,
+            doc_type: doc.doc_type,
+            is_important: doc.is_important,
             created_at: doc.created_at,
             title: aes256.decrypt(doc.title),
             sender_unit: aes256.decrypt(doc.sender_unit),
