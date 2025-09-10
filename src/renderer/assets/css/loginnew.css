@@ -3,6 +3,11 @@ body {
     height: 100vh;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    border: 2px solid #3daee9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 
 /* 标题栏样式 */
@@ -55,6 +60,9 @@ body {
     border: none;
     color: white;
     background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: background 0.2s;
 }
 
@@ -66,6 +74,12 @@ body {
 #close:hover {
     background: #e94a57 !important;
     border-radius: 8px;
+    color: white;
+}
+
+.control-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .login-container {

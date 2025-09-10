@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 获取控制按钮
   const minimizeBtn = getElement('minimize')
-  const maximizeBtn = getElement('maximize')
   const closeBtn = getElement('close')
 
   // 验证API可用性
@@ -56,24 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     minimizeBtn.addEventListener('click', () => {
       console.log('[事件] 点击最小化按钮')
       window.electronAPI.minimize()
-    })
-  }
-  // 最大化/还原按钮
-  if (maximizeBtn) {
-    maximizeBtn.addEventListener('click', () => {
-      console.log('[事件] 点击最大化按钮')
-      window.electronAPI.maximize()
-    })
-
-    // 状态同步
-    window.electronAPI.onMaximized(() => {
-      maximizeBtn.textContent = '❐'
-      console.log('[状态] 窗口最大化')
-    })
-
-    window.electronAPI.onUnmaximized(() => {
-      maximizeBtn.textContent = '□'
-      console.log('[状态] 窗口还原')
     })
   }
   // 关闭按钮

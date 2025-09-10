@@ -4,6 +4,11 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: row;
+    box-sizing: border-box;
+    border: 2px solid #3daee9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 
 hr {
@@ -194,7 +199,7 @@ hr {
 /* 窗口控制按钮 */
 #window-controls {
     display: flex;
-    height: 18px;
+    height: 24px;
     -webkit-app-region: no-drag;
     flex-direction: row;
     justify-content: end;
@@ -202,17 +207,31 @@ hr {
 }
 
 .control-btn {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     border: none;
     color: rgb(44, 44, 44);
     background-color: transparent;
     margin-left: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: background 0.2s;
 }
 
 .control-btn:hover {
     background: #4a4a4a;
+    color: white;
+}
+
+#close:hover {
+    background: #e94a57 !important;
+    color: white;
+}
+
+.control-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .setting-box {

@@ -20,6 +20,8 @@ function createWindow() {
     height: 768,
     titleBarStyle: 'hidden',
     frame: false,
+    resizable: false,
+    maximizable: false,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -79,6 +81,8 @@ function createMainWindow() {
     height: 768,
     titleBarStyle: 'hidden',
     frame: false,
+    resizable: false,
+    maximizable: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload.js'),
       contextIsolation: true,
@@ -118,17 +122,6 @@ ipcMain.on('minimize-window', () => {
   // 主窗口可能尚未创建，添加严格判断
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.minimize()
-  }
-})
-
-ipcMain.on('maximize-window', () => {
-  // 优先处理当前活动窗口
-  const targetWindow = mainWindow || loginWindow
-
-  if (targetWindow && !targetWindow.isDestroyed()) {
-    targetWindow.isMaximized()
-      ? targetWindow.unmaximize()
-      : targetWindow.maximize()
   }
 })
 

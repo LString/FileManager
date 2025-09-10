@@ -13,24 +13,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     console.log('[Preload] 发送最小化请求')
     ipcRenderer.send('minimize-window')
   },
-  maximize: () => {
-    console.log('[Preload] 发送最大化请求')
-    ipcRenderer.send('maximize-window')
-  },
   close: () => {
     console.log('[Preload] 发送关闭请求')
     ipcRenderer.send('close-window')
   },
   logout: () => {
     ipcRenderer.send('logout')
-  },
-  onMaximized: (callback) => {
-    ipcRenderer.on('window-maximized', callback)
-    return () => ipcRenderer.removeListener('window-maximized', callback)
-  },
-  onUnmaximized: (callback) => {
-    ipcRenderer.on('window-unmaximized', callback)
-    return () => ipcRenderer.removeListener('window-unmaximized', callback)
   },
 
   onAuditLogUpdated: (callback) => {
