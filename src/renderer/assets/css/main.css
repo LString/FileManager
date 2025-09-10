@@ -7,7 +7,8 @@ body {
     box-sizing: border-box;
     background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 0 0 1px #d0d0d0, 0 4px 16px rgba(0, 0, 0, 0.2);
+    border: 1px solid #d0d0d0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     overflow: hidden;
 }
 
@@ -228,7 +229,7 @@ hr {
     border-radius: 50%;
     transition: background 0.2s, transform 0.2s;
     pointer-events: none;
-    z-index: -1;
+    z-index: 0;
 }
 
 .control-btn:hover::before {
@@ -239,6 +240,8 @@ hr {
 .control-icon {
     width: 14px;
     height: 14px;
+    position: relative;
+    z-index: 1;
 }
 
 .setting-box {
