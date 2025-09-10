@@ -2,6 +2,7 @@ const Database = require('better-sqlite3');
 // const { create } = require('core-js/core/object');
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const isDev = process.env.NODE_ENV === 'development';
 
 class DB {
@@ -27,6 +28,7 @@ class DB {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid TEXT NOT NULL UNIQUE,
         doc_type INTEGER NOT NULL, -- 1: 普通, 2: 重要
+        type_serial INTEGER NOT NULL,
         sender_unit TEXT NOT NULL,
         sender_number TEXT NOT NULL,
         sender_date TEXT NOT NULL,
@@ -39,7 +41,8 @@ class DB {
         secrecy_level TEXT NOT NULL,
         crgency_level TEXT NOT NULL,
         secrecy_period TEXT NOT NULL,
-        remarks TEXT
+        remarks TEXT,
+        is_important INTEGER DEFAULT 0
       );
 
       CREATE INDEX IF NOT EXISTS idx_documents_uuid ON documents(uuid);
@@ -192,6 +195,24 @@ class DB {
       CREATE INDEX IF NOT EXISTS idx_flow_records_uuid ON flow_records(document_uuid);
     `);
 
+    // Ensure new columns exist for legacy databases
+    const docColumns = this.connection.prepare("PRAGMA table_info(documents)").all();
+    const hasTypeSerial = docColumns.some(col => col.name === 'type_serial');
+    if (!hasTypeSerial) {
+      this.connection.prepare("ALTER TABLE documents ADD COLUMN type_serial INTEGER").run();
+      const types = this.connection.prepare("SELECT DISTINCT doc_type FROM documents").all();
+      const rowsStmt = this.connection.prepare("SELECT id FROM documents WHERE doc_type = ? ORDER BY id");
+      const updateStmt = this.connection.prepare("UPDATE documents SET type_serial = @serial WHERE id = @id");
+      for (const { doc_type } of types) {
+        const rows = rowsStmt.all(doc_type);
+        rows.forEach((row, idx) => updateStmt.run({ serial: idx + 1, id: row.id }));
+      }
+    }
+    const hasImportantFlag = docColumns.some(col => col.name === 'is_important');
+    if (!hasImportantFlag) {
+      this.connection.prepare("ALTER TABLE documents ADD COLUMN is_important INTEGER DEFAULT 0").run();
+    }
+
     // Ensure new column exists for legacy databases
     const flowColumns = this.connection.prepare("PRAGMA table_info(flow_records)").all();
     const hasSupervisors = flowColumns.some(col => col.name === 'supervisors');
@@ -237,30 +258,52 @@ class DB {
       ),
 
       /******************** 文档操作 ********************/
+      getNextTypeSerial: this.connection.prepare(
+        `SELECT COALESCE(MAX(type_serial), 0) + 1 AS next FROM documents WHERE doc_type = @doc_type`
+      ),
+
       createDocument: this.connection.prepare(`
         INSERT INTO documents (
-          uuid, doc_type, title, sender_number, sender_date, sender_unit, 
+          uuid, doc_type, type_serial, title, sender_number, sender_date, sender_unit,
           secrecy_level, secrecy_period, input_user,
           drafting_unit, crgency_level, review_leader,
-          remarks
+          remarks, is_important
         ) VALUES (
-          @uuid, @doc_type, @title, @sender_number, @sender_date, @sender_unit, 
+          @uuid, @doc_type, @type_serial, @title, @sender_number, @sender_date, @sender_unit,
           @secrecy_level, @secrecy_period, @input_user,
           @drafting_unit, @crgency_level, @review_leader,
-          @remarks
+          @remarks, @is_important
         )`),
 
       getDocumentsByType: this.connection.prepare(`
-        SELECT *
-        FROM documents 
+        SELECT
+          type_serial AS id,
+          uuid,
+          doc_type,
+          is_important,
+          sender_unit,
+          sender_number,
+          sender_date,
+          input_user,
+          drafting_unit,
+          title,
+          created_at,
+          updated_at,
+          review_leader,
+          secrecy_level,
+          crgency_level,
+          secrecy_period,
+          remarks
+        FROM documents
         WHERE doc_type = @doc_type
-        ORDER BY created_at DESC`),
+        ORDER BY type_serial DESC`),
 
       getDocumentsByTypeWithKeywords: this.connection.prepare(`
-        SELECT 
-          d.id,
+        SELECT
+          d.type_serial AS id,
           d.uuid,
           d.doc_type,
+          d.is_important,
           d.sender_unit,
           d.sender_number,
           d.sender_date,
@@ -274,7 +317,7 @@ class DB {
           d.crgency_level,
           d.secrecy_period,
           d.remarks,
-          COALESCE(  -- 处理无关键词情况
+          COALESCE(
             (
               SELECT JSON_GROUP_ARRAY(
                 JSON_OBJECT(
@@ -287,11 +330,11 @@ class DB {
               INNER JOIN key_words kw ON dk.keyword_id = kw.id
               WHERE dk.doc_id = d.id
             ),
-            '[]'  -- 返回空数组而非NULL
+            '[]'
           ) AS keywords
         FROM documents AS d
         WHERE d.doc_type = @doc_type
-        ORDER BY d.created_at DESC
+        ORDER BY d.type_serial DESC
       `),
 
       getDocumentById: this.connection.prepare(`
@@ -752,25 +795,48 @@ class DB {
 
   convertToImportant(normalUuid) {
     return this.connection.transaction(() => {
-      // 直接更新文档类型
-      const updateResult = this.connection.prepare(`
-        UPDATE documents 
-        SET doc_type = 2 
-        WHERE uuid = @uuid AND doc_type = 1
-      `).run({ uuid: normalUuid });
-
-      if (updateResult.changes === 0) {
-        throw new Error('文档转换失败：未找到普通文档或已是重要文档');
+      const doc = this.connection.prepare(`
+        SELECT * FROM documents WHERE uuid = @uuid AND doc_type = 1
+      `).get({ uuid: normalUuid });
+      if (!doc) {
+        throw new Error('文档转换失败：未找到普通文档');
       }
 
-      // 自动级联更新批注类型（如果需要）
+      // 标记原文档
       this.connection.prepare(`
-        UPDATE annotations 
-        SET annotate_type = 2 
-        WHERE uuid = @uuid
+        UPDATE documents SET is_important = 1 WHERE uuid = @uuid
       `).run({ uuid: normalUuid });
 
-      return normalUuid; // 保持UUID不变
+      const { next } = this.connection.prepare(`
+        SELECT COALESCE(MAX(type_serial), 0) + 1 AS next FROM documents WHERE doc_type = 2
+      `).get();
+
+      const newUuid = uuidv4();
+
+      const insert = this.connection.prepare(`
+        INSERT INTO documents (
+          uuid, doc_type, type_serial, sender_unit, sender_number, sender_date,
+          input_user, drafting_unit, title, review_leader, secrecy_level,
+          crgency_level, secrecy_period, remarks, is_important
+        )
+        SELECT
+          @newUuid, 2, @serial, sender_unit, sender_number, sender_date,
+          input_user, drafting_unit, title, review_leader, secrecy_level,
+          crgency_level, secrecy_period, remarks, 0
+        FROM documents WHERE uuid = @uuid
+      `);
+      const info = insert.run({ uuid: normalUuid, newUuid, serial: next });
+
+      // 复制关键词
+      const keywords = this.connection.prepare(`
+        SELECT keyword_id FROM doc_keywords WHERE doc_id = @id
+      `).all({ id: doc.id });
+      const insertKw = this.connection.prepare(`
+        INSERT INTO doc_keywords (doc_id, keyword_id) VALUES (?, ?)
+      `);
+      keywords.forEach(k => insertKw.run(info.lastInsertRowid, k.keyword_id));
+
+      return newUuid;
     })();
   }
   updateAuthor({ authorId, newName, newUnit, newAliases, deleteAliasIds }) {
