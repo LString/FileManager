@@ -311,11 +311,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const formTitle = document.getElementById('docTitle').value.trim();
       const formOriginal = document.getElementById('original_number').value.trim();
-      const duplicates = await window.electronAPI.db.checkDocumentDuplicate({
+      const duplicateParams = {
         title: formTitle,
-        original_number: formOriginal,
-        doc_type: docType === 'normal' ? 1 : 2
-      });
+        original_number: formOriginal
+      };
+      if (docType === 'normal') {
+        duplicateParams.doc_type = 1;
+      }
+      const duplicates = await window.electronAPI.db.checkDocumentDuplicate(duplicateParams);
       if (docType === 'normal' && duplicates.length > 0) {
         const confirm = await showConfirmDialog('该文档先前已录入');
         if (confirm) {
