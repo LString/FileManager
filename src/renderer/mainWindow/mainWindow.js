@@ -309,6 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
 
+      let forcedSerial = null;
       const formTitle = document.getElementById('docTitle').value.trim();
       const formOriginal = document.getElementById('original_number').value.trim();
       const duplicates = await window.electronAPI.db.checkDocumentDuplicate({
@@ -346,10 +347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
               document.getElementById('search_input_important').value = searchOriginal;
             }
             document.getElementById('search-important').click();
+            return;
           } else if (action === 'copy') {
-            // TODO: implement duplicate copy handling
+            const origin = await window.electronAPI.db.getDocumentById(duplicates[0].uuid);
+            forcedSerial = origin?.type_serial || null;
+          } else {
+            return;
           }
-          return;
         }
       }
 
@@ -410,6 +414,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         remarks: document.getElementById('remarks').value.trim(),
         annotate: annotateTemp
       };
+
+      if (forcedSerial !== null) {
+        data.type_serial = forcedSerial;
+      }
 
 
       docId = await window.electronAPI.db.createDocument(data);
@@ -1208,6 +1216,21 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
         return { ...doc, status }
       }))
     }
+
+    const serialGroups = {}
+    docs.forEach(doc => {
+      const serial = doc.id
+      if (!serialGroups[serial]) {
+        serialGroups[serial] = []
+      }
+      serialGroups[serial].push(doc)
+    })
+    Object.keys(serialGroups).forEach(serial => {
+      const group = serialGroups[serial].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      group.forEach((doc, idx) => {
+        doc.id = idx === 0 ? String(serial) : `${serial}-${idx}`
+      })
+    })
 
     if (type == 1) {
       if (searchResult == null) {
