@@ -104,20 +104,21 @@
                                     <input type="text" placeholder="请输入编号" id="sender_number" required>
                                 </div>
                                 <div class="form-group">
+                                    <label for="original_number">原文号</label>
+                                    <input type="text" placeholder="请输入原文号" id="original_number">
+                                </div>
+                                <div class="form-group">
                                     <label for="sender_date">来文时间</label>
                                     <input type="text" placeholder="选择日期" id="sender_date" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="sender_unit">来文单位</label>
-                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="secrecy_level">保密等级：</label>
+                                    <label for="secrecy_level">保密密级：</label>
                                     <div class="secrecy_level_container">
                                         <select id="secrecy_level" required>
                                             <option value="普通">普通</option>
                                             <option value="秘密">秘密</option>
                                             <option value="机密">机密</option>
+        
                                             <option value="绝密">绝密</option>
                                         </select>
                                         <select id="secrecy_period" required>
@@ -127,6 +128,28 @@
                                             <option value="20年">20年</option>
                                         </select>
                                     </div>
+
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sender_unit">来文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="review_leader">呈阅领导：</label>
+                                    <div class="input_with_add">
+                                        <div class="review_leader_container" id="review_leader_container">
+                                            <div class="input-wrapper">
+                                                <input type="text" id="review_leader" list="review_leader_list" placeholder="请输入姓名">
+                                            </div>
+
+                                        </div>
+                                        <img id="add_review_leader" style="width: 15px;height: 15px;cursor: pointer;" src="../assets/image/add_icon.png">
+                                    </div>
+                                    <datalist id="review_leader_list">
+                                    </datalist>
 
                                 </div>
                                 <div class="form-group">
@@ -144,51 +167,28 @@
                             </div>
 
                             <div class="form-row">
-                                <!-- 呈阅领导 -->
-                                <div class="form-group">
-                                    <label for="review_leader">呈阅领导：</label>
-                                    <div class="input_with_add">
-                                        <div class="review_leader_container" id="review_leader_container">
-                                            <div class="input-wrapper">
-                                                <input type="text" id="review_leader" list="review_leader_list"
-                                                    placeholder="请输入姓名">
-                                            </div>
-
-                                        </div>
-                                        <img id="add_review_leader" style="width: 15px;height: 15px;cursor: pointer;"
-                                            src="../assets/image/add_icon.png">
-                                    </div>
-                                    <datalist id="review_leader_list">
-                                    </datalist>
-
-                                </div>
-                                <!-- 关键词 -->
                                 <div class="form-group">
                                     <label for="key_words">关键词：</label>
                                     <div class="input_with_add">
                                         <div id="key_words_container" class="review_leader_container">
                                             <div class="input-wrapper">
-                                                <input type="text" id="key_words" list="key_words_list"
-                                                    placeholder="请输入关键词"></input>
+                                                <input type="text" id="key_words" list="key_words_list" placeholder="请输入关键词"></input>
                                             </div>
                                         </div>
-                                        <img id="add_key_words" style="width: 15px;height: 15px;cursor: pointer;"
-                                            src=" ../assets/image/add_icon.png">
+                                        <img id="add_key_words" style="width: 15px;height: 15px;cursor: pointer;" src=" ../assets/image/add_icon.png">
                                     </div>
                                     <datalist id="key_words_list">
                                     </datalist>
                                 </div>
                                 <div class="form-group">
                                     <label for="remarks">备注：</label>
-                                    <input type="text" placeholder="请输入备注" id="remarks" required>
+                                    <input type="text" placeholder="请输入备注" id="remarks">
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group span-2">
                                     <label for="secrecy_period">批注：</label>
                                     <div class="new-doc-add-annotate-contaniner">
                                         <div class="new-doc-add-annotate-contaniner">
-                                            <img id="new_doc_add_annotate"
-                                                src="../assets/image/new_doc_add_annotate.png"
-                                                style="width: 45px;height: 45px;margin-top: 6px;margin-right: 20px;">
+                                            <img id="new_doc_add_annotate" src="../assets/image/new_doc_add_annotate.png" style="width: 45px;height: 45px;margin-top: 6px;margin-right: 20px;">
                                             <span>点击添加备注</span>
                                         </div>
                                         <span id="hasAnnotate" class="hasAnnotate">已有0条批注</span>
@@ -588,6 +588,10 @@
                                         <input type="text" placeholder="请输入编号" id="pop-origin_number" disabled>
                                     </div>
                                     <div class="form-group">
+                                        <label for="pop-original_number">原文号</label>
+                                        <input type="text" placeholder="请输入原文号" id="pop-original_number" disabled>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="pop-sender_number">来文编号</label>
                                         <input type="text" placeholder="请输入编号" id="pop-sender_number" required disabled>
                                     </div>
@@ -595,11 +599,12 @@
                                         <label for="pop-sender_date">来文时间</label>
                                         <input type="text" placeholder="选择日期" id="pop-sender_date" required disabled>
                                     </div>
+                                </div>
+                                <div class="form-row">
                                     <div class="form-group">
                                         <label for="pop-sender_unit">来文单位</label>
                                         <input type="text" placeholder="请输入单位" id="pop-sender_unit" required disabled>
                                     </div>
-
                                     <div class="form-group">
                                         <label for="pop-secrecy_level">保密密级</label>
                                         <div class="pop-secrecy_level_container">
@@ -622,9 +627,6 @@
                                         <label for="pop-drafting_unit">制文单位</label>
                                         <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
                                     </div>
-                                </div>
-                                <div class="form-row">
-                                    <!-- 审核领导 -->
                                     <div class="form-group">
                                         <label for="crgency_level">紧急程度</label>
                                         <select id="pop-crgency_level" required disabled>
@@ -633,23 +635,19 @@
                                             <option value="特急">特急</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="form-row">
                                     <div class="form-group">
                                         <label for="pop-review_leader">呈阅领导</label>
                                         <div class="pop-input_with_add">
-                                            <!-- <div id="review_leader_container">
-                                            <input id="review_leader" list="review_leader_list" required></input>
-                                            <div id="review_leader_list_labels" class="review_leader_list_labels"></div>
-                                        </div> -->
                                             <div class="pop-review_leader_container" id="pop-review_leader_container">
                                                 <div class="input-wrapper">
-                                                    <input type="text" id="pop-review_leader"
-                                                        list="pop-review_leader_list" placeholder="请输入姓名" disabled>
+                                                    <input type="text" id="pop-review_leader" list="pop-review_leader_list" placeholder="请输入姓名" disabled>
                                                 </div>
                                                 <datalist id="pop-review_leader_list">
                                                 </datalist>
                                             </div>
-                                            <img id="pop-add_review_leader" style="width: 15px;height: 15px;"
-                                                src="../assets/image/add_icon.png" disabled>
+                                            <img id="pop-add_review_leader" style="width: 15px;height: 15px;" src="../assets/image/add_icon.png" disabled>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -657,18 +655,16 @@
                                         <div class="pop-input_with_add">
                                             <div id="pop-key_words_container" class="review_leader_container">
                                                 <div class="input-wrapper">
-                                                    <input type="text" id="pop-key_words" placeholder="请输入关键词"
-                                                        disabled></input>
+                                                    <input type="text" id="pop-key_words" placeholder="请输入关键词" disabled></input>
                                                 </div>
                                             </div>
-                                            <img id="pop-add_key_words" style="width: 15px;height: 15px;"
-                                                src=" ../assets/image/add_icon.png" disabled>
+                                            <img id="pop-add_key_words" style="width: 15px;height: 15px;" src=" ../assets/image/add_icon.png" disabled>
                                         </div>
 
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group span-2">
                                         <label for="secrecy_period">备注</label>
-                                        <input type="text" placeholder="请输入备注" id="pop-remarks" required disabled>
+                                        <input type="text" placeholder="请输入备注" id="pop-remarks" disabled>
                                     </div>
                                 </div>
 

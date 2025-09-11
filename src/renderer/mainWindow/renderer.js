@@ -224,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       // 清理数据并验证
       if (formData.sender_unit == "" || formData.sender_number == "" ||
-        formData.original_number == "" ||
         formData.drafting_unit == "" ||
         formData.title == "" ||
         formData.review_leader == "" ||
@@ -247,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const barcodeText = [
         `来文单位：${formData.sender_unit}`,
         `来文编号：${formData.sender_number}`,
-        `原文件号：${formData.original_number}`,
+        `原文号：${formData.original_number}`,
         `制文单位：${formData.drafting_unit}`,
         `文件标题：${formData.title}`,
         `呈阅领导：${formData.review_leader}`,
@@ -314,7 +313,7 @@ async function refreshDocList_normal() {
 
       clone.querySelector('.doc-sender_unit').textContent = `来文单位：${safeDecrypt(doc.sender_unit)}`;
       clone.querySelector('.doc-sender_number').textContent = `来文编号：${safeDecrypt(doc.sender_number)}`;
-      clone.querySelector('.doc-original_number').textContent = `原文件号：${safeDecrypt(doc.original_number)}`;
+      clone.querySelector('.doc-original_number').textContent = `原文号：${safeDecrypt(doc.original_number)}`;
       clone.querySelector('.doc-drafting_unit').textContent = `制文单位：${safeDecrypt(doc.drafting_unit)}`;
 
       container.appendChild(clone);
@@ -357,7 +356,7 @@ async function refreshDocList_important() {
 
       clone.querySelector('.doc-sender_unit-important').textContent = `来文单位：${safeDecrypt(doc.sender_unit)}`;
       clone.querySelector('.doc-sender_number-important').textContent = `来文编号：${safeDecrypt(doc.sender_number)}`;
-      clone.querySelector('.doc-original_number-important').textContent = `原文件号：${safeDecrypt(doc.original_number)}`;
+      clone.querySelector('.doc-original_number-important').textContent = `原文号：${safeDecrypt(doc.original_number)}`;
       clone.querySelector('.doc-drafting_unit-important').textContent = `制文单位：${safeDecrypt(doc.drafting_unit)}`;
 
       container.appendChild(clone);
@@ -986,7 +985,7 @@ async function showDocDetail(docId, type = 1) {
           <span>${doc.sender_number || '未填写'}</span>
         </div>
         <div class="detail-item">
-          <label>原文件号：</label>
+          <label>原文号：</label>
           <span>${doc.original_number || '未填写'}</span>
         </div>
         <div class="detail-item">

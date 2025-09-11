@@ -31,6 +31,7 @@ class DB {
         type_serial INTEGER NOT NULL,
         sender_unit TEXT NOT NULL,
         sender_number TEXT NOT NULL,
+        original_number TEXT,
         sender_date TEXT NOT NULL,
         input_user TEXT NOT NULL,
         drafting_unit TEXT NOT NULL,
@@ -208,6 +209,10 @@ class DB {
         rows.forEach((row, idx) => updateStmt.run({ serial: idx + 1, id: row.id }));
       }
     }
+    const hasOriginalNumber = docColumns.some(col => col.name === 'original_number');
+    if (!hasOriginalNumber) {
+      this.connection.prepare("ALTER TABLE documents ADD COLUMN original_number TEXT").run();
+    }
     const hasImportantFlag = docColumns.some(col => col.name === 'is_important');
     if (!hasImportantFlag) {
       this.connection.prepare("ALTER TABLE documents ADD COLUMN is_important INTEGER DEFAULT 0").run();
@@ -264,12 +269,12 @@ class DB {
 
       createDocument: this.connection.prepare(`
         INSERT INTO documents (
-          uuid, doc_type, type_serial, title, sender_number, sender_date, sender_unit,
+          uuid, doc_type, type_serial, title, sender_number, original_number, sender_date, sender_unit,
           secrecy_level, secrecy_period, input_user,
           drafting_unit, crgency_level, review_leader,
           remarks, is_important
         ) VALUES (
-          @uuid, @doc_type, @type_serial, @title, @sender_number, @sender_date, @sender_unit,
+          @uuid, @doc_type, @type_serial, @title, @sender_number, @original_number, @sender_date, @sender_unit,
           @secrecy_level, @secrecy_period, @input_user,
           @drafting_unit, @crgency_level, @review_leader,
           @remarks, @is_important
@@ -283,6 +288,7 @@ class DB {
           is_important,
           sender_unit,
           sender_number,
+          original_number,
           sender_date,
           input_user,
           drafting_unit,
@@ -306,6 +312,7 @@ class DB {
           d.is_important,
           d.sender_unit,
           d.sender_number,
+          d.original_number,
           d.sender_date,
           d.input_user,
           d.drafting_unit,
@@ -344,6 +351,7 @@ class DB {
         UPDATE documents SET
           title = @title,
           sender_number = @sender_number,
+          original_number = @original_number,
           sender_date = @sender_date,
           sender_unit = @sender_unit,
           secrecy_level = @secrecy_level,
