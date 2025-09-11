@@ -341,6 +341,10 @@ hr {
     grid-column: span 2;
 }
 
+#newDoc-docForm .form-group {
+    position: relative;
+}
+
 #pop-docForm .form-row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3205,7 +3209,17 @@ input:-webkit-autofill:focus {
 }
 
 .duplicate-hint {
+    position: absolute;
+    top: 100%;
+    right: 8px;
+    margin-top: 4px;
     color: #d93025;
     font-size: 12px;
-    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #d93025;
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
 }
