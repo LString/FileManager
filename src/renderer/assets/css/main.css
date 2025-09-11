@@ -384,10 +384,10 @@ hr {
 
 .secrecy_level_container {
     display: grid;
-    justify-content: center;
-    align-items: center;
-    gap: 56px;
     grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
 }
 
 .input_with_add {
@@ -2071,10 +2071,10 @@ input:-webkit-autofill:focus {
 
 .pop-secrecy_level_container {
     display: grid;
-    justify-content: center;
-    align-items: center;
-    gap: 44px;
     grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
 }
 
 #pop-review_leader_container,
