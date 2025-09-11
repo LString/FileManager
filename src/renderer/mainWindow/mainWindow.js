@@ -315,8 +315,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: formTitle,
         original_number: formOriginal
       });
-      const normalDup = duplicates.filter(d => d.doc_type === 1);
-      const importantDup = duplicates.filter(d => d.doc_type === 2);
+      const normalDup = duplicates.filter(d => Number(d.doc_type) === 1);
+      const importantDup = duplicates.filter(d => Number(d.doc_type) === 2);
       if (docType === 'normal' && normalDup.length > 0) {
         const confirm = await showConfirmDialog('该文档先前已录入');
         if (confirm) {
