@@ -312,6 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         doc_type: docType === "normal" ? 1 : 2,
         title: document.getElementById('docTitle').value.trim(),
         sender_number: document.getElementById('sender_number').value.trim(),
+        original_number: document.getElementById('original_number').value.trim(),
         sender_date: document.getElementById('sender_date').value,
         sender_unit: document.getElementById('sender_unit').value.trim(),
         secrecy_level: getValidatedSelectValue('#secrecy_level'),
@@ -1538,6 +1539,7 @@ function showEditModal(doc) {
   document.getElementById('pop-sender_number').value = doc.sender_number
   document.getElementById('pop-sender_date').value = doc.sender_date
   document.getElementById('pop-sender_unit').value = doc.sender_unit
+  document.getElementById('pop-original_number').value = doc.original_number
 
 
   setSelectValue('#pop-secrecy_level', doc.secrecy_level);
@@ -1679,6 +1681,7 @@ document.getElementById('pop-docForm').addEventListener('submit', async (e) => {
 
       title: document.getElementById('pop-docTitle').value.trim(),
       sender_number: document.getElementById('pop-sender_number').value.trim(),
+      original_number: document.getElementById('pop-original_number').value.trim(),
       sender_date: document.getElementById('pop-sender_date').value,
       sender_unit: document.getElementById('pop-sender_unit').value.trim(),
 

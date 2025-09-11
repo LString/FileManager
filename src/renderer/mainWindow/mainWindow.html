@@ -100,16 +100,8 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="sender_number">来文编号</label>
-                                    <input type="text" placeholder="请输入编号" id="sender_number" required>
-                                </div>
-                                <div class="form-group">
                                     <label for="sender_date">来文时间</label>
                                     <input type="text" placeholder="选择日期" id="sender_date" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="sender_unit">来文单位</label>
-                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="secrecy_level">保密等级：</label>
@@ -118,7 +110,7 @@
                                             <option value="普通">普通</option>
                                             <option value="秘密">秘密</option>
                                             <option value="机密">机密</option>
-                                            <option value="绝密">绝密</option>
+                        <option value="绝密">绝密</option>
                                         </select>
                                         <select id="secrecy_period" required>
                                             <option value="1年">1年</option>
@@ -127,11 +119,6 @@
                                             <option value="20年">20年</option>
                                         </select>
                                     </div>
-
-                                </div>
-                                <div class="form-group">
-                                    <label for="drafting_unit">制文单位</label>
-                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="crgency_level">紧急程度：</label>
@@ -140,6 +127,25 @@
                                         <option value="加急">加急</option>
                                         <option value="特急">特急</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sender_number">来文编号</label>
+                                    <input type="text" placeholder="请输入编号" id="sender_number" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sender_unit">来文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="drafting_unit">制文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="original_number">原文号</label>
+                                    <input type="text" placeholder="请输入原文号" id="original_number" required>
                                 </div>
                             </div>
 
@@ -180,7 +186,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="remarks">备注：</label>
-                                    <input type="text" placeholder="请输入备注" id="remarks" required>
+                                    <input type="text" placeholder="请输入备注" id="remarks">
                                 </div>
                                 <div class="form-group">
                                     <label for="secrecy_period">批注：</label>
@@ -618,12 +624,16 @@
                                         </div>
 
                                     </div>
-                                    <div class="form-group">
-                                        <label for="pop-drafting_unit">制文单位</label>
-                                        <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
-                                    </div>
-                                </div>
-                                <div class="form-row">
+                                      <div class="form-group">
+                                          <label for="pop-drafting_unit">制文单位</label>
+                                          <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
+                                      </div>
+                                      <div class="form-group">
+                                          <label for="pop-original_number">原文号</label>
+                                          <input type="text" placeholder="请输入原文号" id="pop-original_number" required disabled>
+                                      </div>
+                                  </div>
+                                  <div class="form-row">
                                     <!-- 审核领导 -->
                                     <div class="form-group">
                                         <label for="crgency_level">紧急程度</label>
@@ -667,10 +677,10 @@
 
                                     </div>
                                     <div class="form-group">
-                                        <label for="secrecy_period">备注</label>
-                                        <input type="text" placeholder="请输入备注" id="pop-remarks" required disabled>
-                                    </div>
-                                </div>
+                                          <label for="secrecy_period">备注</label>
+                                          <input type="text" placeholder="请输入备注" id="pop-remarks" disabled>
+                                      </div>
+                                  </div>
 
 
                                 <div class="form-actions">

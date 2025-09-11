@@ -192,6 +192,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
             type_serial: serial,
             title: aes256.encrypt(data.title),
             sender_number: aes256.encrypt(data.sender_number),
+            original_number: aes256.encrypt(data.original_number),
             sender_date: aes256.encrypt(data.sender_date),
             sender_unit: aes256.encrypt(data.sender_unit),
 
@@ -331,19 +332,20 @@ ipcMain.handle('database', async (_, { action, data }) => {
 
           const password = currentAccount.password
           aes256.init(password)
-          const result = dbInstance.statements.updateDocument.run({
-            title: aes256.encrypt(data.title),
-            sender_number: aes256.encrypt(data.sender_number),
-            sender_date: aes256.encrypt(data.sender_date),
-            sender_unit: aes256.encrypt(data.sender_unit),
-            secrecy_level: aes256.encrypt(data.secrecy_level),
-            secrecy_period: aes256.encrypt(data.secrecy_period),
-            crgency_level: aes256.encrypt(data.crgency_level),
-            drafting_unit: aes256.encrypt(data.drafting_unit),
-            review_leader: data.review_leader.split(',').map(leader => aes256.encrypt(leader)).join(','),
-            remarks: aes256.encrypt(data.remarks),
-            uuid: data.uuid
-          });
+            const result = dbInstance.statements.updateDocument.run({
+              title: aes256.encrypt(data.title),
+              sender_number: aes256.encrypt(data.sender_number),
+              original_number: aes256.encrypt(data.original_number),
+              sender_date: aes256.encrypt(data.sender_date),
+              sender_unit: aes256.encrypt(data.sender_unit),
+              secrecy_level: aes256.encrypt(data.secrecy_level),
+              secrecy_period: aes256.encrypt(data.secrecy_period),
+              crgency_level: aes256.encrypt(data.crgency_level),
+              drafting_unit: aes256.encrypt(data.drafting_unit),
+              review_leader: data.review_leader.split(',').map(leader => aes256.encrypt(leader)).join(','),
+              remarks: aes256.encrypt(data.remarks),
+              uuid: data.uuid
+            });
 
           if (result.changes > 0) {
             dbInstance.logOperation(
