@@ -309,29 +309,32 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const password = currentAccount.password;
         aes256.init(password);
         const map = new Map();
+        const { original_number, title, doc_type } = data;
 
-        if (data.original_number) {
-          const enc = aes256.encrypt(data.original_number);
+        if (original_number) {
+          const enc = aes256.encrypt(original_number);
           const doc = dbInstance.statements.findDocumentByOriginalNumber.get({ original_number: enc });
-          if (doc) {
+          if (doc && (!doc_type || doc.doc_type === doc_type)) {
             map.set(doc.uuid, {
               uuid: doc.uuid,
               doc_type: doc.doc_type,
-              original_number: data.original_number,
+              type_serial: doc.type_serial,
+              original_number: original_number,
               title: aes256.decrypt(doc.title)
             });
           }
         }
 
-        if (data.title) {
-          const enc = aes256.encrypt(data.title);
+        if (title) {
+          const enc = aes256.encrypt(title);
           const doc = dbInstance.statements.findDocumentByTitle.get({ title: enc });
-          if (doc && !map.has(doc.uuid)) {
+          if (doc && !map.has(doc.uuid) && (!doc_type || doc.doc_type === doc_type)) {
             map.set(doc.uuid, {
               uuid: doc.uuid,
               doc_type: doc.doc_type,
+              type_serial: doc.type_serial,
               original_number: doc.original_number ? aes256.decrypt(doc.original_number) : '',
-              title: data.title
+              title: title
             });
           }
         }

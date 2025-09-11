@@ -312,23 +312,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       let forcedSerial = null;
       const formTitle = document.getElementById('docTitle').value.trim();
       const formOriginal = document.getElementById('original_number').value.trim();
+      const docTypeCode = docType === 'normal' ? 1 : 2;
       const duplicates = await window.electronAPI.db.checkDocumentDuplicate({
         title: formTitle,
-        original_number: formOriginal
+        original_number: formOriginal,
+        doc_type: docTypeCode
       });
-      const docTypeCode = docType === 'normal' ? 1 : 2;
-      const sameTypeDuplicates = duplicates.filter(d => d.doc_type === docTypeCode);
-      if (sameTypeDuplicates.length > 0) {
+
+      if (duplicates.length > 0) {
         if (docType === 'normal') {
           const confirm = await showConfirmDialog('该文档先前已录入');
           if (confirm) {
             document.querySelector(".tab-btn[data-tab='view-normal']").click();
-            const hasTitleDup = sameTypeDuplicates.some(d => d.title === formTitle);
+            const hasTitleDup = duplicates.some(d => d.title === formTitle);
             if (hasTitleDup) {
               document.getElementById('normal_search_mode').value = 'title';
               document.getElementById('search_input_normal').value = formTitle;
             } else {
-              const searchOriginal = sameTypeDuplicates[0].original_number || formOriginal;
+              const searchOriginal = duplicates[0].original_number || formOriginal;
               document.getElementById('normal_search_mode').value = 'docno';
               document.getElementById('search_input_normal').value = searchOriginal;
             }
@@ -339,20 +340,19 @@ document.addEventListener('DOMContentLoaded', async () => {
           const action = await showDuplicateOptionsDialog('该文档先前已录入');
           if (action === 'no') {
             document.querySelector(".tab-btn[data-tab='view-important']").click();
-            const hasTitleDup = sameTypeDuplicates.some(d => d.title === formTitle);
+            const hasTitleDup = duplicates.some(d => d.title === formTitle);
             if (hasTitleDup) {
               document.getElementById('important_search_mode').value = 'title';
               document.getElementById('search_input_important').value = formTitle;
             } else {
-              const searchOriginal = sameTypeDuplicates[0].original_number || formOriginal;
+              const searchOriginal = duplicates[0].original_number || formOriginal;
               document.getElementById('important_search_mode').value = 'docno';
               document.getElementById('search_input_important').value = searchOriginal;
             }
             document.getElementById('search-important').click();
             return;
           } else if (action === 'copy') {
-            const origin = await window.electronAPI.db.getDocumentById(sameTypeDuplicates[0].uuid);
-            forcedSerial = origin?.type_serial || null;
+            forcedSerial = duplicates[0].type_serial;
           } else {
             return;
           }
@@ -1198,6 +1198,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
     // 确保每条记录都包含文档类型
     docs = docs.map(doc => ({
       ...doc,
+      type_serial: doc.type_serial ?? doc.id,
       doc_type: doc.doc_type ?? doc.docType ?? doc.type ?? type,
       docType: doc.docType ?? doc.doc_type ?? doc.type ?? type,
       is_important: doc.is_important ?? doc.isImportant ?? 0
@@ -1221,7 +1222,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
 
     const serialGroups = {}
     docs.forEach(doc => {
-      const serial = doc.id
+      const serial = doc.type_serial
       if (!serialGroups[serial]) {
         serialGroups[serial] = []
       }
