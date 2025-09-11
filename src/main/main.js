@@ -308,11 +308,12 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const password = currentAccount.password;
         aes256.init(password);
         const map = new Map();
+        const filterType = data.doc_type ? Number(data.doc_type) : null;
 
         if (data.original_number) {
           const enc = aes256.encrypt(data.original_number);
           const doc = dbInstance.statements.findDocumentByOriginalNumber.get({ original_number: enc });
-          if (doc) {
+          if (doc && (filterType === null || Number(doc.doc_type) === filterType)) {
             map.set(doc.uuid, {
               uuid: doc.uuid,
               doc_type: doc.doc_type,
@@ -325,7 +326,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         if (data.title) {
           const enc = aes256.encrypt(data.title);
           const doc = dbInstance.statements.findDocumentByTitle.get({ title: enc });
-          if (doc && !map.has(doc.uuid)) {
+          if (doc && !map.has(doc.uuid) && (filterType === null || Number(doc.doc_type) === filterType)) {
             map.set(doc.uuid, {
               uuid: doc.uuid,
               doc_type: doc.doc_type,
