@@ -319,6 +319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         duplicateParams.doc_type = 1;
       }
       const duplicates = await window.electronAPI.db.checkDocumentDuplicate(duplicateParams);
+      let overrideSerial = null;
       if (docType === 'normal' && duplicates.length > 0) {
         const confirm = await showConfirmDialog('该文档先前已录入');
         if (confirm) {
@@ -354,7 +355,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           document.getElementById('search-important').click();
           return;
         }
-        // action === 'copy' will continue to submit (待实现)
+        if (action === 'copy') {
+          const baseDoc = await window.electronAPI.db.getDocumentById(duplicates[0].uuid);
+          overrideSerial = baseDoc.type_serial;
+        }
       }
 
       //默认不输入+号时，添加输入内容
@@ -414,6 +418,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         remarks: document.getElementById('remarks').value.trim(),
         annotate: annotateTemp
       };
+      if (overrideSerial !== null) {
+        data.type_serial = overrideSerial;
+      }
 
 
       docId = await window.electronAPI.db.createDocument(data);
@@ -1211,6 +1218,10 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
         }
         return { ...doc, status }
       }))
+
+      if (!docs[0]?.serial) {
+        docs = processImportantSerials(docs)
+      }
     }
 
     if (type == 1) {
@@ -1307,6 +1318,17 @@ function sortDocuments(docs, field, direction) {
   return [...docs].sort((a, b) => {
     let aVal = a[field], bVal = b[field];
 
+    if (field === 'id') {
+      aVal = a.serial ?? aVal;
+      bVal = b.serial ?? bVal;
+      if (aVal !== bVal) {
+        return direction === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      const aIdx = a.copy_index ?? 0;
+      const bIdx = b.copy_index ?? 0;
+      return direction === 'asc' ? aIdx - bIdx : bIdx - aIdx;
+    }
+
     // 处理日期
     if (field === 'sender_date') {
       aVal = aVal ? new Date(aVal).getTime() : 0;
@@ -1350,6 +1372,37 @@ function updateImportSortIcons(currentField, direction) {
       ? `../assets/image/order_${direction === 'asc' ? 'up' : 'down'}.png`
       : '../assets/image/order_up.png';
   });
+}
+
+function processImportantSerials(docs) {
+  const groups = {};
+  docs.forEach(doc => {
+    const serial = doc.id;
+    if (!groups[serial]) {
+      groups[serial] = [];
+    }
+    groups[serial].push(doc);
+  });
+
+  const processed = [];
+  Object.keys(groups).forEach(key => {
+    const group = groups[key].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    group.forEach((doc, index) => {
+      doc.serial = Number(key);
+      doc.copy_index = index;
+      doc.id = index === 0 ? String(key) : `${key}-${index}`;
+      processed.push(doc);
+    });
+  });
+
+  processed.sort((a, b) => {
+    if (a.serial !== b.serial) {
+      return b.serial - a.serial;
+    }
+    return a.copy_index - b.copy_index;
+  });
+
+  return processed;
 }
 
 //搜索文字高亮
@@ -1660,7 +1713,7 @@ const docModal = document.getElementById('docModal');
 function showEditModal(doc) {
   docModal.style.display = 'block';
   currentEditingId = doc.uuid
-  currentEditingDocId = doc.id
+  currentEditingDocId = doc.db_id
   currentEditingTitle = doc.title
   Eidttype = doc.type
 

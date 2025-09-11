@@ -184,7 +184,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const password = currentAccount.password
         aes256.init(password)
         const leadersEncrypt = data.review_leader.split(',').map(name => aes256.encrypt(name)).join(',')
-        const serial = dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
+        const serial = data.type_serial ? data.type_serial : dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
         const lastRowId = dbInstance.statements.createDocument.run(
           {
             uuid: uuid,
@@ -291,6 +291,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
         aes256.init(password);
         return {
           uuid: encryptedDoc.uuid,
+          doc_type: encryptedDoc.doc_type,
+          type_serial: encryptedDoc.type_serial,
           title: aes256.decrypt(encryptedDoc.title),
           sender_unit: aes256.decrypt(encryptedDoc.sender_unit),
           sender_number: aes256.decrypt(encryptedDoc.sender_number),
