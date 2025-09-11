@@ -303,6 +303,40 @@ ipcMain.handle('database', async (_, { action, data }) => {
           created_at: encryptedDoc.created_at,
         };
       }
+
+      case 'checkDocumentDuplicate': {
+        const password = currentAccount.password;
+        aes256.init(password);
+        const map = new Map();
+
+        if (data.original_number) {
+          const enc = aes256.encrypt(data.original_number);
+          const doc = dbInstance.statements.findDocumentByOriginalNumber.get({ original_number: enc });
+          if (doc) {
+            map.set(doc.uuid, {
+              uuid: doc.uuid,
+              doc_type: doc.doc_type,
+              original_number: data.original_number,
+              title: aes256.decrypt(doc.title)
+            });
+          }
+        }
+
+        if (data.title) {
+          const enc = aes256.encrypt(data.title);
+          const doc = dbInstance.statements.findDocumentByTitle.get({ title: enc });
+          if (doc && !map.has(doc.uuid)) {
+            map.set(doc.uuid, {
+              uuid: doc.uuid,
+              doc_type: doc.doc_type,
+              original_number: doc.original_number ? aes256.decrypt(doc.original_number) : '',
+              title: data.title
+            });
+          }
+        }
+
+        return Array.from(map.values());
+      }
       //更新列表
       case 'updateDocument':
         return dbInstance.connection.transaction(() => {

@@ -242,6 +242,49 @@ document.addEventListener('DOMContentLoaded', async () => {
   const new_doc_add_annotate = document.getElementById('new_doc_add_annotate')
   const hasAnnotate = document.getElementById('hasAnnotate')
 
+  let duplicateDocInfo = null;
+  const titleInput = document.getElementById('docTitle');
+  const originalInput = document.getElementById('original_number');
+  function showDuplicateWarning(input) {
+    let warning = input.parentElement.querySelector('.duplicate-warning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.className = 'duplicate-warning';
+      warning.textContent = '该文件可能已录入';
+      input.parentElement.appendChild(warning);
+    }
+    warning.style.display = 'block';
+  }
+
+  function hideDuplicateWarning(input) {
+    const warning = input.parentElement.querySelector('.duplicate-warning');
+    if (warning) {
+      warning.remove();
+    }
+  }
+
+  async function handleDuplicateCheck(input, field) {
+    const value = input.value.trim();
+    if (!value) {
+      duplicateDocInfo = null;
+      hideDuplicateWarning(input);
+      return;
+    }
+    const res = await window.electronAPI.db.checkDocumentDuplicate({ [field]: value });
+    if (res && res.length > 0) {
+      duplicateDocInfo = res[0];
+      showDuplicateWarning(input);
+    } else {
+      duplicateDocInfo = null;
+      hideDuplicateWarning(input);
+    }
+  }
+
+  titleInput.addEventListener('blur', () => handleDuplicateCheck(titleInput, 'title'));
+  titleInput.addEventListener('input', () => hideDuplicateWarning(titleInput));
+  originalInput.addEventListener('blur', () => handleDuplicateCheck(originalInput, 'original_number'));
+  originalInput.addEventListener('input', () => hideDuplicateWarning(originalInput));
+
   new_doc_add_annotate.addEventListener('click', function () {
     showAnnotateAdd()
   })
@@ -265,6 +308,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }));
 
     try {
+
+      const formTitle = document.getElementById('docTitle').value.trim();
+      const formOriginal = document.getElementById('original_number').value.trim();
+      const duplicates = await window.electronAPI.db.checkDocumentDuplicate({
+        title: formTitle,
+        original_number: formOriginal
+      });
+      if (duplicates && duplicates.length > 0) {
+        if (docType === 'normal') {
+          const confirm = await showConfirmDialog('该文档先前已录入');
+          if (confirm) {
+            document.querySelector(".tab-btn[data-tab='view-normal']").click();
+            const hasTitleDup = duplicates.some(d => d.title === formTitle);
+            if (hasTitleDup) {
+              document.getElementById('normal_search_mode').value = 'title';
+              document.getElementById('search_input_normal').value = formTitle;
+            } else {
+              const searchOriginal = duplicates[0].original_number || formOriginal;
+              document.getElementById('normal_search_mode').value = 'docno';
+              document.getElementById('search_input_normal').value = searchOriginal;
+            }
+            document.getElementById('search-normal').click();
+          }
+          return;
+        }
+      }
 
       //默认不输入+号时，添加输入内容
       const inputleader =
@@ -1333,62 +1402,90 @@ function updateImportSortIcons(currentField, direction) {
 
 
 document.getElementById('search-normal').addEventListener('click', async () => {
-
   const leftContainer = document.getElementById('view-doc-nor-left');
   const rightContainer = document.getElementById('view-doc-nor-right');
   hideAnnoSidebar(leftContainer, rightContainer);
   currentDocId = null;
 
-  // 获取选中的搜索字段
-  const searchField = document.getElementById('search_field').value;
-  // 获取搜索关键词并处理
-  const searchKey = document.getElementById('search_inuput_normal')
-    .value
-    .trim()
-    .toLowerCase();
+  const rawKey = document.getElementById('search_input_normal').value.trim();
+  const mode = document.getElementById('normal_search_mode').value;
 
-  // 空关键词处理（显示全部文档）
-  if (searchKey === '') {
+  if (rawKey === '') {
     refreshDocList(1, null);
     return;
   }
 
-
   const dataset = fullListForSearch_Normal || [];
+  const searchKey = rawKey.toLowerCase();
+  const results = [];
 
-  // 根据选定字段进行过滤
-  let filteredDocs = dataset.filter(doc => {
-    // 全部字段搜索
-    if (searchField === 'all') {
-      const searchFields = [
+  if (mode === 'title') {
+    dataset.forEach(doc => {
+      if (String(doc.title || '').toLowerCase().includes(searchKey)) {
+        results.push(doc);
+      }
+    });
+  } else if (mode === 'docno') {
+    dataset.forEach(doc => {
+      const sender = String(doc.sender_number || '').toLowerCase();
+      const original = String(doc.original_number || '').toLowerCase();
+      if (sender.includes(searchKey) || original.includes(searchKey)) {
+        results.push(doc);
+      }
+    });
+  } else if (mode === 'unit') {
+    for (const doc of dataset) {
+      const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
+      if (flows.some(f => String(f.unit || '').trim().toLowerCase() === searchKey)) {
+        results.push(doc);
+      }
+    }
+  } else if (mode === 'leader') {
+    for (const doc of dataset) {
+      const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
+      if (annos.some(a => String(a.author || '').trim().toLowerCase() === searchKey)) {
+        results.push(doc);
+      }
+    }
+  } else {
+    for (const doc of dataset) {
+      let match = [
         doc.title,
         doc.sender_unit,
         doc.sender_number,
         doc.original_number,
         doc.drafting_unit,
         doc.review_leader,
-        doc.input_user,
         doc.secrecy_level,
         doc.crgency_level,
         doc.secrecy_period,
         doc.remarks
-      ];
+      ].some(field => String(field ?? '').toLowerCase().includes(searchKey));
 
-      return searchFields.some(field =>
-        String(field).trim() === searchKey
-      );
+      if (!match) {
+        const annos = await window.electronAPI.db.getAnnotations({ uuid: doc.uuid });
+        match = annos.some(a =>
+          String(a.content || '').toLowerCase().includes(searchKey) ||
+          String(a.annotate_note || '').toLowerCase().includes(searchKey) ||
+          String(a.author || '').toLowerCase().includes(searchKey)
+        );
+      }
+
+      if (!match) {
+        const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
+        match = flows.some(f =>
+          String(f.unit || '').toLowerCase().includes(searchKey)
+        );
+      }
+
+      if (match) {
+        results.push(doc);
+      }
     }
-    // 单字段精确匹配
-    else {
-      // 处理可能为空的字段
-      const fieldValue = doc[searchField] ? String(doc[searchField]).trim() : "";
-      return fieldValue === searchKey;
-    }
-  });
+  }
 
-  refreshDocList(1, filteredDocs);
-
-})
+  refreshDocList(1, results, rawKey);
+});
 
 document.getElementById('search-important').addEventListener('click', async () => {
   const leftContainer = document.getElementById('view-doc-imp-left');
@@ -1415,6 +1512,14 @@ document.getElementById('search-important').addEventListener('click', async () =
         results.push(doc);
       }
     });
+  } else if (mode === 'docno') {
+    dataset.forEach(doc => {
+      const sender = String(doc.sender_number || '').toLowerCase();
+      const original = String(doc.original_number || '').toLowerCase();
+      if (sender.includes(searchKey) || original.includes(searchKey)) {
+        results.push(doc);
+      }
+    });
   } else if (mode === 'unit') {
     for (const doc of dataset) {
       const flows = await window.electronAPI.db.getFlowRecords({ document_uuid: doc.uuid });
@@ -1435,6 +1540,7 @@ document.getElementById('search-important').addEventListener('click', async () =
         doc.title,
         doc.sender_unit,
         doc.sender_number,
+        doc.original_number,
         doc.drafting_unit,
         doc.review_leader,
         doc.secrecy_level,
@@ -1468,7 +1574,7 @@ document.getElementById('search-important').addEventListener('click', async () =
   refreshDocList(2, results, rawKey);
 })
 
-document.getElementById('search_inuput_normal').addEventListener('keydown', (e) => {
+document.getElementById('search_input_normal').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     document.getElementById('search-normal').click();
   }

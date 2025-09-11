@@ -219,22 +219,15 @@
                         <div class="normal-top">
                             <span style="font-size: 20px;font-weight: 500;">查阅普通文档</span>
                             <div class="search-container">
-                                <select id="search_field" class="search_key">
-                                    <option value="all">全部</option>
+                                <select id="normal_search_mode" class="search_key">
+                                    <option value="multi">多字段</option>
+                                    <option value="docno">文号</option>
                                     <option value="title">标题</option>
-                                    <option value="sender_unit">来文单位</option>
-                                    <option value="sender_number">来文编号</option>
-                                    <option value="drafting_unit">制文单位</option>
-                                    <option value="review_leader">制文单位</option>
-                                    <option value="input_user">录入人</option>
-                                    <option value="secrecy_level">秘密等级</option>
-                                    <option value="crgency_level">紧急程度</option>
-                                    <option value="secrecy_period">保密期限</option>
-                                    <option value="remarks">备注</option>
+                                    <option value="unit">分发单位</option>
+                                    <option value="leader">批示领导</option>
                                 </select>
                                 <div class="normal-search">
-                                    <input id="search_inuput_normal" type="text" class="search-input"
-                                        placeholder="搜索...">
+                                    <input id="search_input_normal" type="text" class="search-input" placeholder="搜索...">
                                     <button id="search-normal" type="submit" class="search-button">
                                         <img src="../assets/image/search.png" />
                                     </button>
@@ -292,6 +285,7 @@
                             <div class="search-container">
                                 <select id="important_search_mode" class="search_key">
                                     <option value="multi">多字段</option>
+                                    <option value="docno">文号</option>
                                     <option value="title">标题</option>
                                     <option value="unit">分发单位</option>
                                     <option value="leader">批示领导</option>

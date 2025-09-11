@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getDocumentById: (uuid) => ipcRenderer.invoke('database', { action: 'getDocumentById', data: uuid }),
     updateDocument: (data) => ipcRenderer.invoke('database', { action: 'updateDocument', data }),
     deleteDocument: (data) => ipcRenderer.invoke('database', { action: 'deleteDocument', data }),
+    checkDocumentDuplicate: (data) => ipcRenderer.invoke('database', { action: 'checkDocumentDuplicate', data }),
 
     //转为重要文件
     convertToImportant: (uuid) => ipcRenderer.invoke('database', { action: 'convertToImportant', data: uuid }),
