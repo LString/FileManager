@@ -3203,3 +3203,9 @@ input:-webkit-autofill:focus {
 .password-item input {
     width: 100%;
 }
+
+.duplicate-hint {
+    color: #d93025;
+    font-size: 12px;
+    margin-top: 4px;
+}

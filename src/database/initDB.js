@@ -347,6 +347,18 @@ class DB {
       getDocumentById: this.connection.prepare(`
         SELECT * FROM documents WHERE uuid = @uuid`),
 
+      findDocumentByOriginalNumber: this.connection.prepare(`
+        SELECT uuid, doc_type, original_number, title
+        FROM documents
+        WHERE original_number = @original_number
+      `),
+
+      findDocumentByTitle: this.connection.prepare(`
+        SELECT uuid, doc_type, original_number, title
+        FROM documents
+        WHERE title = @title
+      `),
+
       updateDocument: this.connection.prepare(`
         UPDATE documents SET
           title = @title,

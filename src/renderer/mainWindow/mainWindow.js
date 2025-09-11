@@ -242,6 +242,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   const new_doc_add_annotate = document.getElementById('new_doc_add_annotate')
   const hasAnnotate = document.getElementById('hasAnnotate')
 
+  let duplicateDocInfo = null;
+  const titleInput = document.getElementById('docTitle');
+  const originalInput = document.getElementById('original_number');
+
+  async function handleDuplicateCheck(input, field) {
+    const value = input.value.trim();
+    if (!value) {
+      removeDuplicateHint(input);
+      duplicateDocInfo = null;
+      return;
+    }
+    const res = await window.electronAPI.db.checkDocumentDuplicate({ [field]: value });
+    if (res && res.length > 0) {
+      showDuplicateHint(input);
+      duplicateDocInfo = res[0];
+    } else {
+      removeDuplicateHint(input);
+      duplicateDocInfo = null;
+    }
+  }
+
+  function showDuplicateHint(input) {
+    let hint = input.parentNode.querySelector('.duplicate-hint');
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.className = 'duplicate-hint';
+      hint.textContent = '该文件可能已录入';
+      input.parentNode.appendChild(hint);
+    }
+  }
+
+  function removeDuplicateHint(input) {
+    const hint = input.parentNode.querySelector('.duplicate-hint');
+    if (hint) hint.remove();
+  }
+
+  titleInput.addEventListener('blur', () => handleDuplicateCheck(titleInput, 'title'));
+  originalInput.addEventListener('blur', () => handleDuplicateCheck(originalInput, 'original_number'));
+
   new_doc_add_annotate.addEventListener('click', function () {
     showAnnotateAdd()
   })
@@ -265,6 +304,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }));
 
     try {
+
+      const formTitle = document.getElementById('docTitle').value.trim();
+      const formOriginal = document.getElementById('original_number').value.trim();
+      const duplicates = await window.electronAPI.db.checkDocumentDuplicate({
+        title: formTitle,
+        original_number: formOriginal
+      });
+      if (duplicates && duplicates.length > 0) {
+        if (docType === 'normal') {
+          const confirm = await showConfirmDialog('该文档先前已录入');
+          if (confirm) {
+            document.querySelector(".tab-btn[data-tab='view-normal']").click();
+            const searchOriginal = duplicates[0].original_number || formOriginal;
+            if (searchOriginal) {
+              document.getElementById('search_field').value = 'original_number';
+              document.getElementById('search_inuput_normal').value = searchOriginal;
+              document.getElementById('search-normal').click();
+            }
+          }
+          return;
+        }
+      }
 
       //默认不输入+号时，添加输入内容
       const inputleader =
