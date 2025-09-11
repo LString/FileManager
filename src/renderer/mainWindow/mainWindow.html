@@ -104,12 +104,22 @@
                                     <input type="text" placeholder="请输入编号" id="sender_number" required>
                                 </div>
                                 <div class="form-group">
+                                    <label for="original_number">原文号</label>
+                                    <input type="text" placeholder="请输入原文号" id="original_number">
+                                </div>
+                                <div class="form-group">
                                     <label for="sender_date">来文时间</label>
                                     <input type="text" placeholder="选择日期" id="sender_date" required>
                                 </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="form-group">
                                     <label for="sender_unit">来文单位</label>
                                     <input type="text" placeholder="请输入单位" id="sender_unit" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="drafting_unit">制文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="secrecy_level">保密等级：</label>
@@ -127,12 +137,9 @@
                                             <option value="20年">20年</option>
                                         </select>
                                     </div>
-
                                 </div>
-                                <div class="form-group">
-                                    <label for="drafting_unit">制文单位</label>
-                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
-                                </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="form-group">
                                     <label for="crgency_level">紧急程度：</label>
                                     <select id="crgency_level" required>
@@ -141,10 +148,6 @@
                                         <option value="特急">特急</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <div class="form-row">
-                                <!-- 呈阅领导 -->
                                 <div class="form-group">
                                     <label for="review_leader">呈阅领导：</label>
                                     <div class="input_with_add">
@@ -162,7 +165,6 @@
                                     </datalist>
 
                                 </div>
-                                <!-- 关键词 -->
                                 <div class="form-group">
                                     <label for="key_words">关键词：</label>
                                     <div class="input_with_add">
@@ -178,9 +180,11 @@
                                     <datalist id="key_words_list">
                                     </datalist>
                                 </div>
+                            </div>
+                            <div class="form-row">
                                 <div class="form-group">
                                     <label for="remarks">备注：</label>
-                                    <input type="text" placeholder="请输入备注" id="remarks" required>
+                                    <input type="text" placeholder="请输入备注" id="remarks">
                                 </div>
                                 <div class="form-group">
                                     <label for="secrecy_period">批注：</label>
@@ -221,6 +225,7 @@
                                     <option value="title">标题</option>
                                     <option value="sender_unit">来文单位</option>
                                     <option value="sender_number">来文编号</option>
+                                    <option value="original_number">原文号</option>
                                     <option value="drafting_unit">制文单位</option>
                                     <option value="review_leader">制文单位</option>
                                     <option value="input_user">录入人</option>
@@ -592,6 +597,10 @@
                                         <input type="text" placeholder="请输入编号" id="pop-sender_number" required disabled>
                                     </div>
                                     <div class="form-group">
+                                        <label for="pop-original_number">原文号</label>
+                                        <input type="text" placeholder="请输入原文号" id="pop-original_number" disabled>
+                                    </div>
+                                    <div class="form-group">
                                         <label for="pop-sender_date">来文时间</label>
                                         <input type="text" placeholder="选择日期" id="pop-sender_date" required disabled>
                                     </div>
@@ -668,7 +677,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="secrecy_period">备注</label>
-                                        <input type="text" placeholder="请输入备注" id="pop-remarks" required disabled>
+                                        <input type="text" placeholder="请输入备注" id="pop-remarks" disabled>
                                     </div>
                                 </div>
 

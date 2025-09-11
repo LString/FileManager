@@ -312,6 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         doc_type: docType === "normal" ? 1 : 2,
         title: document.getElementById('docTitle').value.trim(),
         sender_number: document.getElementById('sender_number').value.trim(),
+        original_number: document.getElementById('original_number').value.trim(),
         sender_date: document.getElementById('sender_date').value,
         sender_unit: document.getElementById('sender_unit').value.trim(),
         secrecy_level: getValidatedSelectValue('#secrecy_level'),
@@ -566,27 +567,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // 收集表单数据
       const formData = {
-        sender_unit: document.getElementById('sender_unit').value.trim(), // 获取并清理作者输入
-        sender_number: document.getElementById('sender_number').value.trim(), // 获取并清理内容输入
+        sender_unit: document.getElementById('sender_unit').value.trim(),
+        sender_number: document.getElementById('sender_number').value.trim(),
         original_number: document.getElementById('original_number').value.trim(),
         drafting_unit: document.getElementById('drafting_unit').value.trim(),
-        title: document.getElementById('docTitle').value.trim(), // 获取并清理标题输入
-
+        title: document.getElementById('docTitle').value.trim(),
         review_leader: getValidatedSelectValue('#review_leader'),
         secrecy_level: getValidatedSelectValue('#secrecy_level'),
         crgency_level: getValidatedSelectValue('#crgency_level'),
         secrecy_period: getValidatedSelectValue('#secrecy_period')
       };
-      // 清理数据并验证
       if (formData.sender_unit == "" || formData.sender_number == "" ||
-        formData.original_number == "" ||
         formData.drafting_unit == "" ||
         formData.title == "" ||
         formData.review_leader == "" ||
         formData.secrecy_level == "" ||
         formData.crgency_level == "" ||
         formData.secrecy_period == "") {
-        //弹窗
         return;
       }
 
@@ -1146,6 +1143,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       title: '标题',
       sender_unit: '来文单位',
       sender_number: '来文编号',
+      original_number: '原文号',
       drafting_unit: '制文单位',
       input_user: '录入人',
       sender_date: '来文时间',
@@ -1168,6 +1166,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       title: 280,
       sender_unit: 180,
       sender_number: 140,
+      original_number: 140,
       drafting_unit: 180,
       input_user: 100,
       sender_date: 160,
@@ -1536,6 +1535,7 @@ function showEditModal(doc) {
   document.getElementById('pop-docTitle').value = doc.title
   document.getElementById('pop-origin_number').value = doc.id
   document.getElementById('pop-sender_number').value = doc.sender_number
+  document.getElementById('pop-original_number').value = doc.original_number
   document.getElementById('pop-sender_date').value = doc.sender_date
   document.getElementById('pop-sender_unit').value = doc.sender_unit
 
@@ -1679,6 +1679,7 @@ document.getElementById('pop-docForm').addEventListener('submit', async (e) => {
 
       title: document.getElementById('pop-docTitle').value.trim(),
       sender_number: document.getElementById('pop-sender_number').value.trim(),
+      original_number: document.getElementById('pop-original_number').value.trim(),
       sender_date: document.getElementById('pop-sender_date').value,
       sender_unit: document.getElementById('pop-sender_unit').value.trim(),
 
