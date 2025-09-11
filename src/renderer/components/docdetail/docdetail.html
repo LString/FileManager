@@ -2,76 +2,8 @@
 <html>
 
 <head>
+    <link rel="stylesheet" type="text/css" href="../../assets/css/modal.css">
     <style>
-        .modal {
-            display: block;
-            z-index: 1000;
-            position: absolute;
-            width: 100vw;
-            height: 100vh;
-            left: 0;
-            top: 0;
-        }
-
-        .pop-bg {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            /* 水平居中 */
-            align-items: center;
-        }
-
-        .pop-content {
-            background-color: white;
-            /*上下边距百分是相对于父控件 左右边距自动计算*/
-            border: 1px solid #444;
-            min-height: 0;
-            border-radius: 8px;
-            width: 80%;
-            height: 82%;
-            margin: 10px;
-            display: flex;
-            /* 新增flex布局 */
-            flex-direction: column;
-            /* 垂直排列 */
-            overflow: hidden;
-            box-sizing: border-box;
-            /* 包含内边距 */
-            animation: modalOpen 0.5s ease-out;
-        }
-
-        .pop-content hr {
-            border: 0.2px solid rgba(0, 0, 0, 1);
-            opacity: 0.1;
-            width: 100%;
-            margin-bottom: 25px;
-            margin-top: 0;
-        }
-
-        .modal-header {
-            display: flex;
-            margin-top: 12px;
-            margin-left: 35px;
-            margin-right: 23px;
-            margin-bottom: 7px;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .annotate-title-header {
-            font-size: 20px;
-            font-weight: 400;
-        }
-
-        .modal-body {
-            flex: 1;
-            margin-bottom: 12px;
-            display: flex;
-        }
-
         #pop-docForm {
             width: 100%;
             height: 100%;
@@ -82,6 +14,11 @@
             padding-bottom: 32px;
             flex-direction: column;
             box-sizing: border-box;
+        }
+
+        .annotate-title-header {
+            font-size: 20px;
+            font-weight: 400;
         }
 
 
