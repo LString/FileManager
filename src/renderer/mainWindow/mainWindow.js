@@ -332,6 +332,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('search-normal').click();
           }
           return;
+        } else if (docType === 'important') {
+          const action = await showDuplicateOptionsDialog('该文档先前已录入');
+          if (action === 'no') {
+            document.querySelector(".tab-btn[data-tab='view-important']").click();
+            const hasTitleDup = duplicates.some(d => d.title === formTitle);
+            if (hasTitleDup) {
+              document.getElementById('important_search_mode').value = 'title';
+              document.getElementById('search_input_important').value = formTitle;
+            } else {
+              const searchOriginal = duplicates[0].original_number || formOriginal;
+              document.getElementById('important_search_mode').value = 'docno';
+              document.getElementById('search_input_important').value = searchOriginal;
+            }
+            document.getElementById('search-important').click();
+          } else if (action === 'copy') {
+            // TODO: implement duplicate copy handling
+          }
+          return;
         }
       }
 
@@ -3410,6 +3428,33 @@ async function fillKeywordDetail(keyword_id) {
 }
 
 // 窗口
+async function showDuplicateOptionsDialog(msg) {
+  return new Promise((resolve) => {
+    const mask = document.getElementById('duplicate-dialog-mask');
+    const dialogClose = document.getElementById('duplicate-dialog-close');
+    const cancelBtn = document.getElementById('duplicate-cancelBtn');
+    const skipBtn = document.getElementById('duplicate-skipBtn');
+    const copyBtn = document.getElementById('duplicate-copyBtn');
+    const dialogMsg = document.getElementById('duplicate-dialog-msg');
+
+    dialogMsg.textContent = msg;
+
+    setTimeout(() => {
+      mask.style.display = 'flex';
+    }, 10);
+
+    function close(result) {
+      mask.style.display = 'none';
+      resolve(result);
+    }
+
+    dialogClose.onclick = () => close('cancel');
+    cancelBtn.onclick = () => close('cancel');
+    skipBtn.onclick = () => close('no');
+    copyBtn.onclick = () => close('copy');
+  });
+}
+
 async function showConfirmDialog(msg) {
   return new Promise((resolve) => {
     const mask = document.getElementById('dialog-mask')
