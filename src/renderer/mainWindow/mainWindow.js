@@ -245,26 +245,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   let duplicateDocInfo = null;
   const titleInput = document.getElementById('docTitle');
   const originalInput = document.getElementById('original_number');
+  function showDuplicateWarning(input) {
+    let warning = input.parentElement.querySelector('.duplicate-warning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.className = 'duplicate-warning';
+      warning.textContent = '该文件可能已录入';
+      input.parentElement.appendChild(warning);
+    }
+    warning.style.display = 'block';
+  }
+
+  function hideDuplicateWarning(input) {
+    const warning = input.parentElement.querySelector('.duplicate-warning');
+    if (warning) {
+      warning.remove();
+    }
+  }
 
   async function handleDuplicateCheck(input, field) {
     const value = input.value.trim();
     if (!value) {
       duplicateDocInfo = null;
+      hideDuplicateWarning(input);
       return;
     }
     const res = await window.electronAPI.db.checkDocumentDuplicate({ [field]: value });
     if (res && res.length > 0) {
       duplicateDocInfo = res[0];
-      input.setCustomValidity('该文件可能已录入');
-      input.reportValidity();
-      input.setCustomValidity('');
+      showDuplicateWarning(input);
     } else {
       duplicateDocInfo = null;
+      hideDuplicateWarning(input);
     }
   }
 
   titleInput.addEventListener('blur', () => handleDuplicateCheck(titleInput, 'title'));
+  titleInput.addEventListener('input', () => hideDuplicateWarning(titleInput));
   originalInput.addEventListener('blur', () => handleDuplicateCheck(originalInput, 'original_number'));
+  originalInput.addEventListener('input', () => hideDuplicateWarning(originalInput));
 
   new_doc_add_annotate.addEventListener('click', function () {
     showAnnotateAdd()

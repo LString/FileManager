@@ -341,6 +341,34 @@ hr {
     grid-column: span 2;
 }
 
+#newDoc-docForm .form-group {
+    position: relative;
+}
+
+.duplicate-warning {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.duplicate-warning::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 10px;
+    border-width: 0 6px 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent #fef2f2 transparent;
+}
+
 
 #pop-docForm .form-row {
     display: grid;
