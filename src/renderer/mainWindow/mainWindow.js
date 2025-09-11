@@ -249,33 +249,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function handleDuplicateCheck(input, field) {
     const value = input.value.trim();
     if (!value) {
-      removeDuplicateHint(input);
       duplicateDocInfo = null;
       return;
     }
     const res = await window.electronAPI.db.checkDocumentDuplicate({ [field]: value });
     if (res && res.length > 0) {
-      showDuplicateHint(input);
       duplicateDocInfo = res[0];
+      input.setCustomValidity('该文件可能已录入');
+      input.reportValidity();
+      input.setCustomValidity('');
     } else {
-      removeDuplicateHint(input);
       duplicateDocInfo = null;
     }
-  }
-
-  function showDuplicateHint(input) {
-    let hint = input.parentNode.querySelector('.duplicate-hint');
-    if (!hint) {
-      hint = document.createElement('div');
-      hint.className = 'duplicate-hint';
-      hint.textContent = '该文件可能已录入';
-      input.parentNode.appendChild(hint);
-    }
-  }
-
-  function removeDuplicateHint(input) {
-    const hint = input.parentNode.querySelector('.duplicate-hint');
-    if (hint) hint.remove();
   }
 
   titleInput.addEventListener('blur', () => handleDuplicateCheck(titleInput, 'title'));
