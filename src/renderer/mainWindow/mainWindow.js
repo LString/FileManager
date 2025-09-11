@@ -356,7 +356,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
         if (action === 'copy') {
-          const baseDoc = await window.electronAPI.db.getDocumentById(duplicates[0].uuid);
+          const target = duplicates.find(d => Number(d.doc_type) === 2) || duplicates[0];
+          const baseDoc = await window.electronAPI.db.getDocumentById(target.uuid);
           overrideSerial = baseDoc.type_serial;
         }
       }
