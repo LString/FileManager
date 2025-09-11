@@ -1146,6 +1146,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       title: '标题',
       sender_unit: '来文单位',
       sender_number: '来文编号',
+      original_number: '原文号',
       drafting_unit: '制文单位',
       input_user: '录入人',
       sender_date: '来文时间',
@@ -1168,6 +1169,7 @@ async function refreshDocList(type = 1, searchResult = null, _searchKey = null) 
       title: 280,
       sender_unit: 180,
       sender_number: 140,
+      original_number: 140,
       drafting_unit: 180,
       input_user: 100,
       sender_date: 160,
@@ -1234,6 +1236,7 @@ const fieldMap = {
   '序号': 'id',
   '标题': 'title',
   '来文单位': 'sender_unit',
+  '原文号': 'original_number',
   '制文单位': 'drafting_unit',
   '来文时间': 'sender_date',
   '录入人': 'input_user'

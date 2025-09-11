@@ -99,26 +99,17 @@
                                 <input type="text" placeholder="请输入标题" id="docTitle" required maxlength="100">
                             </div>
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label for="sender_number">来文编号</label>
-                                    <input type="text" placeholder="请输入编号" id="sender_number" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="original_number">原文号</label>
-                                    <input type="text" placeholder="请输入原文号" id="original_number">
-                                </div>
-                                <div class="form-group">
+                                <div class="form-group span-2">
                                     <label for="sender_date">来文时间</label>
                                     <input type="text" placeholder="选择日期" id="sender_date" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="secrecy_level">保密密级：</label>
+                                    <label for="secrecy_level">密级</label>
                                     <div class="secrecy_level_container">
                                         <select id="secrecy_level" required>
                                             <option value="普通">普通</option>
                                             <option value="秘密">秘密</option>
                                             <option value="机密">机密</option>
-        
                                             <option value="绝密">绝密</option>
                                         </select>
                                         <select id="secrecy_period" required>
@@ -128,36 +119,9 @@
                                             <option value="20年">20年</option>
                                         </select>
                                     </div>
-
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="sender_unit">来文单位</label>
-                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="review_leader">呈阅领导：</label>
-                                    <div class="input_with_add">
-                                        <div class="review_leader_container" id="review_leader_container">
-                                            <div class="input-wrapper">
-                                                <input type="text" id="review_leader" list="review_leader_list" placeholder="请输入姓名">
-                                            </div>
-
-                                        </div>
-                                        <img id="add_review_leader" style="width: 15px;height: 15px;cursor: pointer;" src="../assets/image/add_icon.png">
-                                    </div>
-                                    <datalist id="review_leader_list">
-                                    </datalist>
-
-                                </div>
-                                <div class="form-group">
-                                    <label for="drafting_unit">制文单位</label>
-                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="crgency_level">紧急程度：</label>
+                                    <label for="crgency_level">紧急程度</label>
                                     <select id="crgency_level" required>
                                         <option value="普通">普通</option>
                                         <option value="加急">加急</option>
@@ -167,8 +131,43 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="form-group">
-                                    <label for="key_words">关键词：</label>
+                                <div class="form-group span-2">
+                                    <label for="sender_unit">来文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="sender_unit" required>
+                                </div>
+                                <div class="form-group span-2">
+                                    <label for="sender_number">来文编号</label>
+                                    <input type="text" placeholder="请输入编号" id="sender_number" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group span-2">
+                                    <label for="drafting_unit">制文单位</label>
+                                    <input type="text" placeholder="请输入单位" id="drafting_unit" required>
+                                </div>
+                                <div class="form-group span-2">
+                                    <label for="original_number">原文号</label>
+                                    <input type="text" placeholder="请输入原文号" id="original_number">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group span-2">
+                                    <label for="review_leader">呈阅领导</label>
+                                    <div class="input_with_add">
+                                        <div class="review_leader_container" id="review_leader_container">
+                                            <div class="input-wrapper">
+                                                <input type="text" id="review_leader" list="review_leader_list" placeholder="请输入姓名">
+                                            </div>
+                                        </div>
+                                        <img id="add_review_leader" style="width: 15px;height: 15px;cursor: pointer;" src="../assets/image/add_icon.png">
+                                    </div>
+                                    <datalist id="review_leader_list">
+                                    </datalist>
+                                </div>
+                                <div class="form-group span-2">
+                                    <label for="key_words">关键词</label>
                                     <div class="input_with_add">
                                         <div id="key_words_container" class="review_leader_container">
                                             <div class="input-wrapper">
@@ -180,12 +179,15 @@
                                     <datalist id="key_words_list">
                                     </datalist>
                                 </div>
-                                <div class="form-group">
-                                    <label for="remarks">备注：</label>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group span-2">
+                                    <label for="remarks">备注</label>
                                     <input type="text" placeholder="请输入备注" id="remarks">
                                 </div>
                                 <div class="form-group span-2">
-                                    <label for="secrecy_period">批注：</label>
+                                    <label for="secrecy_period">批注</label>
                                     <div class="new-doc-add-annotate-contaniner">
                                         <div class="new-doc-add-annotate-contaniner">
                                             <img id="new_doc_add_annotate" src="../assets/image/new_doc_add_annotate.png" style="width: 45px;height: 45px;margin-top: 6px;margin-right: 20px;">
