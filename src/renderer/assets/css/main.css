@@ -332,9 +332,24 @@ hr {
 
 #newDoc-docForm .form-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0 102px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 40px;
     margin-bottom: 0;
+}
+
+#newDoc-docForm .form-group.span-2 {
+    grid-column: span 2;
+}
+
+#pop-docForm .form-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 44px;
+    margin-top: 10px;
+}
+
+#pop-docForm .form-group.span-2 {
+    grid-column: span 2;
 }
 
 
@@ -369,10 +384,10 @@ hr {
 
 .secrecy_level_container {
     display: grid;
-    justify-content: center;
-    align-items: center;
-    gap: 56px;
     grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
 }
 
 .input_with_add {
@@ -2056,10 +2071,10 @@ input:-webkit-autofill:focus {
 
 .pop-secrecy_level_container {
     display: grid;
-    justify-content: center;
-    align-items: center;
-    gap: 44px;
     grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: center;
+    width: 100%;
 }
 
 #pop-review_leader_container,

@@ -192,6 +192,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
             type_serial: serial,
             title: aes256.encrypt(data.title),
             sender_number: aes256.encrypt(data.sender_number),
+            original_number: data.original_number ? aes256.encrypt(data.original_number) : null,
             sender_date: aes256.encrypt(data.sender_date),
             sender_unit: aes256.encrypt(data.sender_unit),
 
@@ -268,6 +269,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
             title: aes256.decrypt(doc.title),
             sender_unit: aes256.decrypt(doc.sender_unit),
             sender_number: aes256.decrypt(doc.sender_number),
+            original_number: doc.original_number ? aes256.decrypt(doc.original_number) : '',
             drafting_unit: aes256.decrypt(doc.drafting_unit),
             input_user: aes256.decrypt(doc.input_user),
             sender_date: aes256.decrypt(doc.sender_date),
@@ -292,7 +294,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           title: aes256.decrypt(encryptedDoc.title),
           sender_unit: aes256.decrypt(encryptedDoc.sender_unit),
           sender_number: aes256.decrypt(encryptedDoc.sender_number),
-          original_number: aes256.decrypt(encryptedDoc.original_number),
+          original_number: encryptedDoc.original_number ? aes256.decrypt(encryptedDoc.original_number) : '',
           drafting_unit: aes256.decrypt(encryptedDoc.drafting_unit),
           review_leader: aes256.decrypt(encryptedDoc.review_leader),
           secrecy_level: aes256.decrypt(encryptedDoc.secrecy_level),
@@ -334,6 +336,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
           const result = dbInstance.statements.updateDocument.run({
             title: aes256.encrypt(data.title),
             sender_number: aes256.encrypt(data.sender_number),
+            original_number: data.original_number ? aes256.encrypt(data.original_number) : null,
             sender_date: aes256.encrypt(data.sender_date),
             sender_unit: aes256.encrypt(data.sender_unit),
             secrecy_level: aes256.encrypt(data.secrecy_level),
