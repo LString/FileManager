@@ -184,7 +184,7 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const password = currentAccount.password
         aes256.init(password)
         const leadersEncrypt = data.review_leader.split(',').map(name => aes256.encrypt(name)).join(',')
-        const serial = dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
+        const serial = data.type_serial ? data.type_serial : dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
         const lastRowId = dbInstance.statements.createDocument.run(
           {
             uuid: uuid,
@@ -291,6 +291,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
         aes256.init(password);
         return {
           uuid: encryptedDoc.uuid,
+          doc_type: encryptedDoc.doc_type,
+          type_serial: encryptedDoc.type_serial,
           title: aes256.decrypt(encryptedDoc.title),
           sender_unit: aes256.decrypt(encryptedDoc.sender_unit),
           sender_number: aes256.decrypt(encryptedDoc.sender_number),
@@ -312,27 +314,31 @@ ipcMain.handle('database', async (_, { action, data }) => {
 
         if (data.original_number) {
           const enc = aes256.encrypt(data.original_number);
-          const doc = dbInstance.statements.findDocumentByOriginalNumber.get({ original_number: enc });
-          if (doc && (filterType === null || Number(doc.doc_type) === filterType)) {
-            map.set(doc.uuid, {
-              uuid: doc.uuid,
-              doc_type: doc.doc_type,
-              original_number: data.original_number,
-              title: aes256.decrypt(doc.title)
-            });
+          const docs = dbInstance.statements.findDocumentByOriginalNumber.all({ original_number: enc });
+          for (const doc of docs) {
+            if (filterType === null || Number(doc.doc_type) === filterType) {
+              map.set(doc.uuid, {
+                uuid: doc.uuid,
+                doc_type: doc.doc_type,
+                original_number: data.original_number,
+                title: aes256.decrypt(doc.title)
+              });
+            }
           }
         }
 
         if (data.title) {
           const enc = aes256.encrypt(data.title);
-          const doc = dbInstance.statements.findDocumentByTitle.get({ title: enc });
-          if (doc && !map.has(doc.uuid) && (filterType === null || Number(doc.doc_type) === filterType)) {
-            map.set(doc.uuid, {
-              uuid: doc.uuid,
-              doc_type: doc.doc_type,
-              original_number: doc.original_number ? aes256.decrypt(doc.original_number) : '',
-              title: data.title
-            });
+          const docs = dbInstance.statements.findDocumentByTitle.all({ title: enc });
+          for (const doc of docs) {
+            if (!map.has(doc.uuid) && (filterType === null || Number(doc.doc_type) === filterType)) {
+              map.set(doc.uuid, {
+                uuid: doc.uuid,
+                doc_type: doc.doc_type,
+                original_number: doc.original_number ? aes256.decrypt(doc.original_number) : '',
+                title: data.title
+              });
+            }
           }
         }
 

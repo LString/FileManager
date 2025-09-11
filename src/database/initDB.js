@@ -282,6 +282,7 @@ class DB {
 
       getDocumentsByType: this.connection.prepare(`
         SELECT
+          id AS db_id,
           type_serial AS id,
           uuid,
           doc_type,
@@ -306,6 +307,7 @@ class DB {
 
       getDocumentsByTypeWithKeywords: this.connection.prepare(`
         SELECT
+          d.id AS db_id,
           d.type_serial AS id,
           d.uuid,
           d.doc_type,
