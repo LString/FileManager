@@ -313,39 +313,38 @@ document.addEventListener('DOMContentLoaded', async () => {
       const formOriginal = document.getElementById('original_number').value.trim();
       const duplicates = await window.electronAPI.db.checkDocumentDuplicate({
         title: formTitle,
-        original_number: formOriginal
+        original_number: formOriginal,
+        doc_type: docType === 'normal' ? 1 : 2
       });
-      const normalDup = duplicates.filter(d => Number(d.doc_type) === 1);
-      const importantDup = duplicates.filter(d => Number(d.doc_type) === 2);
-      if (docType === 'normal' && normalDup.length > 0) {
+      if (docType === 'normal' && duplicates.length > 0) {
         const confirm = await showConfirmDialog('该文档先前已录入');
         if (confirm) {
           document.querySelector(".tab-btn[data-tab='view-normal']").click();
-          const hasTitleDup = normalDup.some(d => d.title === formTitle);
+          const hasTitleDup = duplicates.some(d => d.title === formTitle);
           if (hasTitleDup) {
             document.getElementById('normal_search_mode').value = 'title';
             document.getElementById('search_input_normal').value = formTitle;
           } else {
-            const searchOriginal = normalDup[0].original_number || formOriginal;
+            const searchOriginal = duplicates[0].original_number || formOriginal;
             document.getElementById('normal_search_mode').value = 'docno';
             document.getElementById('search_input_normal').value = searchOriginal;
           }
           document.getElementById('search-normal').click();
         }
         return;
-      } else if (docType === 'important' && importantDup.length > 0) {
+      } else if (docType === 'important' && duplicates.length > 0) {
         const action = await showDuplicateDialog();
         if (action === 'cancel') {
           return;
         }
         if (action === 'skip') {
           document.querySelector(".tab-btn[data-tab='view-important']").click();
-          const hasTitleDup = importantDup.some(d => d.title === formTitle);
+          const hasTitleDup = duplicates.some(d => d.title === formTitle);
           if (hasTitleDup) {
             document.getElementById('important_search_mode').value = 'title';
             document.getElementById('search_input_important').value = formTitle;
           } else {
-            const searchOriginal = importantDup[0].original_number || formOriginal;
+            const searchOriginal = duplicates[0].original_number || formOriginal;
             document.getElementById('important_search_mode').value = 'docno';
             document.getElementById('search_input_important').value = searchOriginal;
           }
