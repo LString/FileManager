@@ -315,6 +315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: formTitle,
         original_number: formOriginal
       });
+      let forceSerial = null;
       if (duplicates && duplicates.length > 0) {
         if (docType === 'normal') {
           const confirm = await showConfirmDialog('该文档先前已录入');
@@ -332,6 +333,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('search-normal').click();
           }
           return;
+        } else {
+          const impDup = duplicates.filter(d => d.doc_type === 2);
+          if (impDup.length > 0) {
+            const action = await showDuplicateDocDialog('该文档先前已录入');
+            if (action === 'cancel') {
+              return;
+            }
+            if (action === 'search') {
+              document.querySelector(".tab-btn[data-tab='view-important']").click();
+              const hasTitleDup = impDup.some(d => d.title === formTitle);
+              if (hasTitleDup) {
+                document.getElementById('important_search_mode').value = 'title';
+                document.getElementById('search_input_important').value = formTitle;
+              } else {
+                const searchOriginal = impDup[0].original_number || formOriginal;
+                document.getElementById('important_search_mode').value = 'docno';
+                document.getElementById('search_input_important').value = searchOriginal;
+              }
+              document.getElementById('search-important').click();
+              return;
+            }
+            if (action === 'copy') {
+              forceSerial = impDup[0].type_serial;
+            }
+          }
         }
       }
 
@@ -392,6 +418,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         remarks: document.getElementById('remarks').value.trim(),
         annotate: annotateTemp
       };
+
+      if (forceSerial !== null) {
+        data.type_serial = forceSerial;
+      }
 
 
       docId = await window.electronAPI.db.createDocument(data);
@@ -3587,4 +3617,47 @@ function showToast(text, duration = 2000) {
 
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), duration);
+}
+
+async function showDuplicateDocDialog(msg) {
+  return new Promise((resolve) => {
+    const mask = document.getElementById('dialog-mask');
+    const dialog_close = document.getElementById('dialog-close');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const dialog_msg = document.getElementById('dialog-msg');
+
+    dialog_msg.textContent = msg;
+    cancelBtn.textContent = '取消';
+    confirmBtn.textContent = '不录入';
+    copyBtn.textContent = '录入副本';
+    copyBtn.style.display = 'inline-block';
+
+    setTimeout(() => {
+      mask.style.display = 'flex';
+    }, 10);
+
+    const onCancel = () => closeDialog('cancel');
+    const onSearch = () => closeDialog('search');
+    const onCopy = () => closeDialog('copy');
+
+    dialog_close.addEventListener('click', onCancel);
+    cancelBtn.addEventListener('click', onCancel);
+    confirmBtn.addEventListener('click', onSearch);
+    copyBtn.addEventListener('click', onCopy);
+
+    function closeDialog(result) {
+      mask.style.display = 'none';
+      copyBtn.style.display = 'none';
+      confirmBtn.textContent = '确认';
+      dialog_close.removeEventListener('click', onCancel);
+      cancelBtn.removeEventListener('click', onCancel);
+      confirmBtn.removeEventListener('click', onSearch);
+      copyBtn.removeEventListener('click', onCopy);
+      setTimeout(() => {
+        resolve(result);
+      }, 300);
+    }
+  });
 }

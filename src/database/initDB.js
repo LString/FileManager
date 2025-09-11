@@ -348,13 +348,13 @@ class DB {
         SELECT * FROM documents WHERE uuid = @uuid`),
 
       findDocumentByOriginalNumber: this.connection.prepare(`
-        SELECT uuid, doc_type, original_number, title
+        SELECT uuid, doc_type, original_number, title, type_serial
         FROM documents
         WHERE original_number = @original_number
       `),
 
       findDocumentByTitle: this.connection.prepare(`
-        SELECT uuid, doc_type, original_number, title
+        SELECT uuid, doc_type, original_number, title, type_serial
         FROM documents
         WHERE title = @title
       `),

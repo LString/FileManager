@@ -2710,7 +2710,7 @@ input:-webkit-autofill:focus {
     cursor: pointer;
 }
 
-.dialog-btn:first-child {
+.dialog-btn:not(:last-child) {
     margin-right: 40px;
 }
 

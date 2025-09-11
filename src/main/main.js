@@ -184,7 +184,9 @@ ipcMain.handle('database', async (_, { action, data }) => {
         const password = currentAccount.password
         aes256.init(password)
         const leadersEncrypt = data.review_leader.split(',').map(name => aes256.encrypt(name)).join(',')
-        const serial = dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
+        const serial = typeof data.type_serial === 'number'
+          ? data.type_serial
+          : dbInstance.statements.getNextTypeSerial.get({ doc_type: data.doc_type }).next
         const lastRowId = dbInstance.statements.createDocument.run(
           {
             uuid: uuid,
@@ -317,7 +319,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
               uuid: doc.uuid,
               doc_type: doc.doc_type,
               original_number: data.original_number,
-              title: aes256.decrypt(doc.title)
+              title: aes256.decrypt(doc.title),
+              type_serial: doc.type_serial
             });
           }
         }
@@ -330,7 +333,8 @@ ipcMain.handle('database', async (_, { action, data }) => {
               uuid: doc.uuid,
               doc_type: doc.doc_type,
               original_number: doc.original_number ? aes256.decrypt(doc.original_number) : '',
-              title: data.title
+              title: data.title,
+              type_serial: doc.type_serial
             });
           }
         }
