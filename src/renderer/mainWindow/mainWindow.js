@@ -316,17 +316,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: formTitle,
         original_number: formOriginal
       });
-      if (duplicates && duplicates.length > 0) {
+      const docTypeCode = docType === 'normal' ? 1 : 2;
+      const sameTypeDuplicates = duplicates.filter(d => d.doc_type === docTypeCode);
+      if (sameTypeDuplicates.length > 0) {
         if (docType === 'normal') {
           const confirm = await showConfirmDialog('该文档先前已录入');
           if (confirm) {
             document.querySelector(".tab-btn[data-tab='view-normal']").click();
-            const hasTitleDup = duplicates.some(d => d.title === formTitle);
+            const hasTitleDup = sameTypeDuplicates.some(d => d.title === formTitle);
             if (hasTitleDup) {
               document.getElementById('normal_search_mode').value = 'title';
               document.getElementById('search_input_normal').value = formTitle;
             } else {
-              const searchOriginal = duplicates[0].original_number || formOriginal;
+              const searchOriginal = sameTypeDuplicates[0].original_number || formOriginal;
               document.getElementById('normal_search_mode').value = 'docno';
               document.getElementById('search_input_normal').value = searchOriginal;
             }
@@ -337,19 +339,19 @@ document.addEventListener('DOMContentLoaded', async () => {
           const action = await showDuplicateOptionsDialog('该文档先前已录入');
           if (action === 'no') {
             document.querySelector(".tab-btn[data-tab='view-important']").click();
-            const hasTitleDup = duplicates.some(d => d.title === formTitle);
+            const hasTitleDup = sameTypeDuplicates.some(d => d.title === formTitle);
             if (hasTitleDup) {
               document.getElementById('important_search_mode').value = 'title';
               document.getElementById('search_input_important').value = formTitle;
             } else {
-              const searchOriginal = duplicates[0].original_number || formOriginal;
+              const searchOriginal = sameTypeDuplicates[0].original_number || formOriginal;
               document.getElementById('important_search_mode').value = 'docno';
               document.getElementById('search_input_important').value = searchOriginal;
             }
             document.getElementById('search-important').click();
             return;
           } else if (action === 'copy') {
-            const origin = await window.electronAPI.db.getDocumentById(duplicates[0].uuid);
+            const origin = await window.electronAPI.db.getDocumentById(sameTypeDuplicates[0].uuid);
             forcedSerial = origin?.type_serial || null;
           } else {
             return;
