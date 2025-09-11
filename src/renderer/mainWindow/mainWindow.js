@@ -315,24 +315,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         title: formTitle,
         original_number: formOriginal
       });
-      if (duplicates && duplicates.length > 0) {
-        if (docType === 'normal') {
-          const confirm = await showConfirmDialog('该文档先前已录入');
-          if (confirm) {
-            document.querySelector(".tab-btn[data-tab='view-normal']").click();
-            const hasTitleDup = duplicates.some(d => d.title === formTitle);
-            if (hasTitleDup) {
-              document.getElementById('normal_search_mode').value = 'title';
-              document.getElementById('search_input_normal').value = formTitle;
-            } else {
-              const searchOriginal = duplicates[0].original_number || formOriginal;
-              document.getElementById('normal_search_mode').value = 'docno';
-              document.getElementById('search_input_normal').value = searchOriginal;
-            }
-            document.getElementById('search-normal').click();
+      const normalDup = duplicates.filter(d => d.doc_type === 1);
+      const importantDup = duplicates.filter(d => d.doc_type === 2);
+      if (docType === 'normal' && normalDup.length > 0) {
+        const confirm = await showConfirmDialog('该文档先前已录入');
+        if (confirm) {
+          document.querySelector(".tab-btn[data-tab='view-normal']").click();
+          const hasTitleDup = normalDup.some(d => d.title === formTitle);
+          if (hasTitleDup) {
+            document.getElementById('normal_search_mode').value = 'title';
+            document.getElementById('search_input_normal').value = formTitle;
+          } else {
+            const searchOriginal = normalDup[0].original_number || formOriginal;
+            document.getElementById('normal_search_mode').value = 'docno';
+            document.getElementById('search_input_normal').value = searchOriginal;
           }
+          document.getElementById('search-normal').click();
+        }
+        return;
+      } else if (docType === 'important' && importantDup.length > 0) {
+        const action = await showDuplicateDialog();
+        if (action === 'cancel') {
           return;
         }
+        if (action === 'skip') {
+          document.querySelector(".tab-btn[data-tab='view-important']").click();
+          const hasTitleDup = importantDup.some(d => d.title === formTitle);
+          if (hasTitleDup) {
+            document.getElementById('important_search_mode').value = 'title';
+            document.getElementById('search_input_important').value = formTitle;
+          } else {
+            const searchOriginal = importantDup[0].original_number || formOriginal;
+            document.getElementById('important_search_mode').value = 'docno';
+            document.getElementById('search_input_important').value = searchOriginal;
+          }
+          document.getElementById('search-important').click();
+          return;
+        }
+        // action === 'copy' will continue to submit (待实现)
       }
 
       //默认不输入+号时，添加输入内容
@@ -3410,6 +3430,30 @@ async function fillKeywordDetail(keyword_id) {
 }
 
 // 窗口
+async function showDuplicateDialog() {
+  return new Promise((resolve) => {
+    const mask = document.getElementById('duplicate-dialog-mask');
+    const closeBtn = document.getElementById('duplicate-dialog-close');
+    const cancelBtn = document.getElementById('duplicate-cancel');
+    const ignoreBtn = document.getElementById('duplicate-ignore');
+    const copyBtn = document.getElementById('duplicate-copy');
+
+    const closeDialog = (result) => {
+      mask.style.display = 'none';
+      resolve(result);
+    };
+
+    closeBtn.onclick = () => closeDialog('cancel');
+    cancelBtn.onclick = () => closeDialog('cancel');
+    ignoreBtn.onclick = () => closeDialog('skip');
+    copyBtn.onclick = () => closeDialog('copy');
+
+    setTimeout(() => {
+      mask.style.display = 'flex';
+    }, 10);
+  });
+}
+
 async function showConfirmDialog(msg) {
   return new Promise((resolve) => {
     const mask = document.getElementById('dialog-mask')

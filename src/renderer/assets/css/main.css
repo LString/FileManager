@@ -2696,6 +2696,7 @@ input:-webkit-autofill:focus {
     justify-content: center;
     align-items: center;
     margin-top: 31px;
+    gap: 20px;
 }
 
 .dialog-btn {
@@ -2710,9 +2711,6 @@ input:-webkit-autofill:focus {
     cursor: pointer;
 }
 
-.dialog-btn:first-child {
-    margin-right: 40px;
-}
 
 .dialogcancel {
     background-color: rgba(236, 238, 242, 1);
