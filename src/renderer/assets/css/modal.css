@@ -68,9 +68,19 @@
 .modal-header img,
 #dialog-close,
 #duplicate-dialog-close,
-#settings-close,
-#docinfo-close {
+#settings-close {
     cursor: pointer;
+}
+
+.modal-close {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1;
+    color: #303030;
+    cursor: pointer;
+    padding: 0;
 }
 
 .dialog-container hr,
