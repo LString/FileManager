@@ -2012,7 +2012,7 @@ popkeywordscontainer.addEventListener('click', async (e) => {
   }
 })
 
-document.getElementById('eidt-close').addEventListener('click', () => {
+document.getElementById('edit-close').addEventListener('click', () => {
   hideEditModal();
 
 });
