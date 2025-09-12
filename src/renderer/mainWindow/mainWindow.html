@@ -575,43 +575,19 @@
                         <hr>
                         <div class="modal-body">
                             <form id="pop-docForm">
+                                <input type="hidden" id="pop-origin_number" />
+                                <input type="hidden" id="pop-sender_number" />
                                 <div class="form-group">
                                     <label for="pop-docTitle">标题</label>
                                     <input type="text" placeholder="请输入标题" id="pop-docTitle" required maxlength="100" disabled>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group span-2">
-                                        <label for="pop-origin_number">文件序号</label>
-                                        <input type="text" placeholder="请输入编号" id="pop-origin_number" disabled>
-                                    </div>
-                                    <div class="form-group span-2">
-                                        <label for="pop-original_number">原文号</label>
-                                        <input type="text" placeholder="请输入原文号" id="pop-original_number" disabled>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group span-2">
-                                        <label for="pop-sender_number">来文编号</label>
-                                        <input type="text" placeholder="请输入编号" id="pop-sender_number" required disabled>
-                                    </div>
-                                    <div class="form-group span-2">
                                         <label for="pop-sender_date">来文时间</label>
                                         <input type="text" placeholder="选择日期" id="pop-sender_date" required disabled>
                                     </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group span-2">
-                                        <label for="pop-sender_unit">来文单位</label>
-                                        <input type="text" placeholder="请输入单位" id="pop-sender_unit" required disabled>
-                                    </div>
-                                    <div class="form-group span-2">
-                                        <label for="pop-drafting_unit">制文单位</label>
-                                        <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group span-2">
-                                        <label for="pop-secrecy_level">保密密级</label>
+                                    <div class="form-group">
+                                        <label for="pop-secrecy_level">密级</label>
                                         <div class="secrecy_level_container">
                                             <select id="pop-secrecy_level" required disabled>
                                                 <option value="普通">普通</option>
@@ -628,7 +604,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="form-group span-2">
+                                    <div class="form-group">
                                         <label for="pop-crgency_level">紧急程度</label>
                                         <select id="pop-crgency_level" required disabled>
                                             <option value="普通">普通</option>
@@ -639,6 +615,20 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group span-2">
+                                        <label for="pop-sender_unit">来文单位</label>
+                                        <input type="text" placeholder="请输入单位" id="pop-sender_unit" required disabled>
+                                    </div>
+                                    <div class="form-group span-2">
+                                        <label for="pop-drafting_unit">制文单位</label>
+                                        <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pop-original_number">原文号</label>
+                                    <input type="text" placeholder="请输入原文号" id="pop-original_number" disabled>
+                                </div>
+                                <div style="display:none;">
+                                    <div class="form-group span-2">
                                         <label for="pop-review_leader">呈阅领导</label>
                                         <div class="input_with_add pop-input_with_add">
                                             <div class="review_leader_container" id="pop-review_leader_container">
@@ -648,8 +638,13 @@
                                             </div>
                                             <img id="pop-add_review_leader" style="width: 15px;height: 15px;" src="../assets/image/add_icon.png" disabled>
                                         </div>
-                                        <datalist id="pop-review_leader_list">
-                                        </datalist>
+                                        <datalist id="pop-review_leader_list"></datalist>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group span-2">
+                                        <label for="pop-remarks">备注</label>
+                                        <input type="text" placeholder="请输入备注" id="pop-remarks" disabled>
                                     </div>
                                     <div class="form-group span-2">
                                         <label for="key_words">关键词</label>
@@ -661,12 +656,6 @@
                                             </div>
                                             <img id="pop-add_key_words" style="width: 15px;height: 15px;" src="../assets/image/add_icon.png" disabled>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group span-2">
-                                        <label for="pop-remarks">备注</label>
-                                        <input type="text" placeholder="请输入备注" id="pop-remarks" disabled>
                                     </div>
                                 </div>
 
