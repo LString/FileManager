@@ -488,7 +488,7 @@ document.querySelector('#docModal .cancel').addEventListener('click', () => {
   hideEditModal();
   document.getElementById('pop-docForm').reset(); // 清空表单
 });
-document.getElementById('edit-close').addEventListener('click', hideEditModal);
+document.getElementById('docinfo-close').addEventListener('click', hideEditModal);
 // 添加设置下拉框值的方法
 function setSelectValue(selector, value) {
   const select = document.querySelector(selector);

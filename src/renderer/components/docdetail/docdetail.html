@@ -195,7 +195,7 @@
             <div class="pop-content">
                 <div class="modal-header">
                     <span class="annotate-title-header">详情</span>
-                    <img id="edit-close" src="../../assets/image/close.png" />
+                    <img id="docinfo-close" src="../../assets/image/close.png" />
                 </div>
                 <hr>
                 <div class="modal-body">
@@ -300,6 +300,13 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('docinfo-close').addEventListener('click', () => {
+            const modal = document.getElementById('docModal');
+            if (modal) modal.style.display = 'none';
+        });
+    </script>
 
 </body>
 
