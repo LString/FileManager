@@ -2,76 +2,8 @@
 <html>
 
 <head>
+    <link rel="stylesheet" type="text/css" href="../../assets/css/modal.css">
     <style>
-        .modal {
-            display: block;
-            z-index: 1000;
-            position: absolute;
-            width: 100vw;
-            height: 100vh;
-            left: 0;
-            top: 0;
-        }
-
-        .pop-bg {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            /* 水平居中 */
-            align-items: center;
-        }
-
-        .pop-content {
-            background-color: white;
-            /*上下边距百分是相对于父控件 左右边距自动计算*/
-            border: 1px solid #444;
-            min-height: 0;
-            border-radius: 8px;
-            width: 80%;
-            height: 82%;
-            margin: 10px;
-            display: flex;
-            /* 新增flex布局 */
-            flex-direction: column;
-            /* 垂直排列 */
-            overflow: hidden;
-            box-sizing: border-box;
-            /* 包含内边距 */
-            animation: modalOpen 0.5s ease-out;
-        }
-
-        .pop-content hr {
-            border: 0.2px solid rgba(0, 0, 0, 1);
-            opacity: 0.1;
-            width: 100%;
-            margin-bottom: 25px;
-            margin-top: 0;
-        }
-
-        .modal-header {
-            display: flex;
-            margin-top: 12px;
-            margin-left: 35px;
-            margin-right: 23px;
-            margin-bottom: 7px;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .annotate-title-header {
-            font-size: 20px;
-            font-weight: 400;
-        }
-
-        .modal-body {
-            flex: 1;
-            margin-bottom: 12px;
-            display: flex;
-        }
-
         #pop-docForm {
             width: 100%;
             height: 100%;
@@ -82,6 +14,11 @@
             padding-bottom: 32px;
             flex-direction: column;
             box-sizing: border-box;
+        }
+
+        .annotate-title-header {
+            font-size: 20px;
+            font-weight: 400;
         }
 
 
@@ -121,13 +58,15 @@
 
         #pop-docForm .form-row {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 14px 44px;
             margin-top: 10px;
         }
 
-        #pop-docForm .form-group.span-2 {
-            grid-column: span 2;
+        #pop-docForm .form-group.multi {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px 44px;
         }
 
         #pop-docForm label {
@@ -218,7 +157,7 @@
             border: 0.85px solid rgb(181 181 181);
         }
 
-        .pop-secrecy_level_container {
+        .secrecy_level_container {
             display: grid;
             justify-content: center;
             align-items: center;
@@ -256,31 +195,48 @@
             <div class="pop-content">
                 <div class="modal-header">
                     <span class="annotate-title-header">详情</span>
-                    <img id="eidt-close" src="../../assets/image/close.png" />
+                    <button id="docinfo-close" class="modal-close" type="button" aria-label="关闭">&times;</button>
                 </div>
                 <hr>
                 <div class="modal-body">
                     <form id="pop-docForm">
+                        <input type="hidden" id="pop-origin_number" />
                         <div class="form-group">
                             <label for="pop-docTitle">标题</label>
                             <input type="text" placeholder="请输入标题" id="pop-docTitle" required maxlength="100" disabled>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="pop-origin_number">文件序号</label>
-                                <input type="text" placeholder="请输入编号" id="pop-origin_number" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="pop-original_number">原文号</label>
-                                <input type="text" placeholder="请输入原文号" id="pop-original_number" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="pop-sender_number">来文编号</label>
-                                <input type="text" placeholder="请输入编号" id="pop-sender_number" required disabled>
-                            </div>
-                            <div class="form-group">
                                 <label for="pop-sender_date">来文时间</label>
                                 <input type="text" placeholder="选择日期" id="pop-sender_date" required disabled>
+                            </div>
+                            <div class="form-group multi">
+                                <div class="form-group">
+                                    <label for="pop-secrecy_level">密级</label>
+                                    <div class="secrecy_level_container">
+                                        <select id="pop-secrecy_level" required disabled>
+                                            <option value="普通">普通</option>
+                                            <option value="秘密">秘密</option>
+                                            <option value="机密">机密</option>
+                                            <option value="绝密">绝密</option>
+                                        </select>
+                                        <select id="pop-secrecy_period" required disabled>
+                                            <option value="1年">1年</option>
+                                            <option value="5年">5年</option>
+                                            <option value="10年">10年</option>
+                                            <option value="20年">20年</option>
+                                            <option value="长期">长期</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pop-crgency_level">紧急程度</label>
+                                    <select id="pop-crgency_level" required disabled>
+                                        <option value="普通">普通</option>
+                                        <option value="加急">加急</option>
+                                        <option value="特急">特急</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="form-row">
@@ -289,69 +245,51 @@
                                 <input type="text" placeholder="请输入单位" id="pop-sender_unit" required disabled>
                             </div>
                             <div class="form-group">
-                                <label for="pop-secrecy_level">保密密级</label>
-                                <div class="pop-secrecy_level_container">
-                                    <select id="pop-secrecy_level" required disabled>
-                                        <option value="普通">普通</option>
-                                        <option value="秘密">秘密</option>
-                                        <option value="机密">机密</option>
-                                        <option value="绝密">绝密</option>
-                                    </select>
-                                    <select id="pop-secrecy_period" required disabled>
-                                        <option value="1年">1年</option>
-                                        <option value="5年">5年</option>
-                                        <option value="10年">10年</option>
-                                        <option value="20年">20年</option>
-                                        <option value="长期">长期</option>
-                                    </select>
-                                </div>
-
+                                <label for="pop-sender_number">来文编号</label>
+                                <input type="text" placeholder="请输入来文编号" id="pop-sender_number" required disabled>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="pop-drafting_unit">制文单位</label>
                                 <input type="text" placeholder="请输入单位" id="pop-drafting_unit" required disabled>
                             </div>
                             <div class="form-group">
-                                <label for="crgency_level">紧急程度</label>
-                                <select id="pop-crgency_level" required disabled>
-                                    <option value="普通">普通</option>
-                                    <option value="加急">加急</option>
-                                    <option value="特急">特急</option>
-                                </select>
+                                <label for="pop-original_number">原文号</label>
+                                <input type="text" placeholder="请输入原文号" id="pop-original_number" disabled>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
+                        <div style="display:none;">
+                            <div class="form-group span-2">
                                 <label for="pop-review_leader">呈阅领导</label>
                                 <div class="pop-input_with_add">
                                     <div class="pop-review_leader_container" id="pop-review_leader_container">
                                         <div class="input-wrapper">
                                             <input type="text" id="pop-review_leader" list="pop-review_leader_list" placeholder="请输入姓名" disabled>
                                         </div>
-                                        <datalist id="pop-review_leader_list">
-                                        </datalist>
                                     </div>
                                     <img id="pop-add_review_leader" style="width: 15px;height: 15px;" src="../../assets/image/add_icon.png" disabled>
                                 </div>
+                                <datalist id="pop-review_leader_list"></datalist>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
-                                <label for="key_words">关键词</label>
+                                <label for="pop-key_words">关键词</label>
                                 <div class="pop-input_with_add">
                                     <div id="pop-key_words_container" class="review_leader_container">
                                         <div class="input-wrapper">
-                                            <input type="text" id="pop-key_words" placeholder="请输入关键词" disabled></input>
+                                            <input type="text" id="pop-key_words" placeholder="请输入关键词" disabled>
                                         </div>
                                     </div>
-                                    <img id="pop-add_key_words" style="width: 15px;height: 15px;" src=" ../../assets/image/add_icon.png" disabled>
+                                    <img id="pop-add_key_words" style="width: 15px;height: 15px;" src="../../assets/image/add_icon.png" disabled>
                                 </div>
-
                             </div>
-                            <div class="form-group span-2">
-                                <label for="secrecy_period">备注</label>
+                            <div class="form-group">
+                                <label for="pop-remarks">备注</label>
                                 <input type="text" placeholder="请输入备注" id="pop-remarks" disabled>
                             </div>
                         </div>
-
 
                         <div class="form-actions">
                             <button type="submit" class="docModal-actions primary">编辑</button>
@@ -362,6 +300,13 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('docinfo-close').addEventListener('click', () => {
+            const modal = document.getElementById('docModal');
+            if (modal) modal.style.display = 'none';
+        });
+    </script>
 
 </body>
 

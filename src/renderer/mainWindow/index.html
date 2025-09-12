@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" type="text/css" href="../assets/css/index.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/modal.css">
     <link rel="stylesheet" href="../../../node_modules/flatpickr/dist/flatpickr.min.css">
 </head>
 
@@ -201,6 +202,7 @@
             <div class="pop-content">
                 <div class="modal-header">
                     <span class="pop-title-header">编辑文档</span>
+                    <button id="docinfo-close" class="modal-close" type="button" aria-label="关闭">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="pop-docForm">
@@ -280,6 +282,7 @@
             <div class="annotate-content">
                 <div class="modal-header">
                     <span class="annotate-title-header">添加批注</span>
+                    <img id="annotate-close" src="../assets/image/close.png" />
                 </div>
                 <div class="modal-body">
                     <form id="annotate-Form">
@@ -354,6 +357,7 @@
                 <div class="modal-header">
                     <!-- <div id="close-config">X</div> -->
                     <span class="pop-title-header">单位配置管理</span>
+                    <img id="config-close" src="../assets/image/close.png" />
                 </div>
                 <div class="modal-body">
                     <!-- 批注配置 -->

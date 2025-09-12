@@ -372,13 +372,15 @@ hr {
 
 #pop-docForm .form-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px 44px;
     margin-top: 10px;
 }
 
-#pop-docForm .form-group.span-2 {
-    grid-column: span 2;
+#pop-docForm .form-group.multi {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 44px;
 }
 
 
@@ -2084,12 +2086,6 @@ input:-webkit-autofill:focus {
     box-sizing: border-box;
 }
 
-#pop-docForm .form-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 14px 88px;
-    margin-top: 10px;
-}
 
 #pop-docForm label {
     font-size: 16px;
@@ -2600,139 +2596,6 @@ input:-webkit-autofill:focus {
     box-sizing: border-box;
 }
 
-.dialog-mask {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(2px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.dialog-container {
-    width: 464px;
-    height: 209px;
-    background-color: rgb(255, 255, 255);
-    display: flex;
-    margin: 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: start;
-    box-sizing: border-box;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.dialog-title-container {
-    width: 100%;
-    height: 43px;
-    display: flex;
-    flex-direction: row;
-    margin: 0;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-}
-
-.dialog-title {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0px;
-    line-height: 26.06px;
-    margin-top: 8px;
-    margin-left: 17px;
-    color: rgba(48, 48, 48, 1);
-}
-
-#dialog-close {
-    width: 12px;
-    height: 12px;
-    margin-right: 21px;
-    margin-top: 15px;
-}
-
-.dialog-container hr {
-    width: 100%;
-    height: 0;
-    border: 0.5px solid black;
-    margin-top: 8px;
-    padding: 0;
-    opacity: 0.2;
-    box-sizing: border-box;
-}
-
-.dialog-body-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    box-sizing: border-box;
-
-}
-
-.dialog-msg-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
-#dialog-msg {
-    font-size: 18px;
-    font-weight: 400;
-    letter-spacing: 0px;
-    line-height: 26.06px;
-    color: rgba(74, 74, 74, 1);
-    text-align: center;
-    margin-left: 10px;
-}
-
-.dialog-tbn-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-top: 31px;
-    gap: 20px;
-}
-
-.dialog-btn {
-    opacity: 1;
-    border-radius: 10px;
-    background: rgba(236, 238, 242, 1);
-    width: 126px;
-    height: 37px;
-    padding: 5px 0 5px 0;
-    font-size: 18px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-
-.dialogcancel {
-    background-color: rgba(236, 238, 242, 1);
-    color: rgba(98, 106, 123, 1);
-}
-
-.dialogcancel:hover {
-    background-color: rgb(211, 212, 214)
-}
-
-.confirm {
-    background-color: rgba(66, 135, 242, 1);
-    color: white;
-}
-
-.confirm:hover {
-    background-color: rgb(36, 120, 245);
-}
 
 .view-keyword-body {
     position: relative;
@@ -3171,9 +3034,6 @@ input:-webkit-autofill:focus {
     border-bottom: none;
 }
 
-.dialog-btn.full-width {
-    width: 100%;
-}
 
 .switch {
     position: relative;
