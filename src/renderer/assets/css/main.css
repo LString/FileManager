@@ -372,13 +372,15 @@ hr {
 
 #pop-docForm .form-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px 44px;
     margin-top: 10px;
 }
 
-#pop-docForm .form-group.span-2 {
-    grid-column: span 2;
+#pop-docForm .form-group.multi {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 44px;
 }
 
 
@@ -2084,12 +2086,6 @@ input:-webkit-autofill:focus {
     box-sizing: border-box;
 }
 
-#pop-docForm .form-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 14px 88px;
-    margin-top: 10px;
-}
 
 #pop-docForm label {
     font-size: 16px;
