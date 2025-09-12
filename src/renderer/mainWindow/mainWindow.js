@@ -3688,3 +3688,14 @@ function showToast(text, duration = 2000) {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), duration);
 }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal, .dialog-mask').forEach(m => {
+      if (getComputedStyle(m).display !== 'none') {
+        const btn = m.querySelector('.modal-close, #dialog-close, #duplicate-dialog-close, #settings-close')
+        if (btn) btn.click()
+      }
+    })
+  }
+})

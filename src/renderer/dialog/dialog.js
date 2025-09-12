@@ -20,6 +20,12 @@ window.electronAPI.receiveConfig((action) => {
         document.getElementById('img-notice-icon').style.display = 'block'
     }else{
         document.getElementById('img-notice-icon').style.display = 'none'
-    } 
+    }
 
 });
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.getElementById('dialog-close').click();
+    }
+})

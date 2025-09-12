@@ -1392,4 +1392,15 @@ document.getElementById('unit-tree').addEventListener('click', async e => {
   }
 });
 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal, .dialog-mask').forEach(m => {
+      if (getComputedStyle(m).display !== 'none') {
+        const btn = m.querySelector('.modal-close, #dialog-close, #duplicate-dialog-close, #settings-close')
+        if (btn) btn.click()
+      }
+    })
+  }
+})
+
 
