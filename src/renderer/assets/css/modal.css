@@ -83,6 +83,11 @@
     padding: 0;
 }
 
+.modal-close img {
+    width: 24px;
+    height: 24px;
+}
+
 .dialog-container hr,
 .pop-content hr,
 .settings-content hr {
