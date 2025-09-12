@@ -34,6 +34,7 @@
     box-sizing: border-box;
     padding: 20px;
     max-height: 90%;
+    overflow: auto;
 }
 
 .dialog-container {
@@ -81,7 +82,6 @@
 }
 
 /* Body */
-.dialog-body-container,
 .modal-body {
     flex: 1;
     display: flex;
@@ -89,6 +89,13 @@
     align-items: center;
     justify-content: center;
     overflow: auto;
+}
+
+.dialog-body-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .dialog-msg-container {
@@ -138,5 +145,9 @@
 .dialog-btn.dialogcancel:hover,
 .dialog-btn.cancel:hover {
     background-color: #d3d4d6;
+}
+
+.dialog-btn.full-width {
+    width: 100%;
 }
 
